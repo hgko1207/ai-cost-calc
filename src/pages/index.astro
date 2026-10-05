@@ -1,0 +1,257 @@
+---
+import Calculator from '../components/Calculator';
+import { prices, presets, relatedPosts } from '../lib/data';
+import '../styles/global.css';
+
+const BLOG_URL = 'https://hgko-dev.tistory.com/';
+const title = 'AI 코딩 비용 계산기 — Claude·GPT·Gemini API vs 구독 요금 비교';
+const description =
+  '하루 사용량을 넣으면 Claude, GPT, Gemini 모델별 API 월 비용과 Pro·Max 등 구독 요금제 중 무엇이 유리한지 원화로 계산합니다. 프롬프트 캐싱·긴 컨텍스트 할증까지 반영.';
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const canonical = new URL(base, Astro.site).toString();
+const updated = prices.updatedAt;
+const updatedLabel = updated.replace(/^(\d{4})-(\d{2})-(\d{2})$/, '$1년 $2월 $3일').replace(/ 0/g, ' ');
+const vendorName = (id: string) => prices.vendors.find((v) => v.id === id)?.name ?? id;
+const withUtm = (url: string) => {
+  const u = new URL(url);
+  u.searchParams.set('utm_source', 'ai-cost-calc');
+  u.searchParams.set('utm_medium', 'referral');
+  return u.toString();
+};
+
+const faqs = [
+  {
+    q: 'Claude Code는 API로 쓰는 게 싸요, Max 구독이 싸요?',
+    a: '매일 몇 시간씩 에이전트 작업을 한다면 대부분 구독이 훨씬 저렴합니다. 운영자 실측(82일)으로는 Opus 5.5 API 환산 월 약 $490어치를 썼고, 같은 사용을 Max 5x($100)로 감당했습니다. 반대로 가끔 쓰는 정도라면 API 종량제가 더 쌉니다.',
+  },
+  {
+    q: '프롬프트 캐싱이 왜 그렇게 중요한가요?',
+    a: '코딩 에이전트는 매 요청마다 같은 대화·코드를 다시 보내기 때문에 입력의 90% 이상이 캐시 읽기입니다. 캐시 읽기는 일반 입력 단가의 2.5~10% 수준이라, 캐싱을 빼고 계산하면 비용이 몇 배로 부풀려집니다.',
+  },
+  {
+    q: '구독 요금제의 사용 한도는 정확한가요?',
+    a: '아닙니다. Anthropic·OpenAI·Google 모두 구독 한도를 토큰 수로 공개하지 않습니다. 이 계산기는 공식 배수(예: Max 5x = Pro의 5배)와 운영자 실측을 바탕으로 "API 환산 금액" 기준 한도를 추정하며, 고급 설정에서 배율을 조절할 수 있습니다.',
+  },
+  {
+    q: '내 실제 토큰 사용량은 어떻게 확인하나요?',
+    a: 'Claude Code는 ~/.claude/projects 폴더에 세션별 사용량을 기록합니다. npx ccusage 같은 도구로 일별 입력·출력·캐시 토큰을 집계해 그대로 "직접 입력"에 넣으면 됩니다.',
+  },
+];
+
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: 'AI 코딩 비용 계산기',
+    url: canonical,
+    applicationCategory: 'UtilitiesApplication',
+    operatingSystem: 'Any',
+    inLanguage: 'ko',
+    dateModified: updated,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'KRW' },
+    description,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
+    <meta name="theme-color" content="#f7f5f2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#16171a" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary" />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+    />
+    <script is:inline>
+      // ?embed=1 이면 계산기만 보이게 (티스토리 iframe 삽입용)
+      if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.dataset.embed = '1';
+    </script>
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <p class="eyebrow">
+          가격 기준 <time datetime={updated}>{updatedLabel}</time>
+        </p>
+        <h1>AI 코딩 비용 계산기</h1>
+        <p class="lead no-embed">
+          API 종량제로 쓸까, 구독할까? 내 사용량을 넣으면 Claude·GPT·Gemini 모델별 월 비용과 가장 유리한 요금제를 원화로 계산합니다.
+        </p>
+        <a class="embed-only open-full" href={base} target="_blank" rel="noopener">전체 화면에서 자세히 보기 ↗</a>
+      </header>
+
+      <main>
+        <Calculator client:load data={{ vendors: prices.vendors, models: prices.models, plans: prices.plans, presets }} />
+
+        <section class="prose no-embed" aria-labelledby="how">
+          <h2 id="how">계산 원리</h2>
+          <ol>
+            <li>
+              <strong>월 토큰량</strong> = 하루 입력·출력 토큰 × 한 달 작업일. 입력은 캐시 읽기 / 캐시 쓰기 / 일반 입력 비율로 나눕니다.
+            </li>
+            <li>
+              <strong>API 월 비용</strong> = 일반 입력 × 입력 단가 + 캐시 쓰기 × 캐시 쓰기 단가 + 캐시 읽기 × 캐시 읽기 단가 + 출력 × 출력 단가
+              (모두 100만 토큰당 USD). 원화는 입력한 환율로 환산하고, 선택 시 부가세 10%를 더합니다.
+            </li>
+            <li>
+              <strong>긴 컨텍스트 할증</strong>: 요청당 평균 컨텍스트가 모델의 기준(OpenAI 272K, Gemini Pro 200K)을 넘으면 할증 단가를 적용합니다.
+              Claude 5.x 모델은 1M까지 할증이 없습니다. 최대 컨텍스트보다 길면 "컨텍스트 초과"로 표시합니다.
+            </li>
+            <li>
+              <strong>구독 한도</strong>: 요금제마다 "API로 환산해 월 얼마어치까지 쓸 수 있는가"를 추정값으로 두고, 내 API 비용이 그 안이면
+              "감당 가능"으로 봅니다. 감당 가능한 선택지 중 가장 싼 것을 추천합니다.
+            </li>
+            <li>
+              <strong>프리셋</strong>: "매일 코딩"과 "헤비 에이전트"는 운영자의 Claude Code 실제 로그(2026년 6~10월, 82일)를 집계한 값입니다.
+              입력의 93%가 캐시 읽기, 7%가 캐시 쓰기였고 출력은 입력의 0.3% 수준이었습니다.
+            </li>
+          </ol>
+        </section>
+
+        <section class="prose no-embed" aria-labelledby="data">
+          <h2 id="data">가격 데이터 <span class="muted">(확인일 {updatedLabel})</span></h2>
+          <div class="table-wrap">
+            <table class="detail">
+              <caption>API 단가 (USD / 100만 토큰)</caption>
+              <thead>
+                <tr>
+                  <th scope="col">모델</th>
+                  <th scope="col" class="num">입력</th>
+                  <th scope="col" class="num">캐시 쓰기</th>
+                  <th scope="col" class="num">캐시 읽기</th>
+                  <th scope="col" class="num">출력</th>
+                  <th scope="col">비고</th>
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  prices.models.map((m) => (
+                    <tr>
+                      <th scope="row">
+                        <a href={m.sourceUrl} rel="noopener" target="_blank">{m.name}</a>
+                        <span class="sub">{vendorName(m.vendor)} · 최대 {m.contextWindowK}K</span>
+                      </th>
+                      <td class="num">${m.prices.input}</td>
+                      <td class="num">${m.prices.cacheWrite}</td>
+                      <td class="num">${m.prices.cacheRead}</td>
+                      <td class="num">${m.prices.output}</td>
+                      <td class="note">
+                        {m.longContext && `${m.longContext.thresholdK}K 초과 시 입력 $${m.longContext.prices.input} / 출력 $${m.longContext.prices.output}. `}
+                        {m.note}
+                      </td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
+          <div class="table-wrap">
+            <table class="detail">
+              <caption>구독 요금제</caption>
+              <thead>
+                <tr>
+                  <th scope="col">요금제</th>
+                  <th scope="col" class="num">월 요금</th>
+                  <th scope="col">코딩 도구</th>
+                  <th scope="col">공식 한도</th>
+                  <th scope="col">계산기 한도 가정 (API 환산)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  prices.plans.map((p) => (
+                    <tr>
+                      <th scope="row">
+                        <a href={p.sourceUrl} rel="noopener" target="_blank">{p.name}</a>
+                      </th>
+                      <td class="num">
+                        ${p.usdMonthly}
+                        {p.krwMonthly && <span class="sub">₩{p.krwMonthly.toLocaleString('ko-KR')}</span>}
+                      </td>
+                      <td>{p.codingTools}</td>
+                      <td class="note">{p.limitsNote}</td>
+                      <td class="note">
+                        월 ${p.capacityUsd.toLocaleString('en-US')}
+                        <span class="sub">{p.capacityBasis}</span>
+                      </td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
+          <p class="muted small">
+            출처:{' '}
+            {
+              prices.vendors.map((v, i) => (
+                <>
+                  {i > 0 && ' · '}
+                  <a href={v.apiPricingUrl} rel="noopener" target="_blank">{v.name} API</a>,{' '}
+                  <a href={v.planPricingUrl} rel="noopener" target="_blank">{v.name} 구독</a>
+                </>
+              ))
+            }
+            . Gemini CLI·Code Assist의 개인 구독 사용은 2026-06-18부로 종료되어 Antigravity로 이전되었습니다.
+          </p>
+        </section>
+
+        <section class="prose no-embed" aria-labelledby="faq">
+          <h2 id="faq">자주 묻는 질문</h2>
+          {
+            faqs.map((f) => (
+              <details class="faq">
+                <summary>{f.q}</summary>
+                <p>{f.a}</p>
+              </details>
+            ))
+          }
+        </section>
+
+        <section class="prose no-embed" aria-labelledby="related">
+          <h2 id="related">블로그 관련 글</h2>
+          <ul class="related">
+            {
+              relatedPosts.map((p) => (
+                <li>
+                  <a href={withUtm(p.url)} target="_blank" rel="noopener">
+                    <strong>{p.title}</strong>
+                    <span>{p.description}</span>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+      </main>
+
+      <footer class="footer no-embed">
+        <p>
+          만든 사람: <a href={withUtm(BLOG_URL)} target="_blank" rel="noopener">hgko-dev 블로그</a> · Claude Code·AI 코딩 실전 기록
+        </p>
+        <p class="muted small">
+          모든 결과는 추정치이며 실제 청구액과 다를 수 있습니다. 가격은 각 회사 공식 페이지 기준({updatedLabel} 확인)이며, 이후 변경될 수 있습니다.
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>

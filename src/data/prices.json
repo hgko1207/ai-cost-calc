@@ -1,0 +1,358 @@
+{
+  "updatedAt": "2026-10-05",
+  "vendors": [
+    {
+      "id": "anthropic",
+      "name": "Anthropic",
+      "apiPricingUrl": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "planPricingUrl": "https://claude.com/pricing"
+    },
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "apiPricingUrl": "https://developers.openai.com/api/docs/pricing",
+      "planPricingUrl": "https://chatgpt.com/ko-KR/pricing/"
+    },
+    {
+      "id": "google",
+      "name": "Google",
+      "apiPricingUrl": "https://ai.google.dev/gemini-api/docs/pricing",
+      "planPricingUrl": "https://gemini.google/kr/subscriptions/"
+    }
+  ],
+  "models": [
+    {
+      "id": "fable-5-1",
+      "vendor": "anthropic",
+      "name": "Claude Fable 5.1",
+      "apiId": "claude-fable-5-1",
+      "tier": "flagship",
+      "contextWindowK": 1000,
+      "prices": {
+        "input": 10,
+        "cacheWrite": 12.5,
+        "cacheRead": 0.25,
+        "output": 50
+      },
+      "note": "1M 컨텍스트까지 동일 단가. 캐시 쓰기는 5분 TTL 기준(1시간 TTL은 $20).",
+      "sourceUrl": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "verifiedAt": "2026-10-05"
+    },
+    {
+      "id": "opus-5-5",
+      "vendor": "anthropic",
+      "name": "Claude Opus 5.5",
+      "apiId": "claude-opus-5-5",
+      "tier": "flagship",
+      "contextWindowK": 1000,
+      "prices": {
+        "input": 4,
+        "cacheWrite": 5,
+        "cacheRead": 0.2,
+        "output": 20
+      },
+      "note": "1M 컨텍스트까지 동일 단가. 캐시 쓰기는 5분 TTL 기준(1시간 TTL은 $8).",
+      "sourceUrl": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "verifiedAt": "2026-10-05"
+    },
+    {
+      "id": "sonnet-5-5",
+      "vendor": "anthropic",
+      "name": "Claude Sonnet 5.5",
+      "apiId": "claude-sonnet-5-5",
+      "tier": "workhorse",
+      "contextWindowK": 1000,
+      "prices": {
+        "input": 2,
+        "cacheWrite": 2.5,
+        "cacheRead": 0.2,
+        "output": 10
+      },
+      "sourceUrl": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "verifiedAt": "2026-10-05"
+    },
+    {
+      "id": "haiku-4-5",
+      "vendor": "anthropic",
+      "name": "Claude Haiku 4.5",
+      "apiId": "claude-haiku-4-5-20251001",
+      "tier": "light",
+      "contextWindowK": 200,
+      "prices": {
+        "input": 1,
+        "cacheWrite": 1.25,
+        "cacheRead": 0.1,
+        "output": 5
+      },
+      "sourceUrl": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "verifiedAt": "2026-10-05"
+    },
+    {
+      "id": "gpt-6-astra",
+      "vendor": "openai",
+      "name": "GPT-6 Astra",
+      "apiId": "gpt-6-astra",
+      "tier": "flagship",
+      "contextWindowK": 1050,
+      "prices": {
+        "input": 10,
+        "cacheWrite": 12.5,
+        "cacheRead": 1,
+        "output": 50
+      },
+      "longContext": {
+        "thresholdK": 272,
+        "prices": {
+          "input": 20,
+          "cacheWrite": 25,
+          "cacheRead": 2,
+          "output": 75
+        }
+      },
+      "sourceUrl": "https://developers.openai.com/api/docs/pricing",
+      "verifiedAt": "2026-10-05"
+    },
+    {
+      "id": "gpt-6-1-sol",
+      "vendor": "openai",
+      "name": "GPT-6.1 Sol",
+      "apiId": "gpt-6.1-sol",
+      "tier": "workhorse",
+      "contextWindowK": 1050,
+      "prices": {
+        "input": 2,
+        "cacheWrite": 2.5,
+        "cacheRead": 0.1,
+        "output": 10
+      },
+      "longContext": {
+        "thresholdK": 272,
+        "prices": {
+          "input": 4,
+          "cacheWrite": 5,
+          "cacheRead": 0.2,
+          "output": 15
+        }
+      },
+      "sourceUrl": "https://developers.openai.com/api/docs/pricing",
+      "verifiedAt": "2026-10-05"
+    },
+    {
+      "id": "gpt-6-luna",
+      "vendor": "openai",
+      "name": "GPT-6 Luna",
+      "apiId": "gpt-6-luna",
+      "tier": "light",
+      "contextWindowK": 1050,
+      "prices": {
+        "input": 0.1,
+        "cacheWrite": 0.125,
+        "cacheRead": 0.01,
+        "output": 0.5
+      },
+      "longContext": {
+        "thresholdK": 272,
+        "prices": {
+          "input": 0.2,
+          "cacheWrite": 0.25,
+          "cacheRead": 0.02,
+          "output": 0.75
+        }
+      },
+      "sourceUrl": "https://developers.openai.com/api/docs/pricing",
+      "verifiedAt": "2026-10-05"
+    },
+    {
+      "id": "gemini-3-1-pro",
+      "vendor": "google",
+      "name": "Gemini 3.1 Pro (Preview)",
+      "apiId": "gemini-3.1-pro-preview",
+      "tier": "flagship",
+      "contextWindowK": 1048,
+      "prices": {
+        "input": 2,
+        "cacheWrite": 2,
+        "cacheRead": 0.2,
+        "output": 12
+      },
+      "longContext": {
+        "thresholdK": 200,
+        "prices": {
+          "input": 4,
+          "cacheWrite": 4,
+          "cacheRead": 0.4,
+          "output": 18
+        }
+      },
+      "note": "캐시 쓰기 요금이 따로 없고 시간당 저장 요금($4.50/1M·시간)이 붙음. 계산기에서는 캐시 쓰기를 입력 단가로 근사하고 저장 요금은 제외.",
+      "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing",
+      "verifiedAt": "2026-10-05"
+    },
+    {
+      "id": "gemini-3-8-flash",
+      "vendor": "google",
+      "name": "Gemini 3.8 Flash",
+      "apiId": "gemini-3.8-flash",
+      "tier": "workhorse",
+      "contextWindowK": 1048,
+      "prices": {
+        "input": 0.75,
+        "cacheWrite": 0.75,
+        "cacheRead": 0.075,
+        "output": 3.75
+      },
+      "note": "2026-12-31까지 프로모션 가격. 2027-01-01부터 입력 $1.50 / 출력 $7.50로 2배 인상 예정. 캐시 저장 요금 제외.",
+      "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing",
+      "verifiedAt": "2026-10-05"
+    },
+    {
+      "id": "gemini-3-5-flash-lite",
+      "vendor": "google",
+      "name": "Gemini 3.5 Flash-Lite",
+      "apiId": "gemini-3.5-flash-lite",
+      "tier": "light",
+      "contextWindowK": 1048,
+      "prices": {
+        "input": 0.3,
+        "cacheWrite": 0.3,
+        "cacheRead": 0.03,
+        "output": 2.5
+      },
+      "note": "캐시 저장 요금 제외.",
+      "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing",
+      "verifiedAt": "2026-10-05"
+    }
+  ],
+  "plans": [
+    {
+      "id": "claude-pro",
+      "vendor": "anthropic",
+      "name": "Claude Pro",
+      "usdMonthly": 20,
+      "krwMonthly": null,
+      "codingTools": "Claude Code",
+      "limitsNote": "5시간 단위 한도 + 주간 한도 (수치 비공개)",
+      "capacityUsd": 100,
+      "capacityBasis": "Max 5x 추정치의 1/5 (공식: Max 5x = Pro의 5배)",
+      "sourceUrl": "https://support.claude.com/en/articles/8325606-what-is-the-pro-plan",
+      "verifiedAt": "2026-10-05"
+    },
+    {
+      "id": "claude-max-5x",
+      "vendor": "anthropic",
+      "name": "Claude Max 5x",
+      "usdMonthly": 100,
+      "krwMonthly": null,
+      "codingTools": "Claude Code",
+      "limitsNote": "Pro의 5배 (5시간 단위) + 주간 한도",
+      "capacityUsd": 500,
+      "capacityBasis": "운영자 실측(하한): 집 PC에서만 Opus 5.5 API 환산 월 약 $490 사용, 같은 계정을 회사에서도 사용하며 5시간 한도에 자주·주간 한도에 가끔 도달",
+      "sourceUrl": "https://support.claude.com/en/articles/11049741-what-is-the-max-plan",
+      "verifiedAt": "2026-10-05"
+    },
+    {
+      "id": "claude-max-20x",
+      "vendor": "anthropic",
+      "name": "Claude Max 20x",
+      "usdMonthly": 200,
+      "krwMonthly": null,
+      "codingTools": "Claude Code",
+      "limitsNote": "Pro의 20배 (5시간 단위) + 주간 한도",
+      "capacityUsd": 2000,
+      "capacityBasis": "Max 5x 추정치 × 4 (공식 배수 기준)",
+      "sourceUrl": "https://support.claude.com/en/articles/11049741-what-is-the-max-plan",
+      "verifiedAt": "2026-10-05"
+    },
+    {
+      "id": "chatgpt-plus",
+      "vendor": "openai",
+      "name": "ChatGPT Plus",
+      "usdMonthly": 20,
+      "krwMonthly": 29000,
+      "codingTools": "Codex",
+      "limitsNote": "5시간당 로컬 메시지: Astra 5~45, Sol 15~160 + 주간 한도",
+      "capacityUsd": 100,
+      "capacityBasis": "추정(근거 약함): Claude Pro와 같은 수준으로 가정",
+      "sourceUrl": "https://chatgpt.com/ko-KR/pricing/",
+      "verifiedAt": "2026-10-05"
+    },
+    {
+      "id": "chatgpt-pro-100",
+      "vendor": "openai",
+      "name": "ChatGPT Pro ($100)",
+      "usdMonthly": 100,
+      "krwMonthly": 159000,
+      "codingTools": "Codex",
+      "limitsNote": "5시간 한도 없음, 주간 한도 있음 (수치 비공개)",
+      "capacityUsd": 500,
+      "capacityBasis": "추정(근거 약함): Plus의 약 5배로 가정",
+      "sourceUrl": "https://chatgpt.com/ko-KR/pricing/",
+      "verifiedAt": "2026-10-05"
+    },
+    {
+      "id": "chatgpt-pro-200",
+      "vendor": "openai",
+      "name": "ChatGPT Pro ($200)",
+      "usdMonthly": 200,
+      "krwMonthly": null,
+      "codingTools": "Codex",
+      "limitsNote": "5시간 한도 없음, 주간 한도 있음 (수치 비공개)",
+      "capacityUsd": 1000,
+      "capacityBasis": "추정(근거 약함): Plus의 약 10배로 가정",
+      "sourceUrl": "https://learn.chatgpt.com/docs/pricing",
+      "verifiedAt": "2026-10-05"
+    },
+    {
+      "id": "chatgpt-pro-500",
+      "vendor": "openai",
+      "name": "ChatGPT Pro ($500)",
+      "usdMonthly": 500,
+      "krwMonthly": null,
+      "codingTools": "Codex (Astra Ultrafast 포함)",
+      "limitsNote": "5시간 한도 없음, 가장 높은 사용량 (수치 비공개)",
+      "capacityUsd": 2500,
+      "capacityBasis": "추정(근거 약함): Plus의 약 25배로 가정",
+      "sourceUrl": "https://learn.chatgpt.com/docs/pricing",
+      "verifiedAt": "2026-10-05"
+    },
+    {
+      "id": "google-ai-pro",
+      "vendor": "google",
+      "name": "Google AI Pro",
+      "usdMonthly": 19.99,
+      "krwMonthly": 29000,
+      "codingTools": "Antigravity, Jules",
+      "limitsNote": "Antigravity 5시간 단위 갱신 (수치 비공개), Jules 하루 100건",
+      "capacityUsd": 100,
+      "capacityBasis": "추정(근거 약함): Claude Pro와 같은 수준으로 가정",
+      "sourceUrl": "https://gemini.google/kr/subscriptions/",
+      "verifiedAt": "2026-10-05"
+    },
+    {
+      "id": "google-ai-ultra-5x",
+      "vendor": "google",
+      "name": "Google AI Ultra (5x)",
+      "usdMonthly": 99.99,
+      "krwMonthly": 119000,
+      "codingTools": "Antigravity, Jules",
+      "limitsNote": "AI Pro의 5배",
+      "capacityUsd": 500,
+      "capacityBasis": "AI Pro 추정치 × 5 (공식 배수 기준)",
+      "sourceUrl": "https://gemini.google/kr/subscriptions/",
+      "verifiedAt": "2026-10-05"
+    },
+    {
+      "id": "google-ai-ultra-20x",
+      "vendor": "google",
+      "name": "Google AI Ultra (20x)",
+      "usdMonthly": 199.99,
+      "krwMonthly": 300000,
+      "codingTools": "Antigravity, Jules",
+      "limitsNote": "AI Pro의 20배",
+      "capacityUsd": 2000,
+      "capacityBasis": "AI Pro 추정치 × 20 (공식 배수 기준)",
+      "sourceUrl": "https://gemini.google/kr/subscriptions/",
+      "verifiedAt": "2026-10-05"
+    }
+  ]
+}
