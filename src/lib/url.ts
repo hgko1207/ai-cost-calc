@@ -123,3 +123,48 @@ export function onMoney(cb: (m: Money) => void): () => void {
   window.addEventListener(MONEY_EVENT, h);
   return () => window.removeEventListener(MONEY_EVENT, h);
 }
+
+// ── 팀 계산기 URL ──
+export const TEAM_LIMITS = { maxPeople: 10_000, minHours: 0.5, maxHours: 16 } as const;
+
+export interface TeamUrlState {
+  toolId: string;
+  billing: 'monthly' | 'annual';
+  workDays: number;
+  groups: { typeId: string; count: number; hours: number }[];
+}
+
+/** 그룹 키: 유형 id 첫 글자 + c(인원)/h(시간). 예: heavy → hc, hh */
+export const teamGroupKey = (typeId: string, k: 'c' | 'h') => `${typeId[0]}${k}`;
+
+export function teamToQuery(s: TeamUrlState, d: TeamUrlState): string {
+  const q = new URLSearchParams();
+  if (s.toolId !== d.toolId) q.set('tt', s.toolId);
+  if (s.billing !== d.billing) q.set('b', s.billing);
+  if (s.workDays !== d.workDays) q.set('twd', String(s.workDays));
+  s.groups.forEach((g, i) => {
+    if (g.count !== d.groups[i]?.count) q.set(teamGroupKey(g.typeId, 'c'), String(g.count));
+    if (g.hours !== d.groups[i]?.hours) q.set(teamGroupKey(g.typeId, 'h'), String(g.hours));
+  });
+  return q.toString();
+}
+
+export function teamFromQuery(search: string, d: TeamUrlState, toolIds: string[]): TeamUrlState {
+  const q = new URLSearchParams(search);
+  const num = (k: string, min: number, max: number) => {
+    const raw = q.get(k);
+    const n = Number(raw);
+    return raw !== null && raw.trim() !== '' && Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : undefined;
+  };
+  const tt = q.get('tt');
+  return {
+    toolId: tt && toolIds.includes(tt) ? tt : d.toolId,
+    billing: q.get('b') === 'monthly' ? 'monthly' : 'annual',
+    workDays: num('twd', 1, 31) ?? d.workDays,
+    groups: d.groups.map((g) => ({
+      typeId: g.typeId,
+      count: Math.round(num(teamGroupKey(g.typeId, 'c'), 0, TEAM_LIMITS.maxPeople) ?? g.count),
+      hours: num(teamGroupKey(g.typeId, 'h'), TEAM_LIMITS.minHours, TEAM_LIMITS.maxHours) ?? g.hours,
+    })),
+  };
+}

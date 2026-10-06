@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { compare, modelCost, planZones, type Settings } from './calc';
 import { makeCapacityOf } from './advisor';
 import { advisor, prices, presets } from './data';
-import { fromQuery, toQuery, type CalcState } from './url';
+import { fromQuery, teamFromQuery, teamToQuery, toQuery, type CalcState, type TeamUrlState } from './url';
 
 const model = (id: string) => prices.models.find((m) => m.id === id)!;
 const daily = presets.find((p) => p.id === 'daily')!.values;
@@ -106,5 +106,39 @@ describe('url', () => {
     expect(s.dailyInputM).toBe(25);
     expect(s.cacheReadPct).toBe(100);
     expect(s.workDays).toBe(0);
+  });
+});
+
+describe('팀 URL', () => {
+  const d: TeamUrlState = {
+    toolId: 'claude-code',
+    billing: 'annual',
+    workDays: 22,
+    groups: [
+      { typeId: 'heavy', count: 2, hours: 7 },
+      { typeId: 'normal', count: 8, hours: 2 },
+    ],
+  };
+  const tools = ['claude-code', 'codex', 'gemini'];
+
+  it('기본값과 다른 값만 쓰고 그대로 복원한다', () => {
+    const s: TeamUrlState = { ...d, toolId: 'codex', billing: 'monthly', groups: [{ typeId: 'heavy', count: 3, hours: 8 }, d.groups[1]] };
+    const q = teamToQuery(s, d);
+    expect(q).toBe('tt=codex&b=monthly&hc=3&hh=8');
+    expect(teamFromQuery(q, d, tools)).toEqual(s);
+  });
+
+  it('범위 밖·잘못된 값은 자르거나 무시한다', () => {
+    const s = teamFromQuery('hc=99999&nc=-5&hh=0&nh=abc&tt=nope&twd=40', d, tools);
+    expect(s.groups[0].count).toBe(10_000);
+    expect(s.groups[1].count).toBe(0);
+    expect(s.groups[0].hours).toBe(0.5);
+    expect(s.groups[1].hours).toBe(2); // 숫자가 아니면 기본값
+    expect(s.toolId).toBe('claude-code');
+    expect(s.workDays).toBe(31);
+  });
+
+  it('빈 값(hc=)은 0명이 아니라 기본값', () => {
+    expect(teamFromQuery('hc=', d, tools).groups[0].count).toBe(2);
   });
 });

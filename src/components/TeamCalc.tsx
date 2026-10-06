@@ -5,7 +5,17 @@ import { krwShort } from '../lib/format';
 import { evaluateTeam, type Billing, type TeamGroup } from '../lib/team';
 import MobileResultBar from './MobileResultBar';
 import Segmented from './Segmented';
-import { DEFAULT_MONEY, copyShareUrl, moneyFromQuery, onMoney, replaceOwnParams } from '../lib/url';
+import {
+  DEFAULT_MONEY,
+  TEAM_LIMITS,
+  copyShareUrl,
+  moneyFromQuery,
+  onMoney,
+  replaceOwnParams,
+  teamFromQuery,
+  teamGroupKey as groupKey,
+  teamToQuery,
+} from '../lib/url';
 
 export interface TeamCalcProps {
   team: Team;
@@ -21,8 +31,6 @@ interface State {
   workDays: number;
 }
 
-// URL 키: tt=도구, b=결제주기, twd=작업일, {유형 첫 글자}c/{유형 첫 글자}h = 인원/시간
-const groupKey = (typeId: string, k: 'c' | 'h') => `${typeId[0]}${k}`;
 const STATUS_LABEL = { ok: '여유', tight: '한도 근접', short: '한도 초과', api: '쓴 만큼 결제' } as const;
 
 export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps) {
@@ -42,37 +50,13 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
   const [openId, setOpenId] = useState<string | null>(null);
 
   useEffect(() => {
-    const q = new URLSearchParams(window.location.search);
-    const num = (k: string, min: number, max: number) => {
-      const n = Number(q.get(k));
-      return q.has(k) && Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : undefined;
-    };
-    setState({
-      toolId: team.tools.some((t) => t.id === q.get('tt')) ? q.get('tt')! : DEFAULTS.toolId,
-      billing: q.get('b') === 'monthly' ? 'monthly' : 'annual',
-      workDays: num('twd', 1, 31) ?? DEFAULTS.workDays,
-      groups: DEFAULTS.groups.map((g) => ({
-        typeId: g.typeId,
-        count: Math.round(num(groupKey(g.typeId, 'c'), 0, 10_000) ?? g.count),
-        hours: num(groupKey(g.typeId, 'h'), 0.5, 16) ?? g.hours,
-      })),
-    });
+    setState(teamFromQuery(window.location.search, DEFAULTS, team.tools.map((t) => t.id)));
     setMoney(moneyFromQuery(window.location.search));
     setHydrated(true);
     return onMoney(setMoney);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const query = useMemo(() => {
-    const q = new URLSearchParams();
-    if (state.toolId !== DEFAULTS.toolId) q.set('tt', state.toolId);
-    if (state.billing !== DEFAULTS.billing) q.set('b', state.billing);
-    if (state.workDays !== DEFAULTS.workDays) q.set('twd', String(state.workDays));
-    state.groups.forEach((g, i) => {
-      if (g.count !== DEFAULTS.groups[i].count) q.set(groupKey(g.typeId, 'c'), String(g.count));
-      if (g.hours !== DEFAULTS.groups[i].hours) q.set(groupKey(g.typeId, 'h'), String(g.hours));
-    });
-    return q.toString();
-  }, [state]); // eslint-disable-line react-hooks/exhaustive-deps
+  const query = useMemo(() => teamToQuery(state, DEFAULTS), [state]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (hydrated) replaceOwnParams(OWN_KEYS, query);
   }, [query, hydrated]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -145,11 +129,12 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
                       value={g.count}
                       aria-label={`${type.name} 인원 수`}
                       onChange={(e) => {
+                        if (e.target.value.trim() === '') return; // 지우는 중에는 0명으로 바꾸지 않는다
                         const n = Math.round(Number(e.target.value));
-                        if (n >= 0 && n <= 10_000) setGroup(i, { count: n });
+                        if (n >= 0 && n <= TEAM_LIMITS.maxPeople) setGroup(i, { count: n });
                       }}
                     />
-                    <button type="button" aria-label={`${type.name} 1명 늘리기`} onClick={() => setGroup(i, { count: g.count + 1 })}>
+                    <button type="button" aria-label={`${type.name} 1명 늘리기`} onClick={() => setGroup(i, { count: Math.min(TEAM_LIMITS.maxPeople, g.count + 1) })}>
                       +
                     </button>
                     <span className="unit-text">명</span>
@@ -163,8 +148,9 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
                       step={0.5}
                       value={g.hours}
                       onChange={(e) => {
+                        if (e.target.value.trim() === '') return;
                         const n = Number(e.target.value);
-                        if (n >= 0.5 && n <= 16) setGroup(i, { hours: n });
+                        if (n >= TEAM_LIMITS.minHours && n <= TEAM_LIMITS.maxHours) setGroup(i, { hours: n });
                       }}
                     />
                     시간

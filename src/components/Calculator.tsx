@@ -276,6 +276,7 @@ export default function Calculator({ data }: { data: CalculatorData }) {
                     <span className={`dot v-${c.model.vendor}`} />
                     {c.model.name}
                     {c.longContext && <span className="tag">할증</span>}
+                    {c.model.retiresAt && <span className="tag">종료 예정</span>}
                   </span>
                   <span className="bar-track">
                     {c.available ? (

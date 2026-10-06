@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { advisor, prices, team } from './data';
+import { krwShort } from './format';
 import { evaluateTeam, type TeamInput } from './team';
 
 const base: TeamInput = {
@@ -92,5 +93,47 @@ describe('evaluateTeam', () => {
 
   it('인원이 0이면 추천 없음', () => {
     expect(run({ groups: [] }).recommended).toBeNull();
+  });
+
+  describe('극단 입력', () => {
+    it('모든 그룹이 0명이면 추천 없음, 모든 방식이 "인원을 입력하세요"', () => {
+      const r = run({ groups: [{ typeId: 'heavy', count: 0, hours: 7 }, { typeId: 'normal', count: 0, hours: 2 }] });
+      expect(r.headcount).toBe(0);
+      expect(r.recommended).toBeNull();
+      expect(r.options.every((o) => o.notApplicableReason === '인원을 입력하세요')).toBe(true);
+    });
+
+    it('Team 좌석 경계: 2명 OK, 150명 OK, 151명 해당 없음', () => {
+      const g = (n: number) => [{ typeId: 'normal', count: n, hours: 2 }];
+      expect(opt(run({ groups: g(2) }), 'claude-team').applicable).toBe(true);
+      expect(opt(run({ groups: g(150) }), 'claude-team').applicable).toBe(true);
+      expect(opt(run({ groups: g(151) }), 'claude-team').notApplicableReason).toBe('최대 150명까지');
+    });
+
+    it('Enterprise 경계: 19명 해당 없음, 20명 OK (연간)', () => {
+      const g = (n: number) => [{ typeId: 'normal', count: n, hours: 2 }];
+      expect(opt(run({ groups: g(19) }), 'claude-enterprise').applicable).toBe(false);
+      expect(opt(run({ groups: g(20) }), 'claude-enterprise').applicable).toBe(true);
+    });
+
+    it('1만+1만 명: 금액이 유한하고 억 단위로 표시', () => {
+      const groups = [{ typeId: 'heavy', count: 10_000, hours: 7 }, { typeId: 'normal', count: 10_000, hours: 2 }];
+      const r = run({ groups });
+      expect(opt(r, 'claude-team').applicable).toBe(false); // 150명 초과
+      expect(opt(r, 'claude-enterprise').applicable).toBe(true);
+      // Enterprise는 사용량을 API 요금으로 내므로 정액 개인 구독보다 비싸게 나온다
+      expect(r.recommended?.option.id).toBe('claude-individual');
+      expect(Number.isFinite(r.recommended!.annualKrw)).toBe(true);
+      expect(krwShort(r.recommended!.annualKrw)).toContain('억');
+      // 월간이면 Enterprise도 안 되므로 개인 구독 지원만 남는다
+      expect(run({ groups, billing: 'monthly' }).recommended?.option.id).toBe('claude-individual');
+    });
+
+    it('Gemini(초과 시 대기)를 하루 16시간 쓰면 한도 초과로 표시되고 추가 비용은 붙지 않는다', () => {
+      const r = run({ toolId: 'gemini', groups: [{ typeId: 'heavy', count: 3, hours: 16 }] });
+      const std = opt(r, 'code-assist-standard');
+      expect(std.lines[0].overageKrw).toBe(0);
+      expect(r.recommended).not.toBeNull();
+    });
   });
 });

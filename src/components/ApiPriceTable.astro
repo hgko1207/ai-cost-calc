@@ -3,6 +3,7 @@
 import { prices } from '../lib/data';
 
 const vendorName = (id: string) => prices.vendors.find((v) => v.id === id)?.name ?? id;
+const shortDate = (d: string) => d.replace(/^(\d{4})-0?(\d+)-0?(\d+)$/, '$1.$2.$3');
 ---
 
 <details class="price-more">
@@ -28,6 +29,8 @@ const vendorName = (id: string) => prices.vendors.find((v) => v.id === id)?.name
             <tr>
               <th scope="row">
                 <a href={m.sourceUrl} rel="noopener" target="_blank">{m.name}</a>
+                {m.retiresAt && <span class="pill warn-pill">{shortDate(m.retiresAt)} 종료 예정</span>}
+                {m.priceChangesAt && <span class="pill">{shortDate(m.priceChangesAt)} 가격 변경</span>}
                 <span class="sub">{vendorName(m.vendor)} · 최대 {m.contextWindowK}K</span>
               </th>
               <td class="num">${m.prices.input}</td>

@@ -6,6 +6,7 @@ import presetsJson from '../data/presets.json';
 import relatedJson from '../data/related-posts.json';
 import advisorJson from '../data/advisor.json';
 import teamJson from '../data/team.json';
+import { planAgentHours } from './advisor';
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const price = z.number().nonnegative();
@@ -33,6 +34,8 @@ const ModelSchema = z.object({
   prices: tokenPrices,
   longContext: z.object({ thresholdK: z.number().positive(), prices: tokenPrices }).optional(),
   note: z.string().optional(),
+  retiresAt: isoDate.optional(), // 지원 종료 예정일 (공식 발표)
+  priceChangesAt: isoDate.optional(), // 가격 변경 예정일 (공식 발표)
   sourceUrl: z.url(),
   verifiedAt: isoDate,
 });
@@ -211,7 +214,12 @@ export const advisor = AdvisorSchema.superRefine((a, ctx) => {
   }
 }).parse(advisorJson);
 
-export const team = TeamSchema.superRefine((t, ctx) => {
+/** team.json 검증. 테스트에서 잘못된 데이터를 넣어 거부되는지 확인할 수 있게 함수로 둔다. */
+export function parseTeam(json: unknown) {
+  return TeamRefined.parse(json);
+}
+
+const TeamRefined = TeamSchema.superRefine((t, ctx) => {
   const planIds = new Set(prices.plans.map((p) => p.id));
   const modelIds = new Set(prices.models.map((m) => m.id));
   const modeIds = new Set(advisor.modes.map((m) => m.id));
@@ -227,7 +235,13 @@ export const team = TeamSchema.superRefine((t, ctx) => {
       if (o.kind !== 'individual') continue;
       for (const p of o.plans) {
         if (!planIds.has(p.planId)) ctx.addIssue({ code: 'custom', message: `알 수 없는 요금제: ${p.planId}` });
+        // 한도가 없으면 0시간으로 계산돼 금액이 조용히 틀린다 → 빌드에서 막는다
+        if (planAgentHours(advisor, p.planId) == null) {
+          ctx.addIssue({ code: 'custom', message: `advisor.json에 한도(agentHours)가 없는 요금제: ${p.planId}` });
+        }
       }
     }
   }
-}).parse(teamJson);
+});
+
+export const team = parseTeam(teamJson);
