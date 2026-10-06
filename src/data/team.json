@@ -68,7 +68,7 @@
             "회사 데이터 학습 제외(기본)",
             "좌석별 추가 사용 한도 설정"
           ],
-          "sourceUrl": "https://support.claude.com/en/articles/9266767-what-is-the-team-plan"
+          "sourceUrl": "https://support.claude.com/ko/articles/9266767"
         },
         {
           "id": "claude-enterprise",
@@ -83,7 +83,7 @@
             "데이터 보존 기간 설정",
             "IP 허용 목록"
           ],
-          "sourceUrl": "https://support.claude.com/en/articles/9797531-what-is-the-enterprise-plan",
+          "sourceUrl": "https://support.claude.com/ko/articles/9797531",
           "limitNote": "좌석별 한도 없음, 사용량은 API 요금으로 결제"
         },
         {
@@ -110,7 +110,7 @@
             "관리 콘솔·SSO 없음",
             "개인 계정이라 퇴사 시 회수 어려움"
           ],
-          "sourceUrl": "https://claude.com/pricing"
+          "sourceUrl": "https://claude.com/ko/pricing"
         },
         {
           "id": "claude-api",
@@ -122,7 +122,7 @@
             "워크스페이스별 지출 한도 설정",
             "사용자별 비용 대시보드"
           ],
-          "sourceUrl": "https://code.claude.com/docs/en/costs"
+          "sourceUrl": "https://code.claude.com/docs/ko/costs"
         }
       ],
       "overage": "paid"
@@ -233,7 +233,7 @@
             "IP 면책",
             "소스 인용 표시"
           ],
-          "sourceUrl": "https://cloud.google.com/products/gemini/pricing"
+          "sourceUrl": "https://cloud.google.com/products/gemini/pricing?hl=ko"
         },
         {
           "id": "code-assist-enterprise",
@@ -256,7 +256,7 @@
             "Standard 기능 전체",
             "사내 코드로 맞춤화"
           ],
-          "sourceUrl": "https://cloud.google.com/products/gemini/pricing"
+          "sourceUrl": "https://cloud.google.com/products/gemini/pricing?hl=ko"
         },
         {
           "id": "gemini-api",
@@ -266,7 +266,7 @@
           "features": [
             "한도 없음, 쓴 만큼 청구"
           ],
-          "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing"
+          "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing?hl=ko"
         }
       ],
       "overage": "wait"

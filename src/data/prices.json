@@ -4,8 +4,8 @@
     {
       "id": "anthropic",
       "name": "Anthropic",
-      "apiPricingUrl": "https://platform.claude.com/docs/en/about-claude/pricing",
-      "planPricingUrl": "https://claude.com/pricing"
+      "apiPricingUrl": "https://platform.claude.com/docs/ko/about-claude/pricing",
+      "planPricingUrl": "https://claude.com/ko/pricing"
     },
     {
       "id": "openai",
@@ -16,7 +16,7 @@
     {
       "id": "google",
       "name": "Google",
-      "apiPricingUrl": "https://ai.google.dev/gemini-api/docs/pricing",
+      "apiPricingUrl": "https://ai.google.dev/gemini-api/docs/pricing?hl=ko",
       "planPricingUrl": "https://gemini.google/kr/subscriptions/"
     }
   ],
@@ -35,7 +35,7 @@
         "output": 50
       },
       "note": "1M 컨텍스트까지 동일 단가. 캐시 쓰기는 5분 TTL 기준(1시간 TTL은 $20).",
-      "sourceUrl": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "sourceUrl": "https://platform.claude.com/docs/ko/about-claude/pricing",
       "verifiedAt": "2026-10-05"
     },
     {
@@ -52,7 +52,7 @@
         "output": 20
       },
       "note": "1M 컨텍스트까지 동일 단가. 캐시 쓰기는 5분 TTL 기준(1시간 TTL은 $8).",
-      "sourceUrl": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "sourceUrl": "https://platform.claude.com/docs/ko/about-claude/pricing",
       "verifiedAt": "2026-10-05"
     },
     {
@@ -68,7 +68,7 @@
         "cacheRead": 0.2,
         "output": 10
       },
-      "sourceUrl": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "sourceUrl": "https://platform.claude.com/docs/ko/about-claude/pricing",
       "verifiedAt": "2026-10-05"
     },
     {
@@ -84,7 +84,7 @@
         "cacheRead": 0.1,
         "output": 5
       },
-      "sourceUrl": "https://platform.claude.com/docs/en/about-claude/pricing",
+      "sourceUrl": "https://platform.claude.com/docs/ko/about-claude/pricing",
       "verifiedAt": "2026-10-05"
     },
     {
@@ -185,7 +185,7 @@
         }
       },
       "note": "캐시 쓰기 요금이 따로 없고 시간당 저장 요금($4.50/1M·시간)이 붙음. 계산기에서는 캐시 쓰기를 입력 단가로 근사하고 저장 요금은 제외.",
-      "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing",
+      "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing?hl=ko",
       "verifiedAt": "2026-10-05"
     },
     {
@@ -202,7 +202,7 @@
         "output": 3.75
       },
       "note": "2026-12-31까지 프로모션 가격. 2027-01-01부터 입력 $1.50 / 출력 $7.50로 2배 인상 예정. 캐시 저장 요금 제외.",
-      "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing",
+      "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing?hl=ko",
       "verifiedAt": "2026-10-05"
     },
     {
@@ -219,7 +219,7 @@
         "output": 2.5
       },
       "note": "캐시 저장 요금 제외.",
-      "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing",
+      "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing?hl=ko",
       "verifiedAt": "2026-10-05"
     }
   ],
@@ -234,7 +234,7 @@
       "limitsNote": "5시간 단위 한도 + 주간 한도 (수치 비공개)",
       "capacityUsd": 100,
       "capacityBasis": "Max 5x 추정치의 1/5 (공식: Max 5x = Pro의 5배)",
-      "sourceUrl": "https://support.claude.com/en/articles/8325606-what-is-the-pro-plan",
+      "sourceUrl": "https://support.claude.com/ko/articles/8325606",
       "verifiedAt": "2026-10-05"
     },
     {
@@ -247,7 +247,7 @@
       "limitsNote": "Pro의 5배 (5시간 단위) + 주간 한도",
       "capacityUsd": 500,
       "capacityBasis": "운영자 실측(하한): 집 PC에서만 Opus 5.5 API 환산 월 약 $490 사용, 같은 계정을 회사에서도 사용하며 5시간 한도에 자주·주간 한도에 가끔 도달",
-      "sourceUrl": "https://support.claude.com/en/articles/11049741-what-is-the-max-plan",
+      "sourceUrl": "https://support.claude.com/ko/articles/11049741",
       "verifiedAt": "2026-10-05"
     },
     {
@@ -260,7 +260,7 @@
       "limitsNote": "Pro의 20배 (5시간 단위) + 주간 한도",
       "capacityUsd": 2000,
       "capacityBasis": "Max 5x 추정치 × 4 (공식 배수 기준)",
-      "sourceUrl": "https://support.claude.com/en/articles/11049741-what-is-the-max-plan",
+      "sourceUrl": "https://support.claude.com/ko/articles/11049741",
       "verifiedAt": "2026-10-05"
     },
     {
