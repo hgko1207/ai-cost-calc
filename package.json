@@ -11,11 +11,10 @@
     "usage": "node scripts/usage-summary.mjs"
   },
   "dependencies": {
-    "@astrojs/react": "^7.0.0",
+    "@astrojs/preact": "^6.0.6",
     "@astrojs/sitemap": "^3.7.4",
     "astro": "^7.3.5",
-    "react": "^19.3.0",
-    "react-dom": "^19.3.0",
+    "preact": "^10.29.8",
     "zod": "^4.6.5"
   },
   "devDependencies": {

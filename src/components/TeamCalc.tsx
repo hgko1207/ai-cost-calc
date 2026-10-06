@@ -6,6 +6,7 @@ import { compareAlternative, compositionText, evaluateTeam, type Billing, type T
 import { buildTeamSummary } from '../lib/teamSummary';
 import FeatureChecks from './FeatureChecks';
 import MobileResultBar from './MobileResultBar';
+import NumberInput from './NumberInput';
 import Segmented from './Segmented';
 import {
   DEFAULT_MONEY,
@@ -145,17 +146,14 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
                     <button type="button" aria-label={`${type.name} 1명 줄이기`} onClick={() => setGroup(i, { count: Math.max(0, g.count - 1) })}>
                       −
                     </button>
-                    <input
-                      type="number"
-                      inputMode="numeric"
-                      min={0}
+                    <NumberInput
                       value={g.count}
-                      aria-label={`${type.name} 인원 수`}
-                      onChange={(e) => {
-                        if (e.target.value.trim() === '') return; // 지우는 중에는 0명으로 바꾸지 않는다
-                        const n = Math.round(Number(e.target.value));
-                        if (n >= 0 && n <= TEAM_LIMITS.maxPeople) setGroup(i, { count: n });
-                      }}
+                      min={0}
+                      max={TEAM_LIMITS.maxPeople}
+                      integer
+                      unit="명"
+                      ariaLabel={`${type.name} 인원 수`}
+                      onChange={(count) => setGroup(i, { count })}
                     />
                     <button type="button" aria-label={`${type.name} 1명 늘리기`} onClick={() => setGroup(i, { count: Math.min(TEAM_LIMITS.maxPeople, g.count + 1) })}>
                       +
@@ -164,17 +162,14 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
                   </div>
                   <label className="group-hours">
                     하루
-                    <input
-                      type="number"
-                      min={0.5}
-                      max={16}
-                      step={0.5}
+                    <NumberInput
                       value={g.hours}
-                      onChange={(e) => {
-                        if (e.target.value.trim() === '') return;
-                        const n = Number(e.target.value);
-                        if (n >= TEAM_LIMITS.minHours && n <= TEAM_LIMITS.maxHours) setGroup(i, { hours: n });
-                      }}
+                      min={TEAM_LIMITS.minHours}
+                      max={TEAM_LIMITS.maxHours}
+                      step={0.5}
+                      unit="시간"
+                      ariaLabel={`${type.name} 하루 사용 시간`}
+                      onChange={(hours) => setGroup(i, { hours })}
                     />
                     시간
                   </label>
@@ -197,16 +192,7 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
           />
           <label className="inline-field">
             한 달 작업일
-            <input
-              type="number"
-              min={1}
-              max={31}
-              value={state.workDays}
-              onChange={(e) => {
-                const n = Number(e.target.value);
-                if (n >= 1 && n <= 31) setState((s) => ({ ...s, workDays: n }));
-              }}
-            />
+            <NumberInput value={state.workDays} min={1} max={31} integer unit="일" onChange={(workDays) => setState((s) => ({ ...s, workDays }))} />
             일
           </label>
         </div>

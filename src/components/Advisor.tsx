@@ -4,6 +4,7 @@ import { advise, type Advice, type AdvisorInput, type PlanFit, type PlanStatus }
 import type { Advisor as AdvisorData, LimitFrequency, Model, Plan, RelatedPost } from '../lib/data';
 import { krwShort, tokensM } from '../lib/format';
 import MobileResultBar from './MobileResultBar';
+import NumberInput from './NumberInput';
 import Segmented from './Segmented';
 import { DEFAULT_MONEY, copyShareUrl, moneyFromQuery, onMoney, replaceOwnParams } from '../lib/url';
 
@@ -197,16 +198,7 @@ export default function Advisor({ advisor, models, plans, relatedPosts }: Adviso
           </div>
           <label className="inline-field">
             한 달 작업일
-            <input
-              type="number"
-              min={1}
-              max={31}
-              value={state.workDays}
-              onChange={(e) => {
-                const n = Number(e.target.value);
-                if (n >= 1 && n <= 31) set({ workDays: n });
-              }}
-            />
+            <NumberInput value={state.workDays} min={1} max={31} integer unit="일" onChange={(workDays) => set({ workDays })} />
             일
           </label>
         </div>

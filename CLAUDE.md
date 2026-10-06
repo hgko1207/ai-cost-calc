@@ -1,7 +1,7 @@
 # AI 코딩 요금제 계산기
 
 hgko-dev.tistory.com 블로그용 무료 웹 도구. 개인 탭은 Pro·Max 요금제를 추천하고, 팀·회사 탭은 도입 비용을 월·연 단위로 비교한다.
-Astro 7 + React 19 정적 사이트(계산기만 React 아일랜드). 배포 주소는 https://hgko1207.github.io/ai-cost-calc/
+Astro 7 + Preact(compat, React 문법 그대로) 정적 사이트(계산기만 아일랜드). 배포 주소는 https://hgko1207.github.io/ai-cost-calc/
 
 ## 소통
 - 답변·보고·질문은 항상 **한국어**로 한다. 코드, 식별자, 명령어는 원문 그대로 둔다.

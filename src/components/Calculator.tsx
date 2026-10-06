@@ -31,6 +31,8 @@ function NumField(props: {
   const { label, unit, value, onChange, min = 0, max, step = 1, hint } = props;
   // 입력 중인 문자열("1." 등)을 보존하려고 로컬 문자열 상태를 둔다
   const [text, setText] = useState(String(value));
+  const parsed = Number(text);
+  const invalid = text.trim() !== '' && (!Number.isFinite(parsed) || parsed < min || parsed > (max ?? Infinity));
   useEffect(() => {
     if (Number(text) !== value) setText(String(value));
   }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -45,15 +47,25 @@ function NumField(props: {
           max={max}
           step={step}
           value={text}
+          aria-invalid={invalid}
           onChange={(e) => {
             setText(e.target.value);
             const n = Number(e.target.value);
-            if (e.target.value !== '' && Number.isFinite(n)) onChange(Math.min(max ?? Infinity, Math.max(min, n)));
+            if (e.target.value !== '' && Number.isFinite(n) && n >= min && n <= (max ?? Infinity)) onChange(n);
+          }}
+          onBlur={() => {
+            if (invalid) setText(String(value));
           }}
         />
         <span className="unit">{unit}</span>
       </span>
-      {hint && <span className="field-hint">{hint}</span>}
+      {invalid ? (
+        <span className="num-error" role="alert">
+          {min}~{max ?? '∞'} 사이로 입력하세요
+        </span>
+      ) : (
+        hint && <span className="field-hint">{hint}</span>
+      )}
     </label>
   );
 }
