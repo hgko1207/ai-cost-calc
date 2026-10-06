@@ -1,11 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { compare, modelCost, planZones, type Settings } from './calc';
-import { prices, presets } from './data';
+import { makeCapacityOf } from './advisor';
+import { advisor, prices, presets } from './data';
 import { fromQuery, toQuery, type CalcState } from './url';
 
 const model = (id: string) => prices.models.find((m) => m.id === id)!;
 const daily = presets.find((p) => p.id === 'daily')!.values;
 const settings: Settings = { ...daily, fxRate: 1400, vat: false, capacityScale: 1 };
+const capacityOf = makeCapacityOf(advisor, prices.models, daily.workDays);
 
 describe('modelCost', () => {
   it('매일 코딩 프리셋 × Opus 5.5를 손계산과 일치시킨다', () => {
@@ -38,32 +40,51 @@ describe('modelCost', () => {
 
 describe('compare', () => {
   it('한도 안에서 가장 싼 구독을 고른다', () => {
-    const r = compare(model('opus-5-5'), prices.plans, settings);
+    const r = compare(model('opus-5-5'), prices.plans, settings, capacityOf);
     expect(r.best.id).toBe('claude-max-5x'); // Pro는 한도($100) 초과
     expect(r.options.find((o) => o.id === 'claude-pro')!.covers).toBe(false);
     expect(r.savingKrw).toBeCloseTo(332.2 * 1400 - 140_000);
   });
 
   it('사용량이 적으면 API를 추천한다', () => {
-    const r = compare(model('sonnet-5-5'), prices.plans, { ...settings, dailyInputM: 0.1, dailyOutputK: 1 });
+    const r = compare(model('sonnet-5-5'), prices.plans, { ...settings, dailyInputM: 0.1, dailyOutputK: 1 }, capacityOf);
     expect(r.best.kind).toBe('api');
     expect(r.savingKrw).toBe(0);
   });
 
-  it('공식 원화 가격이 있으면 환율·부가세와 무관하게 사용한다', () => {
-    const r = compare(model('gemini-3-1-pro'), prices.plans, { ...settings, vat: true });
-    expect(r.options.find((o) => o.id === 'google-ai-pro')!.krw).toBe(29_000);
+  it('공식 원화가는 부가세 포함가로 보고, 부가세 별도 기준이면 1.1로 나눈다', () => {
+    const withVat = compare(model('gemini-3-1-pro'), prices.plans, { ...settings, vat: true }, capacityOf);
+    expect(withVat.options.find((o) => o.id === 'google-ai-pro')!.krw).toBe(29_000);
+    const noVat = compare(model('gemini-3-1-pro'), prices.plans, { ...settings, vat: false }, capacityOf);
+    expect(noVat.options.find((o) => o.id === 'google-ai-pro')!.krw).toBeCloseTo(29_000 / 1.1);
+    // 달러 요금제는 부가세 포함이면 1.1배
+    expect(withVat.api.usd * 1400 * 1.1).toBeCloseTo(withVat.apiKrw);
   });
 });
 
 describe('planZones', () => {
   it('손익분기점과 한도 지점을 계산한다', () => {
-    const { usdPerDailyM, zones } = planZones(model('opus-5-5'), prices.plans, settings);
+    const { usdPerDailyM, zones } = planZones(model('opus-5-5'), prices.plans, settings, capacityOf);
     expect(usdPerDailyM).toBeCloseTo(332.2 / 25);
     const max5 = zones.find((z) => z.plan.id === 'claude-max-5x')!;
     expect(max5.breakEvenM).toBeCloseTo(140_000 / ((332.2 / 25) * 1400));
-    expect(max5.capacityM).toBeCloseTo(500 / (332.2 / 25));
+    expect(max5.capacityM).toBeCloseTo(capacityOf(prices.plans.find((p) => p.id === 'claude-max-5x')!) / (332.2 / 25));
     expect(max5.hasZone).toBe(true);
+  });
+});
+
+describe('한도 기준 통일', () => {
+  it('토큰 계산기의 한도는 요금제 추천의 하루 감당 시간에서 나온다 (Max 5x = 6시간)', () => {
+    const max5 = prices.plans.find((p) => p.id === 'claude-max-5x')!;
+    // 6시간 × (Opus 5.5로 에이전트 작업 하루 1시간의 API 월 비용)
+    const perHour = modelCost(model('opus-5-5'), { ...advisor.agentHourUsage, workDays: 22 }).usd;
+    expect(capacityOf(max5)).toBeCloseTo(6 * perHour);
+  });
+
+  it('하루 7시간 에이전트 작업이면 위·아래 계산기 모두 Max 5x 한도 초과로 본다', () => {
+    const usage = { ...advisor.agentHourUsage, dailyInputM: 35, dailyOutputK: 112, workDays: 22 };
+    const r = compare(model('opus-5-5'), prices.plans, { ...settings, ...usage }, capacityOf);
+    expect(r.options.find((o) => o.id === 'claude-max-5x')!.covers).toBe(false);
   });
 });
 

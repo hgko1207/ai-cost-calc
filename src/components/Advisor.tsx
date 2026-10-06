@@ -3,7 +3,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { advise, type Advice, type AdvisorInput, type PlanFit, type PlanStatus } from '../lib/advisor';
 import type { Advisor as AdvisorData, LimitFrequency, Model, Plan } from '../lib/data';
 import { krwShort, tokensM } from '../lib/format';
-import { copyShareUrl, replaceOwnParams } from '../lib/url';
+import MobileResultBar from './MobileResultBar';
+import Segmented from './Segmented';
+import { DEFAULT_MONEY, copyShareUrl, moneyFromQuery, onMoney, replaceOwnParams } from '../lib/url';
 
 export interface AdvisorProps {
   advisor: AdvisorData;
@@ -14,13 +16,13 @@ export interface AdvisorProps {
 type State = Omit<AdvisorInput, 'fxRate' | 'vat'>;
 
 const KEYS = { toolId: 't', hours: 'h', modeId: 'u', currentPlanId: 'c', frequency: 'f', workDays: 'wd' } as const;
-const STATUS_LABEL: Record<PlanStatus, string> = { short: '부족', tight: '빠듯함', ok: '여유' };
+const STATUS_LABEL: Record<PlanStatus, string> = { short: '한도 초과', tight: '한도 근접', ok: '여유' };
 const FREQ_IDS: LimitFrequency[] = ['none', 'sometimes', 'often', 'daily'];
 
 function toQuery(s: State, d: State): string {
   const q = new URLSearchParams();
   for (const [field, key] of Object.entries(KEYS) as [keyof State, string][]) {
-    if (s[field] !== d[field]) q.set(key, String(s[field]));
+    if (s[field] !== d[field] && s[field] !== null) q.set(key, String(s[field]));
   }
   return q.toString();
 }
@@ -31,11 +33,13 @@ function fromQuery(search: string, d: State, data: AdvisorData, plans: Plan[]): 
   const tool = data.tools.find((t) => t.id === q.get(KEYS.toolId));
   if (tool) s.toolId = tool.id;
   const h = Number(q.get(KEYS.hours));
-  if (q.has(KEYS.hours) && Number.isFinite(h)) s.hours = Math.min(16, Math.max(0.5, h));
+  if (q.has(KEYS.hours) && Number.isFinite(h)) s.hours = Math.min(12, Math.max(0.5, h)); // 슬라이더 범위와 같게
   const mode = q.get(KEYS.modeId);
   if (data.modes.some((m) => m.id === mode)) s.modeId = mode!;
+  // 지금 요금제는 선택한 도구의 요금제만 받는다
   const cur = q.get(KEYS.currentPlanId);
-  if (cur === 'none' || plans.some((p) => p.id === cur)) s.currentPlanId = cur!;
+  const toolPlans = data.tools.find((t) => t.id === s.toolId)?.plans ?? [];
+  if (cur === 'none' || toolPlans.some((p) => p.planId === cur)) s.currentPlanId = cur!;
   const f = q.get(KEYS.frequency) as LimitFrequency | null;
   if (f && FREQ_IDS.includes(f)) s.frequency = f;
   const wd = Number(q.get(KEYS.workDays));
@@ -51,7 +55,7 @@ function reasonText(a: Advice, s: State, modeName: string, current: PlanFit | un
   const usage = `하루 ${s.hours}시간, '${modeName}' 방식`;
   switch (a.reason) {
     case 'api-cheaper':
-      return `${usage} 정도면 사용량이 적어서, 구독보다 쓴 만큼 내는 API가 더 저렴합니다. 다만 매번 결제 걱정 없이 쓰고 싶다면 ${a.fits[0].plan.name} 요금제도 괜찮습니다.`;
+      return `${usage} 정도면 구독보다 쓴 만큼 내는 API가 조금 더 저렴합니다. 다만 매번 결제 걱정 없이 쓰고 싶다면 ${(a.fits.find((f) => f.status !== 'short') ?? a.fits.at(-1)!).plan.name} 요금제도 괜찮습니다.`;
     case 'fits':
       return rec!.status === 'tight'
         ? `${usage} 기준으로 ${rec!.plan.name} 요금제가 가장 경제적입니다. 다만 한도에 가끔 걸릴 수 있습니다.`
@@ -71,53 +75,26 @@ function reasonText(a: Advice, s: State, modeName: string, current: PlanFit | un
   }
 }
 
-function Segmented<T extends string>(props: {
-  label: string;
-  value: T;
-  options: { id: T; name: string; description?: string }[];
-  onChange: (v: T) => void;
-  wide?: boolean;
-}) {
-  return (
-    <div className="q-options" role="radiogroup" aria-label={props.label} data-wide={props.wide || undefined}>
-      {props.options.map((o) => (
-        <button
-          key={o.id}
-          type="button"
-          role="radio"
-          aria-checked={props.value === o.id}
-          className="opt"
-          onClick={() => props.onChange(o.id)}
-        >
-          <strong>{o.name}</strong>
-          {o.description && <span>{o.description}</span>}
-        </button>
-      ))}
-    </div>
-  );
-}
-
 export default function Advisor({ advisor, models, plans }: AdvisorProps) {
   const DEFAULTS: State = {
     toolId: advisor.tools[0].id,
     hours: 4,
     modeId: 'pair',
     currentPlanId: 'none',
-    frequency: 'sometimes',
+    frequency: null,
     workDays: advisor.defaultWorkDays,
   };
   const [state, setState] = useState<State>(DEFAULTS);
-  const [money, setMoney] = useState({ fxRate: 1400, vat: false });
+  const [money, setMoney] = useState(DEFAULT_MONEY);
   const [hydrated, setHydrated] = useState(false);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    const q = new URLSearchParams(window.location.search);
     setState(fromQuery(window.location.search, DEFAULTS, advisor, plans));
-    // 환율·부가세는 아래 토큰 계산기의 파라미터(fx, vat)를 함께 쓴다
-    const fx = Number(q.get('fx'));
-    setMoney({ fxRate: fx > 0 ? fx : 1400, vat: q.get('vat') === '1' });
+    // 환율·부가세는 아래 토큰 계산기의 파라미터(fx, vat)를 함께 쓰고, 바뀌면 이벤트로 따라간다
+    setMoney(moneyFromQuery(window.location.search));
     setHydrated(true);
+    return onMoney(setMoney);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const query = toQuery(state, DEFAULTS);
@@ -129,6 +106,7 @@ export default function Advisor({ advisor, models, plans }: AdvisorProps) {
   const tool = advisor.tools.find((t) => t.id === state.toolId) ?? advisor.tools[0];
   const mode = advisor.modes.find((m) => m.id === state.modeId) ?? advisor.modes[0];
   const freq = advisor.limitFrequencies.find((f) => f.id === state.frequency) ?? advisor.limitFrequencies[0];
+  const freqChosen = state.frequency !== null;
   const a = useMemo(() => advise({ ...state, ...money }, advisor, models, plans), [state, money, advisor, models, plans]);
   const current = a.fits.find((f) => f.isCurrent);
   const rec = a.recommended;
@@ -137,11 +115,12 @@ export default function Advisor({ advisor, models, plans }: AdvisorProps) {
   const setTool = (toolId: string) => {
     const next = advisor.tools.find((t) => t.id === toolId)!;
     // 도구를 바꾸면 그 도구의 요금제가 아닌 "지금 요금제"는 초기화
-    set({ toolId, currentPlanId: next.plans.some((p) => p.planId === state.currentPlanId) ? state.currentPlanId : 'none' });
+    const keep = next.plans.some((p) => p.planId === state.currentPlanId);
+    set({ toolId, currentPlanId: keep ? state.currentPlanId : 'none', frequency: keep ? state.frequency : null });
   };
 
   const copyLink = async () => {
-    await copyShareUrl();
+    await copyShareUrl(Object.values(KEYS));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -173,6 +152,7 @@ export default function Advisor({ advisor, models, plans }: AdvisorProps) {
             max={12}
             step={0.5}
             value={state.hours}
+            aria-valuetext={`하루 ${state.hours}시간`}
             onChange={(e) => set({ hours: Number(e.target.value) })}
           />
           <div className="range-scale" aria-hidden="true">
@@ -209,13 +189,15 @@ export default function Advisor({ advisor, models, plans }: AdvisorProps) {
             label="지금 요금제"
             value={state.currentPlanId}
             options={[{ id: 'none', name: '없음' }, ...tool.plans.map((p) => ({ id: p.planId, name: shortName(planName(p.planId)) }))]}
-            onChange={(currentPlanId) => set({ currentPlanId })}
+            onChange={(currentPlanId) => set({ currentPlanId, frequency: null })}
           />
         </div>
 
         {state.currentPlanId !== 'none' && (
           <div className="q">
-            <p className="q-label">5. 그 요금제에서 사용 한도에 얼마나 자주 걸리나요?</p>
+            <p className="q-label">
+              5. 그 요금제에서 사용 한도에 얼마나 자주 걸리나요? <span className="muted small">(선택하면 경험을 우선 반영)</span>
+            </p>
             <Segmented
               label="한도에 걸리는 빈도"
               value={state.frequency}
@@ -226,7 +208,10 @@ export default function Advisor({ advisor, models, plans }: AdvisorProps) {
         )}
       </section>
 
-      <section className="card result" aria-live="polite" aria-labelledby="r-title">
+      <section className="card result" id="advisor-result" aria-labelledby="r-title">
+        <p className="sr-only" aria-live="polite">
+          {hydrated && `추천: ${rec ? `${rec.plan.name}, 월 ${krwShort(rec.krw)}` : `API 종량제, 월 약 ${krwShort(a.api.krw)}`}`}
+        </p>
         <p className="eyebrow-inline">추천</p>
         <h2 id="r-title" className="result-title">
           {rec ? rec.plan.name : 'API 종량제 (쓴 만큼 결제)'}
@@ -248,15 +233,24 @@ export default function Advisor({ advisor, models, plans }: AdvisorProps) {
               <div className="meter" aria-hidden="true">
                 <span style={{ width: `${Math.min(100, f.utilization * 100)}%` }} />
               </div>
-              <div className="fit-status">{STATUS_LABEL[f.status]}</div>
+              <div className="fit-status">
+                {f.isCurrent && freqChosen
+                  ? state.frequency === 'none'
+                    ? '한도에 거의 안 걸림 (입력하신 경험)'
+                    : `한도에 ${freq.name} 걸림 (입력하신 경험)`
+                  : STATUS_LABEL[f.status]}
+              </div>
               <div className="fit-cap">
                 {f.agentHours / mode.intensity >= 16
-                  ? `'${mode.name}' 기준 하루 종일 써도 여유`
-                  : `'${mode.name}' 기준 하루 약 ${+(f.agentHours / mode.intensity).toFixed(1)}시간까지`}
+                  ? `하루 ${state.hours}시간 사용 · 한도 넉넉함`
+                  : `하루 ${state.hours}시간 사용 · 한도 약 ${+(f.agentHours / mode.intensity).toFixed(1)}시간 (${Math.round(f.utilization * 100)}%)`}
               </div>
             </li>
           ))}
         </ol>
+        <p className="muted small legend">
+          여유: 한도의 70% 이하 · 한도 근접: 70% 초과~100%, 가끔 한도에 걸릴 수 있음 · 한도 초과: 하루 사용량이 한도를 넘음. 한도는 공식 배수와 운영자 경험으로 잡은 추정치입니다.
+        </p>
 
         <div className="api-note">
           <p>
@@ -264,9 +258,11 @@ export default function Advisor({ advisor, models, plans }: AdvisorProps) {
             <span className="muted"> ({a.api.model.name} 기준)</span>
           </p>
           <p className="muted small">
-            {rec && saving > 0
-              ? `→ 구독으로 월 약 ${krwShort(saving)} 아끼는 셈입니다. 사용량이 많을수록 구독이 유리합니다.`
-              : '→ 이 정도 사용량이면 쓴 만큼 내는 쪽이 더 쌉니다.'}
+            {!rec
+              ? '→ 이 정도 사용량이면 쓴 만큼 내는 쪽이 더 쌉니다.'
+              : saving > 0
+                ? `→ 구독으로 월 약 ${krwShort(saving)} 아끼는 셈입니다. 사용량이 많을수록 구독이 유리합니다.`
+                : '→ 금액만 보면 API가 비슷하거나 조금 싸지만, 구독은 정해진 금액으로 한도 걱정을 덜 수 있습니다.'}
           </p>
         </div>
 
@@ -284,9 +280,9 @@ export default function Advisor({ advisor, models, plans }: AdvisorProps) {
             <li>{tool.basis}</li>
             <li>
               API 환산: 한 달 입력 약 {tokensM(a.monthlyTokens.inputM)}·출력 {tokensM(a.monthlyTokens.outputM)} 토큰, 프롬프트 캐싱
-              반영, 환율 {money.fxRate.toLocaleString('ko-KR')}원/$.
+              반영, 환율 {money.fxRate.toLocaleString('ko-KR')}원/$, 부가세 {money.vat ? '포함' : '별도'}.
             </li>
-            {current && <li>지금 요금제의 상태는 계산 대신 알려 주신 "한도에 걸리는 빈도"로 판단했습니다.</li>}
+            {current && freqChosen && <li>지금 요금제의 상태는 계산 대신 알려 주신 "한도에 걸리는 빈도"로 판단했습니다.</li>}
           </ul>
         </details>
 
@@ -294,6 +290,12 @@ export default function Advisor({ advisor, models, plans }: AdvisorProps) {
           {copied ? '링크를 복사했습니다' : '이 결과 링크 복사'}
         </button>
       </section>
+      {hydrated && (
+        <MobileResultBar
+          targetId="advisor-result"
+          label={`추천: ${rec ? `${shortName(rec.plan.name)} · 월 ${krwShort(rec.krw)}` : `API 종량제 · 월 ${krwShort(a.api.krw)}`}`}
+        />
+      )}
     </div>
   );
 }

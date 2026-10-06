@@ -3,7 +3,7 @@ import type { Model, Plan, TokenPrices, UsageValues } from './data';
 
 export interface Settings extends UsageValues {
   fxRate: number; // 원/달러
-  vat: boolean; // USD 가격에 부가세 10% 적용
+  vat: boolean; // true = 부가세 10% 포함 기준 (공식 원화가는 부가세 포함가로 본다)
   capacityScale: number; // 구독 한도 가정 배율
 }
 
@@ -48,18 +48,25 @@ export function modelCost(model: Model, s: UsageValues): ModelCost {
   };
 }
 
+/** 공식 원화가(부가세 포함 표시)를 현재 기준(부가세 포함/별도)에 맞춘다 */
+export function officialKrw(krwInclVat: number, s: Pick<Settings, 'vat'>): number {
+  return s.vat ? krwInclVat : krwInclVat / VAT;
+}
+
 export function usdToKrw(usd: number, s: Pick<Settings, 'fxRate' | 'vat'>): number {
   return usd * s.fxRate * (s.vat ? VAT : 1);
 }
 
-/** 구독 월 요금(원). 공식 원화 가격이 있으면 그대로, 없으면 USD × 환율(+부가세). */
+/** 구독 월 요금(원). 공식 원화가가 있으면 그 값(부가세 기준 맞춤), 없으면 USD × 환율(+부가세). */
 export function planKrw(plan: Plan, s: Pick<Settings, 'fxRate' | 'vat'>): number {
-  return plan.krwMonthly ?? usdToKrw(plan.usdMonthly, s);
+  return plan.krwMonthly != null ? officialKrw(plan.krwMonthly, s) : usdToKrw(plan.usdMonthly, s);
 }
 
 /** 해당 사용량(API 환산 USD)을 구독 한도 안에서 감당할 수 있는지 */
-export function planCovers(plan: Plan, apiUsd: number, capacityScale: number): boolean {
-  return apiUsd <= plan.capacityUsd * capacityScale;
+export type CapacityOf = (plan: Plan) => number; // 요금제의 API 환산 월 한도(USD)
+
+export function planCovers(capacityUsd: number, apiUsd: number, capacityScale: number): boolean {
+  return apiUsd <= capacityUsd * capacityScale;
 }
 
 export interface Option {
@@ -79,7 +86,7 @@ export interface Comparison {
   savingKrw: number; // best가 구독일 때 API 대비 절약액
 }
 
-export function compare(model: Model, plans: Plan[], s: Settings): Comparison {
+export function compare(model: Model, plans: Plan[], s: Settings, capacityOf: CapacityOf): Comparison {
   const api = modelCost(model, s);
   const apiKrw = usdToKrw(api.usd, s);
   const options: Option[] = [
@@ -91,7 +98,7 @@ export function compare(model: Model, plans: Plan[], s: Settings): Comparison {
         id: p.id,
         name: p.name,
         krw: planKrw(p, s),
-        covers: planCovers(p, api.usd, s.capacityScale),
+        covers: planCovers(capacityOf(p), api.usd, s.capacityScale),
         plan: p,
       })),
   ].sort((a, b) => a.krw - b.krw);
@@ -113,7 +120,12 @@ export interface PlanZone {
  * 하루 입력 토큰을 x로 두고, 출력·캐시 비율은 현재 설정 그대로 유지할 때
  * 구독이 API보다 유리한 구간을 계산한다. API 비용은 x에 정비례한다.
  */
-export function planZones(model: Model, plans: Plan[], s: Settings): { usdPerDailyM: number; zones: PlanZone[] } {
+export function planZones(
+  model: Model,
+  plans: Plan[],
+  s: Settings,
+  capacityOf: CapacityOf,
+): { usdPerDailyM: number; zones: PlanZone[] } {
   const outPerIn = s.dailyInputM > 0 ? s.dailyOutputK / s.dailyInputM : 0;
   const unit = modelCost(model, { ...s, dailyInputM: 1, dailyOutputK: outPerIn });
   const usdPerDailyM = unit.usd;
@@ -122,7 +134,7 @@ export function planZones(model: Model, plans: Plan[], s: Settings): { usdPerDai
     .filter((p) => p.vendor === model.vendor)
     .map((plan) => {
       const breakEvenM = krwPerDailyM > 0 ? planKrw(plan, s) / krwPerDailyM : Infinity;
-      const capacityM = usdPerDailyM > 0 ? (plan.capacityUsd * s.capacityScale) / usdPerDailyM : Infinity;
+      const capacityM = usdPerDailyM > 0 ? (capacityOf(plan) * s.capacityScale) / usdPerDailyM : Infinity;
       return { plan, breakEvenM, capacityM, hasZone: breakEvenM < capacityM };
     });
   return { usdPerDailyM, zones };

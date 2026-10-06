@@ -8,7 +8,7 @@ export interface AdvisorInput {
   hours: number; // 하루 사용 시간
   modeId: string;
   currentPlanId: string; // 'none' 또는 요금제 id
-  frequency: LimitFrequency; // 현재 요금제에서 한도에 걸리는 빈도
+  frequency: LimitFrequency | null; // 현재 요금제에서 한도에 걸리는 빈도 (선택 안 하면 null)
   workDays: number;
   fxRate: number;
   vat: boolean;
@@ -84,7 +84,7 @@ export function advise(input: AdvisorInput, advisor: Advisor, models: Model[], p
       plan,
       agentHours,
       utilization,
-      status: isCurrent ? statusFromFrequency(input.frequency) : statusOf(utilization),
+      status: isCurrent && input.frequency ? statusFromFrequency(input.frequency) : statusOf(utilization),
       krw: planKrw(plan, input),
       isCurrent,
     };
@@ -99,7 +99,8 @@ export function advise(input: AdvisorInput, advisor: Advisor, models: Model[], p
     monthlyTokens: { inputM: usage.dailyInputM * usage.workDays, outputM: (usage.dailyOutputK / 1000) * usage.workDays },
   });
 
-  const currentIdx = fits.findIndex((f) => f.isCurrent);
+  // 지금 요금제와 한도 빈도를 모두 알려 준 경우에만 그 경험을 우선한다
+  const currentIdx = input.frequency ? fits.findIndex((f) => f.isCurrent) : -1;
   if (currentIdx >= 0) {
     const f = input.frequency;
     if (f === 'often' || f === 'daily') {
@@ -114,6 +115,43 @@ export function advise(input: AdvisorInput, advisor: Advisor, models: Model[], p
 
   const cheapestFit = fits.find((f) => f.status !== 'short');
   if (!cheapestFit) return result(fits.at(-1)!, 'exceeds-all');
-  if (apiKrw < fits[0].krw) return result(null, 'api-cheaper');
+  // 추천하려는 요금제보다 API가 싸면 API를 추천한다 (가장 싼 요금제가 아니라 감당 가능한 요금제와 비교)
+  if (apiKrw < cheapestFit.krw) return result(null, 'api-cheaper');
   return result(cheapestFit, 'fits');
+}
+
+/** 요금제의 하루 감당 가능 시간(에이전트 작업 환산). advisor.json이 유일한 출처다. */
+export function planAgentHours(advisor: Advisor, planId: string): number | undefined {
+  for (const t of advisor.tools) {
+    const p = t.plans.find((x) => x.planId === planId);
+    if (p) return p.agentHours;
+  }
+  return undefined;
+}
+
+/** 에이전트 작업을 하루 1시간 할 때의 API 월 비용(USD) */
+export function apiUsdPerAgentHour(advisor: Advisor, model: Model, workDays: number): number {
+  const u = advisor.agentHourUsage;
+  return modelCost(model, {
+    dailyInputM: u.dailyInputM,
+    dailyOutputK: u.dailyOutputK,
+    workDays,
+    cacheReadPct: u.cacheReadPct,
+    cacheWritePct: u.cacheWritePct,
+    avgContextK: u.avgContextK,
+  }).usd;
+}
+
+/**
+ * 토큰 계산기용 "API 환산 월 한도(USD)".
+ * 하루 감당 시간 × (그 도구 기본 모델로 에이전트 작업 1시간의 API 월 비용)으로, 요금제 추천과 같은 기준을 쓴다.
+ */
+export function makeCapacityOf(advisor: Advisor, models: Model[], workDays: number): (plan: Plan) => number {
+  return (plan) => {
+    const tool = advisor.tools.find((t) => t.plans.some((p) => p.planId === plan.id));
+    const hours = planAgentHours(advisor, plan.id);
+    const model = models.find((m) => m.id === tool?.defaultModel);
+    if (!tool || hours == null || !model) return 0;
+    return hours * apiUsdPerAgentHour(advisor, model, workDays);
+  };
 }

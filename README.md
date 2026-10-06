@@ -24,8 +24,8 @@ npm run usage     # 내 Claude Code 로그에서 토큰 사용량 집계 (숫자
 1. `src/data/prices.json`
    - `updatedAt`: 페이지에 표시되는 기준일
    - `models[]`: 단가는 모두 USD / 100만 토큰. `longContext`는 할증 구간이 있는 모델만.
-   - `plans[]`: `krwMonthly`는 공식 원화가가 있을 때만, 없으면 `null`(USD × 환율로 계산).
-     `capacityUsd`는 "API 환산 월 사용 가능액" 추정값, 근거는 `capacityBasis`에 적는다.
+   - `plans[]`: `krwMonthly`는 공식 원화가(부가세 포함 표시)가 있을 때만, 없으면 `null`(USD × 환율로 계산).
+   - 요금제별 사용 한도(하루 감당 시간)는 `advisor.json`에만 둔다. 토큰 계산기·팀 계산기도 이 값을 쓴다.
    - 항목마다 `sourceUrl`, `verifiedAt` 갱신
 2. `npm test && npm run build`: 스키마가 맞지 않으면 빌드가 실패한다.
 3. 커밋·푸시하면 자동 배포된다(아래 설정 후).
@@ -66,7 +66,7 @@ npm run usage     # 내 Claude Code 로그에서 토큰 사용량 집계 (숫자
 | `m` | 비교 기준 모델 id | `&m=gpt-6-astra` |
 | `in` / `out` / `d` | 하루 입력(M) / 하루 출력(K) / 월 작업일 | `&in=40` |
 | `cr` / `cw` / `ctx` | 캐시 읽기% / 캐시 쓰기% / 평균 컨텍스트(K) | |
-| `fx` / `vat` / `cap` | 환율 / 부가세(1) / 구독 한도 배율 | |
+| `fx` / `vat` / `cap` | 환율 / 부가세(기본 포함, `vat=0`이면 별도) / 구독 한도 배율 | |
 | `embed=1` | 계산기만 표시 (블로그 iframe용) | |
 
 ## 티스토리 글에 넣기

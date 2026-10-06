@@ -1,6 +1,9 @@
 ---
 // 개인 구독 요금제 표
-import { prices } from '../lib/data';
+import { planAgentHours } from '../lib/advisor';
+import { advisor, prices } from '../lib/data';
+
+const basisOf = (planId: string) => advisor.tools.find((t) => t.plans.some((p) => p.planId === planId))?.basis;
 ---
 
 <div class="table-wrap">
@@ -12,7 +15,7 @@ import { prices } from '../lib/data';
         <th scope="col" class="num">월 요금</th>
         <th scope="col">코딩 도구</th>
         <th scope="col">공식 한도</th>
-        <th scope="col">계산기 한도 가정 (API 환산)</th>
+        <th scope="col">계산기의 하루 한도 추정</th>
       </tr>
     </thead>
     <tbody>
@@ -29,8 +32,7 @@ import { prices } from '../lib/data';
             <td>{p.codingTools}</td>
             <td class="note">{p.limitsNote}</td>
             <td class="note">
-              월 ${p.capacityUsd.toLocaleString('en-US')}
-              <span class="sub">{p.capacityBasis}</span>
+              {planAgentHours(advisor, p.id) != null ? `에이전트 작업 하루 약 ${planAgentHours(advisor, p.id)}시간` : '-'}
             </td>
           </tr>
         ))
@@ -38,6 +40,9 @@ import { prices } from '../lib/data';
     </tbody>
   </table>
 </div>
+<p class="muted small">
+  하루 한도 추정의 근거: {advisor.tools.map((t) => `${t.name} — ${t.basis}`).join(' ')}
+</p>
 <p class="muted small">
   출처:{' '}
   {

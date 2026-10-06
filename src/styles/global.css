@@ -14,7 +14,8 @@
   --label-strong: #000000;
   --label-normal: #171719;
   --label-neutral: rgba(46, 47, 51, 0.88);
-  --label-alternative: rgba(55, 56, 60, 0.61);
+  /* Montage 원값은 0.61(대비 3.6:1)이라 본문에 쓰면 WCAG AA 미달 → Montage 투명도 단계의 0.74로 올림(약 5:1) */
+  --label-alternative: rgba(55, 56, 60, 0.74);
   --label-assistive: rgba(55, 56, 60, 0.28);
   --label-disable: rgba(55, 56, 60, 0.16);
   /* semantic: background */
@@ -34,6 +35,12 @@
   --cautionary: #ff9200;
   --negative: #ff4242;
   --cautionary-bg: rgba(255, 146, 0, 0.08);
+  /* 상태 글자색: 흰 배경에서 4.5:1 이상이 되도록 status 색을 진하게 */
+  --positive-text: #007a33;
+  --cautionary-text: #a35700;
+  --negative-text: #d32f2f;
+  --inverse-bg: #1b1c1e;
+  --inverse-label: #f7f7f8;
   /* elevation */
   --shadow-small: 0 2px 4px -2px rgba(23, 23, 23, 0.06), 0 4px 6px -1px rgba(23, 23, 23, 0.06);
   --shadow-medium: 0 4px 6px -2px rgba(23, 23, 23, 0.07), 0 10px 15px -3px rgba(23, 23, 23, 0.07);
@@ -59,7 +66,7 @@
     --label-strong: #ffffff;
     --label-normal: #f7f7f8;
     --label-neutral: rgba(194, 196, 200, 0.88);
-    --label-alternative: rgba(174, 176, 182, 0.61);
+    --label-alternative: rgba(174, 176, 182, 0.8);
     --label-assistive: rgba(174, 176, 182, 0.28);
     --label-disable: rgba(152, 155, 162, 0.16);
     --bg-normal: #1b1c1e;
@@ -75,6 +82,11 @@
     --cautionary: #ffa938;
     --negative: #ff6363;
     --cautionary-bg: rgba(255, 169, 56, 0.1);
+    --positive-text: #1ed45a;
+    --cautionary-text: #ffa938;
+    --negative-text: #ff6363;
+    --inverse-bg: #f7f7f8;
+    --inverse-label: #171719;
     --v-anthropic: #ff7a33;
     --v-openai: #1ed45a;
     --v-google: #3385ff;
@@ -223,7 +235,7 @@ button {
   padding: 12px;
   border: 0;
   background: none;
-  color: var(--label-assistive);
+  color: var(--label-alternative);
   /* headline2 bold */
   font-size: 17px;
   line-height: 24px;
@@ -232,7 +244,7 @@ button {
   transition: color 0.15s ease;
 }
 .tabs [role='tab']:hover {
-  color: var(--label-alternative);
+  color: var(--label-neutral);
 }
 .tabs [role='tab'][aria-selected='true'] {
   color: var(--label-strong);
@@ -316,6 +328,8 @@ button {
 .preset {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  min-height: 44px;
   gap: 2px;
   padding: 9px 14px;
   border: 0;
@@ -367,7 +381,7 @@ button {
   position: relative;
   height: 16px;
   margin: 0 8px;
-  color: var(--label-assistive);
+  color: var(--label-alternative);
   font-size: 12px;
   line-height: 16px;
 }
@@ -415,6 +429,7 @@ button {
 .inline-field input,
 .group-hours input {
   width: 64px;
+  min-height: 40px;
   padding: 7px 10px;
   text-align: right;
 }
@@ -518,15 +533,15 @@ button {
 }
 .s-ok .fit-status,
 .st-ok {
-  color: var(--positive);
+  color: var(--positive-text);
 }
 .s-tight .fit-status,
 .st-tight {
-  color: var(--cautionary);
+  color: var(--cautionary-text);
 }
 .s-short .fit-status,
 .st-short {
-  color: var(--negative);
+  color: var(--negative-text);
 }
 .st-api {
   color: var(--label-alternative);
@@ -579,7 +594,7 @@ button {
 }
 .warn-pill {
   background: var(--cautionary-bg);
-  color: var(--cautionary);
+  color: var(--cautionary-text);
 }
 .badge {
   margin-left: 6px;
@@ -690,8 +705,8 @@ button {
   gap: 4px;
 }
 .stepper button {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   border: 0;
   border-radius: 8px;
   background: var(--fill-normal);
@@ -705,6 +720,7 @@ button {
 }
 .stepper input {
   width: 52px;
+  min-height: 40px;
   padding: 6px 4px;
   text-align: center;
   -moz-appearance: textfield;
@@ -1538,4 +1554,87 @@ table.detail tr.is-best-row td {
 }
 table.detail tr.is-best-row strong {
   color: var(--primary-normal);
+}
+.assign-detail {
+  flex-basis: 100%;
+  color: var(--label-alternative);
+  font-size: 13px;
+  line-height: 18px;
+}
+.legend {
+  margin: -6px 0 16px;
+}
+
+/* 화면 읽기 프로그램 전용 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.why summary,
+.faq summary,
+.advanced summary {
+  padding: 6px 0;
+}
+@media (max-width: 767px) {
+  .stepper button,
+  .stepper input,
+  .inline-field input,
+  .group-hours input {
+    min-height: 44px;
+  }
+  .stepper button {
+    width: 44px;
+  }
+}
+
+/* 모바일 결과 바로가기 바 */
+.mobile-bar {
+  display: none;
+}
+@media (max-width: 991px) {
+  .mobile-bar {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 10px 10px 16px;
+    border-radius: 14px;
+    background: var(--inverse-bg);
+    color: var(--inverse-label);
+    box-shadow: var(--shadow-medium);
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 600;
+  }
+  .mobile-bar-label {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .mobile-bar button {
+    flex: none;
+    min-height: 40px;
+    padding: 8px 16px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--primary-normal);
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  [data-embed] .mobile-bar {
+    display: none;
+  }
 }

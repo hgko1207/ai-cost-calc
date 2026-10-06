@@ -76,19 +76,50 @@ export function replaceOwnParams(ownKeys: readonly string[], ownQuery: string): 
   window.history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
 }
 
-/** 공유용 주소: 현재 상태 그대로, embed 표시만 뺀다 */
-export function shareUrl(): string {
-  const params = new URLSearchParams(window.location.search);
-  params.delete('embed');
+/** 공유용 주소: 지금 보고 있는 계산기의 키(+ 환율·부가세)만 남긴다. 다른 탭의 값이 섞이지 않게. */
+export function shareUrl(keepKeys: readonly string[]): string {
+  const keep = new Set([...keepKeys, 'fx', 'vat']);
+  const params = new URLSearchParams();
+  new URLSearchParams(window.location.search).forEach((v, k) => {
+    if (keep.has(k)) params.set(k, v);
+  });
   const qs = params.toString();
   return `${window.location.origin}${window.location.pathname}${qs ? `?${qs}` : ''}`;
 }
 
-export async function copyShareUrl(): Promise<void> {
-  const url = shareUrl();
+export async function copyShareUrl(keepKeys: readonly string[]): Promise<void> {
+  const url = shareUrl(keepKeys);
   try {
     await navigator.clipboard.writeText(url);
   } catch {
     window.prompt('아래 링크를 복사하세요', url);
   }
+}
+
+// ── 환율·부가세: 세 계산기가 함께 쓰는 값 ──
+export interface Money {
+  fxRate: number;
+  vat: boolean;
+}
+export const DEFAULT_MONEY: Money = { fxRate: 1400, vat: true };
+const MONEY_EVENT = 'aicalc:money';
+
+export function moneyFromQuery(search: string): Money {
+  const q = new URLSearchParams(search);
+  const fx = Number(q.get('fx'));
+  return {
+    fxRate: q.has('fx') && Number.isFinite(fx) ? Math.min(100_000, Math.max(1, fx)) : DEFAULT_MONEY.fxRate,
+    vat: q.has('vat') ? q.get('vat') === '1' : DEFAULT_MONEY.vat,
+  };
+}
+
+/** 토큰 계산기에서 환율·부가세를 바꾸면 다른 계산기에도 알린다 */
+export function emitMoney(m: Money): void {
+  window.dispatchEvent(new CustomEvent<Money>(MONEY_EVENT, { detail: m }));
+}
+
+export function onMoney(cb: (m: Money) => void): () => void {
+  const h = (e: Event) => cb((e as CustomEvent<Money>).detail);
+  window.addEventListener(MONEY_EVENT, h);
+  return () => window.removeEventListener(MONEY_EVENT, h);
 }

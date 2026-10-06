@@ -51,6 +51,21 @@ describe('advise', () => {
     expect(a.reason).toBe('upgrade-top');
   });
 
+  it('추천하려는 요금제보다 API가 싸면 API를 추천한다 (같이 코딩 3시간)', () => {
+    const a = run({ hours: 3, modeId: 'pair' }); // Max 5x 14만 원 vs API 약 13.9만 원
+    expect(a.api.krw).toBeLessThan(140_000);
+    expect(a.reason).toBe('api-cheaper');
+    expect(a.recommended).toBeNull();
+  });
+
+  it('한도 빈도를 고르지 않으면 지금 요금제도 계산값으로 판단한다', () => {
+    // 하루 4시간 에이전트 = Max 5x 한도(6시간)의 67% → 여유, 유지
+    const a = run({ hours: 4, modeId: 'agent', currentPlanId: 'claude-max-5x', frequency: null });
+    const cur = a.fits.find((f) => f.isCurrent)!;
+    expect(cur.status).toBe('ok');
+    expect(a.recommended?.plan.id).toBe('claude-max-5x');
+  });
+
   it('API 환산 비용은 실측 기반 시간당 토큰으로 계산한다', () => {
     // 하루 5.5시간 에이전트 = 입력 27.5M/일 → Opus 5.5 월 약 $364
     const a = run({ hours: 5.5, modeId: 'agent' });

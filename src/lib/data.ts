@@ -45,8 +45,6 @@ const PlanSchema = z.object({
   krwMonthly: z.number().positive().nullable(),
   codingTools: z.string(),
   limitsNote: z.string(),
-  capacityUsd: z.number().positive(),
-  capacityBasis: z.string(),
   proMultiplier: z.number().positive().optional(), // 개인 Pro 대비 사용량 배수 (공식)
   sourceUrl: z.url(),
   verifiedAt: isoDate,
@@ -150,9 +148,9 @@ const TeamOptionSchema = z.discriminatedUnion('kind', [
   z.object({
     ...TeamOptionBase,
     kind: z.literal('individual'),
-    plans: z.array(z.object({ planId: z.string(), agentHours: z.number().positive() })).min(1),
+    // 감당 가능 시간은 advisor.json의 같은 요금제 값을 쓴다 (한 곳에서만 관리)
+    plans: z.array(z.object({ planId: z.string() })).min(1),
   }),
-  z.object({ ...TeamOptionBase, kind: z.literal('api') }),
 ]);
 const TeamSchema = z.object({
   updatedAt: isoDate,
@@ -199,6 +197,11 @@ export const relatedPosts = z.array(RelatedPostSchema).parse(relatedJson);
 
 export const advisor = AdvisorSchema.superRefine((a, ctx) => {
   const planIds = new Set(prices.plans.map((p) => p.id));
+  // 업그레이드 = 다음 요금제이므로 도구별 요금제는 가격 오름차순이어야 한다
+  for (const t of a.tools) {
+    const usd = t.plans.map((p) => prices.plans.find((x) => x.id === p.planId)?.usdMonthly ?? 0);
+    if (usd.some((v, i) => i > 0 && v < usd[i - 1])) ctx.addIssue({ code: 'custom', message: `${t.id}: 요금제는 가격 오름차순으로` });
+  }
   const modelIds = new Set(prices.models.map((m) => m.id));
   for (const t of a.tools) {
     if (!modelIds.has(t.defaultModel)) ctx.addIssue({ code: 'custom', message: `알 수 없는 모델: ${t.defaultModel}` });
@@ -212,6 +215,9 @@ export const team = TeamSchema.superRefine((t, ctx) => {
   const planIds = new Set(prices.plans.map((p) => p.id));
   const modelIds = new Set(prices.models.map((m) => m.id));
   const modeIds = new Set(advisor.modes.map((m) => m.id));
+  // URL 키를 유형 id의 첫 글자로 만들므로 첫 글자가 겹치면 안 된다
+  const initials = t.userTypes.map((u) => u.id[0]);
+  if (new Set(initials).size !== initials.length) ctx.addIssue({ code: 'custom', message: '사용자 유형 id의 첫 글자가 겹칩니다' });
   for (const u of t.userTypes) {
     if (!modeIds.has(u.modeId)) ctx.addIssue({ code: 'custom', message: `알 수 없는 사용 방식: ${u.modeId}` });
   }

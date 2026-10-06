@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { compare, modelCost, planZones, uncachedPct, usdToKrw, type Settings } from '../lib/calc';
-import type { Model, Plan, Preset, UsageValues, Vendor } from '../lib/data';
+import { makeCapacityOf } from '../lib/advisor';
+import type { Advisor, Model, Plan, Preset, UsageValues, Vendor } from '../lib/data';
 import { krw, krwShort, tokensM, usd } from '../lib/format';
-import { CALC_KEYS, copyShareUrl, fromQuery, replaceOwnParams, toQuery, type CalcState } from '../lib/url';
+import { CALC_KEYS, DEFAULT_MONEY, copyShareUrl, emitMoney, fromQuery, replaceOwnParams, toQuery, type CalcState } from '../lib/url';
 import BreakEvenChart from './BreakEvenChart';
 
 // 데이터는 빌드 시 zod로 검증한 뒤 props로 받는다 (클라이언트 번들에 zod를 넣지 않기 위해)
@@ -11,6 +12,7 @@ export interface CalculatorData {
   models: Model[];
   plans: Plan[];
   presets: Preset[];
+  advisor: Advisor; // 요금제 한도는 요금제 추천과 같은 기준(advisor.json)을 쓴다
 }
 
 const DEFAULT_PRESET_ID = 'daily';
@@ -61,7 +63,7 @@ export default function Calculator({ data }: { data: CalculatorData }) {
   const prices = data;
   const DEFAULTS = useMemo<CalcState>(() => {
     const preset = presets.find((p) => p.id === DEFAULT_PRESET_ID) ?? presets[0];
-    return { ...preset.values, presetId: preset.id, modelId: DEFAULT_MODEL_ID, fxRate: 1400, vat: false, capacityScale: 1 };
+    return { ...preset.values, presetId: preset.id, modelId: DEFAULT_MODEL_ID, fxRate: DEFAULT_MONEY.fxRate, vat: DEFAULT_MONEY.vat, capacityScale: 1 };
   }, [presets]);
   const vendorName = (id: string) => vendors.find((v) => v.id === id)?.name ?? id;
 
@@ -86,13 +88,19 @@ export default function Calculator({ data }: { data: CalculatorData }) {
     if (hydrated) replaceOwnParams(CALC_KEYS, query);
   }, [query, hydrated]);
 
+  // 환율·부가세를 바꾸면 위쪽 추천·팀 계산기에도 알린다
+  useEffect(() => {
+    if (hydrated) emitMoney({ fxRate: state.fxRate, vat: state.vat });
+  }, [state.fxRate, state.vat, hydrated]);
+
   const setUsage = (patch: Partial<UsageValues>) => setState((s) => ({ ...s, ...patch, presetId: 'custom' }));
   const set = (patch: Partial<CalcState>) => setState((s) => ({ ...s, ...patch }));
 
   const settings: Settings = state;
   const model = prices.models.find((m) => m.id === state.modelId) ?? prices.models[0];
-  const result = useMemo(() => compare(model, prices.plans, settings), [model, state]); // eslint-disable-line react-hooks/exhaustive-deps
-  const zoneData = useMemo(() => planZones(model, prices.plans, settings), [model, state]); // eslint-disable-line react-hooks/exhaustive-deps
+  const capacityOf = useMemo(() => makeCapacityOf(data.advisor, prices.models, state.workDays), [data.advisor, prices.models, state.workDays]);
+  const result = useMemo(() => compare(model, prices.plans, settings, capacityOf), [model, state, capacityOf]); // eslint-disable-line react-hooks/exhaustive-deps
+  const zoneData = useMemo(() => planZones(model, prices.plans, settings, capacityOf), [model, state, capacityOf]); // eslint-disable-line react-hooks/exhaustive-deps
   const costs = useMemo(
     () => prices.models.map((m) => modelCost(m, settings)).sort((a, b) => b.usd - a.usd),
     [state], // eslint-disable-line react-hooks/exhaustive-deps
@@ -100,7 +108,7 @@ export default function Calculator({ data }: { data: CalculatorData }) {
   const maxUsd = Math.max(...costs.filter((c) => c.available).map((c) => c.usd), 1e-9);
 
   const copyLink = async () => {
-    await copyShareUrl();
+    await copyShareUrl(CALC_KEYS);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -145,7 +153,7 @@ export default function Calculator({ data }: { data: CalculatorData }) {
         </div>
         <label className="check">
           <input type="checkbox" checked={state.vat} onChange={(e) => set({ vat: e.target.checked })} />
-          달러 가격에 부가세 10% 포함 (국내 카드 결제 시 실제 청구액에 가까움)
+          부가세 10% 포함 (국내 결제 시 실제 청구액 기준, 위쪽 추천에도 함께 적용)
         </label>
 
         <details className="advanced">
@@ -160,7 +168,7 @@ export default function Calculator({ data }: { data: CalculatorData }) {
       </section>
 
       {/* ── 결론 ── */}
-      <section className="card verdict" aria-live="polite">
+      <section className="card verdict">
         <label className="model-select">
           <span>주로 쓸 모델</span>
           <select value={state.modelId} onChange={(e) => set({ modelId: e.target.value })}>

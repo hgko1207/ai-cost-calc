@@ -68,7 +68,7 @@
           "id": "claude-enterprise",
           "kind": "seat-plus-usage",
           "name": "Claude Enterprise",
-          "summary": "좌석 $20(연간) + 사용량은 API 요금. 좌석별 한도 없음",
+          "summary": "좌석 $20(연간) + 사용량은 API 요금. 좌석별 한도 없음. 직접 가입은 20명, 영업팀 계약은 50명부터",
           "minSeats": 20,
           "seatAnnualUsd": 20,
           "features": [
@@ -87,16 +87,13 @@
           "summary": "각자 Pro·Max를 결제하고 회사가 비용 처리",
           "plans": [
             {
-              "planId": "claude-pro",
-              "agentHours": 1.2
+              "planId": "claude-pro"
             },
             {
-              "planId": "claude-max-5x",
-              "agentHours": 6
+              "planId": "claude-max-5x"
             },
             {
-              "planId": "claude-max-20x",
-              "agentHours": 24
+              "planId": "claude-max-20x"
             }
           ],
           "features": [
@@ -150,20 +147,16 @@
           "summary": "각자 Plus·Pro를 결제하고 회사가 비용 처리",
           "plans": [
             {
-              "planId": "chatgpt-plus",
-              "agentHours": 1.2
+              "planId": "chatgpt-plus"
             },
             {
-              "planId": "chatgpt-pro-100",
-              "agentHours": 6
+              "planId": "chatgpt-pro-100"
             },
             {
-              "planId": "chatgpt-pro-200",
-              "agentHours": 12
+              "planId": "chatgpt-pro-200"
             },
             {
-              "planId": "chatgpt-pro-500",
-              "agentHours": 30
+              "planId": "chatgpt-pro-500"
             }
           ],
           "features": [

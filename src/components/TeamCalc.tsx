@@ -3,7 +3,9 @@ import { useEffect, useMemo, useState } from 'react';
 import type { Advisor, Model, Plan, Team } from '../lib/data';
 import { krwShort } from '../lib/format';
 import { evaluateTeam, type Billing, type TeamGroup } from '../lib/team';
-import { copyShareUrl, replaceOwnParams } from '../lib/url';
+import MobileResultBar from './MobileResultBar';
+import Segmented from './Segmented';
+import { DEFAULT_MONEY, copyShareUrl, moneyFromQuery, onMoney, replaceOwnParams } from '../lib/url';
 
 export interface TeamCalcProps {
   team: Team;
@@ -21,7 +23,7 @@ interface State {
 
 // URL 키: tt=도구, b=결제주기, twd=작업일, {유형 첫 글자}c/{유형 첫 글자}h = 인원/시간
 const groupKey = (typeId: string, k: 'c' | 'h') => `${typeId[0]}${k}`;
-const STATUS_LABEL = { ok: '여유', tight: '빠듯함', short: '한도 초과', api: '쓴 만큼' } as const;
+const STATUS_LABEL = { ok: '여유', tight: '한도 근접', short: '한도 초과', api: '쓴 만큼 결제' } as const;
 
 export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps) {
   const DEFAULTS: State = {
@@ -30,10 +32,11 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
     billing: 'annual',
     workDays: team.defaultWorkDays,
   };
-  const OWN_KEYS = ['tt', 'b', 'twd', ...team.userTypes.flatMap((t) => [groupKey(t.id, 'c'), groupKey(t.id, 'h')])];
+  // lc·lh는 예전 '가벼운 사용자' 그룹 키. 공유 링크에 남지 않도록 함께 정리한다
+  const OWN_KEYS = ['tt', 'b', 'twd', 'lc', 'lh', ...team.userTypes.flatMap((t) => [groupKey(t.id, 'c'), groupKey(t.id, 'h')])];
 
   const [state, setState] = useState<State>(DEFAULTS);
-  const [money, setMoney] = useState({ fxRate: 1400, vat: false });
+  const [money, setMoney] = useState(DEFAULT_MONEY);
   const [hydrated, setHydrated] = useState(false);
   const [copied, setCopied] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -54,9 +57,9 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
         hours: num(groupKey(g.typeId, 'h'), 0.5, 16) ?? g.hours,
       })),
     });
-    const fx = Number(q.get('fx'));
-    setMoney({ fxRate: fx > 0 ? fx : 1400, vat: q.get('vat') === '1' });
+    setMoney(moneyFromQuery(window.location.search));
     setHydrated(true);
+    return onMoney(setMoney);
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const query = useMemo(() => {
@@ -83,11 +86,20 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
   const maxMonthly = Math.max(...r.options.filter((o) => o.applicable).map((o) => o.monthlyKrw), 1);
   const typeName = (id: string) => team.userTypes.find((t) => t.id === id)?.name ?? id;
 
+  /** "1인 하루 7시간 사용 · 좌석 한도 약 7.5시간 (93%)" */
+  const usageText = (l: { typeId: string; loadHours: number; capacityAgentHours?: number; status: string }) => {
+    const hours = state.groups.find((g) => g.typeId === l.typeId)?.hours ?? 0;
+    if (!l.capacityAgentHours || l.loadHours <= 0) return `1인 하루 ${hours}시간 사용 · 좌석별 한도 없음`;
+    const cap = (l.capacityAgentHours * hours) / l.loadHours; // 이 그룹의 사용 방식 기준 시간으로 환산
+    if (cap >= 16) return `1인 하루 ${hours}시간 사용 · 한도 넉넉함`;
+    return `1인 하루 ${hours}시간 사용 · 한도 약 ${+cap.toFixed(1)}시간 (${Math.round((l.loadHours / l.capacityAgentHours) * 100)}%)`;
+  };
+
   const setGroup = (i: number, patch: Partial<TeamGroup>) =>
     setState((s) => ({ ...s, groups: s.groups.map((g, j) => (j === i ? { ...g, ...patch } : g)) }));
 
   const copyLink = async () => {
-    await copyShareUrl();
+    await copyShareUrl([...OWN_KEYS, 'tab']);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -101,20 +113,12 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
 
         <div className="q">
           <p className="q-label">1. 어떤 도구를 도입하나요?</p>
-          <div className="q-options" role="radiogroup" aria-label="도입할 도구">
-            {team.tools.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                role="radio"
-                aria-checked={state.toolId === t.id}
-                className="opt"
-                onClick={() => setState((s) => ({ ...s, toolId: t.id }))}
-              >
-                <strong>{t.name}</strong>
-              </button>
-            ))}
-          </div>
+          <Segmented
+            label="도입할 도구"
+            value={state.toolId}
+            options={team.tools.map((t) => ({ id: t.id, name: t.name }))}
+            onChange={(toolId) => setState((s) => ({ ...s, toolId }))}
+          />
         </div>
 
         <div className="q">
@@ -131,7 +135,7 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
                     <span>{type.description}</span>
                   </div>
                   <div className="stepper" role="group" aria-label={`${type.name} 인원`}>
-                    <button type="button" aria-label="1명 줄이기" onClick={() => setGroup(i, { count: Math.max(0, g.count - 1) })}>
+                    <button type="button" aria-label={`${type.name} 1명 줄이기`} onClick={() => setGroup(i, { count: Math.max(0, g.count - 1) })}>
                       −
                     </button>
                     <input
@@ -145,7 +149,7 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
                         if (n >= 0 && n <= 10_000) setGroup(i, { count: n });
                       }}
                     />
-                    <button type="button" aria-label="1명 늘리기" onClick={() => setGroup(i, { count: g.count + 1 })}>
+                    <button type="button" aria-label={`${type.name} 1명 늘리기`} onClick={() => setGroup(i, { count: g.count + 1 })}>
                       +
                     </button>
                     <span className="unit-text">명</span>
@@ -173,26 +177,15 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
 
         <div className="q">
           <p className="q-label">3. 결제 주기</p>
-          <div className="q-options" role="radiogroup" aria-label="결제 주기">
-            {(
-              [
-                ['annual', '연간 결제', '좌석 단가가 약 20% 저렴'],
-                ['monthly', '월간 결제', '인원 변동이 잦을 때'],
-              ] as const
-            ).map(([id, name, desc]) => (
-              <button
-                key={id}
-                type="button"
-                role="radio"
-                aria-checked={state.billing === id}
-                className="opt"
-                onClick={() => setState((s) => ({ ...s, billing: id }))}
-              >
-                <strong>{name}</strong>
-                <span>{desc}</span>
-              </button>
-            ))}
-          </div>
+          <Segmented<Billing>
+            label="결제 주기"
+            value={state.billing}
+            options={[
+              { id: 'annual', name: '연간 결제', description: '좌석 단가가 약 20% 저렴' },
+              { id: 'monthly', name: '월간 결제', description: '인원 변동이 잦을 때' },
+            ]}
+            onChange={(billing) => setState((s) => ({ ...s, billing }))}
+          />
           <label className="inline-field">
             한 달 작업일
             <input
@@ -210,7 +203,10 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
         </div>
       </section>
 
-      <section className="card result" aria-live="polite" aria-labelledby="team-r">
+      <section className="card result" id="team-result" aria-labelledby="team-r">
+        <p className="sr-only" aria-live="polite">
+          {hydrated && rec && `추천: ${rec.option.name}, 월 ${krwShort(rec.monthlyKrw)}, 연 ${krwShort(rec.annualKrw)}`}
+        </p>
         <p className="eyebrow-inline">추천 도입 방식</p>
         {rec ? (
           <>
@@ -227,12 +223,14 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
                     {l.choice}
                     <span className={`assign-status st-${l.status}`}>{STATUS_LABEL[l.status]}</span>
                   </span>
+                  <span className="assign-detail">{usageText(l)}</span>
                 </li>
               ))}
             </ul>
-            {rec.lines.some((l) => l.status === 'tight') && (
-              <p className="muted small hint">빠듯한 그룹은 한도에 자주 걸리면 상위 좌석·요금제로 바꾸는 게 좋습니다.</p>
-            )}
+            <p className="muted small hint">
+              상태는 <strong>1인 기준</strong>입니다. 한 사람의 하루 사용 시간이 좌석 한도의 70% 이하면 여유, 70% 초과~100%면 한도 근접(가끔 걸릴 수 있음)입니다. 인원 수가 아니라 하루 사용
+              시간을 바꾸면 달라집니다.
+            </p>
             <dl className="totals">
               <div>
                 <dt>월 비용</dt>
@@ -345,9 +343,12 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
             <li>사람마다 감당 가능한 가장 싼 좌석을 배정하고, 한도를 넘는 사용량은 {tool.overageNote}.</li>
             <li>
               Enterprise 사용량과 좌석 한도 초과분은 API 요금({models.find((m) => m.id === tool.defaultModel)?.name} 기준, 에이전트 작업 하루 1시간당 월 약{' '}
-              {krwShort(r.apiUsdPerAgentHour * money.fxRate)})으로 계산했습니다.
+              {krwShort(r.apiUsdPerAgentHour * money.fxRate * (money.vat ? 1.1 : 1))})으로 계산했습니다.
             </li>
-            <li>달러 가격은 환율 {money.fxRate.toLocaleString('ko-KR')}원/$, 부가세 별도로 환산했습니다.</li>
+            <li>
+              달러 가격은 환율 {money.fxRate.toLocaleString('ko-KR')}원/$, 부가세 {money.vat ? '10% 포함' : '별도'}로 환산했습니다. 공식 원화 가격은 부가세 포함가로
+              보고 같은 기준에 맞췄습니다.
+            </li>
           </ul>
         </details>
 
@@ -355,6 +356,9 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
           {copied ? '링크를 복사했습니다' : '이 결과 링크 복사'}
         </button>
       </section>
+      {hydrated && rec && (
+        <MobileResultBar targetId="team-result" label={`추천: ${rec.option.name} · 월 ${krwShort(rec.monthlyKrw)}`} />
+      )}
     </div>
   );
 }
