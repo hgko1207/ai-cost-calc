@@ -5,6 +5,7 @@ import pricesJson from '../data/prices.json';
 import presetsJson from '../data/presets.json';
 import relatedJson from '../data/related-posts.json';
 import advisorJson from '../data/advisor.json';
+import teamJson from '../data/team.json';
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const price = z.number().nonnegative();
@@ -111,7 +112,74 @@ const AdvisorSchema = z.object({
   ),
 });
 
+const SeatSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  monthlyUsd: price,
+  annualUsd: price,
+  monthlyKrw: z.number().positive().optional(),
+  annualKrw: z.number().positive().optional(),
+  agentHours: z.number().positive(),
+  basis: z.string(),
+});
+const TeamOptionBase = {
+  id: z.string(),
+  name: z.string(),
+  summary: z.string(),
+  features: z.array(z.string()),
+  sourceUrl: z.url(),
+};
+const TeamOptionSchema = z.discriminatedUnion('kind', [
+  z.object({
+    ...TeamOptionBase,
+    kind: z.literal('seats'),
+    minSeats: z.number().int().positive(),
+    maxSeats: z.number().int().positive().optional(),
+    seats: z.array(SeatSchema).min(1),
+  }),
+  z.object({
+    ...TeamOptionBase,
+    kind: z.literal('seat-plus-usage'),
+    minSeats: z.number().int().positive(),
+    seatAnnualUsd: price,
+  }),
+  z.object({
+    ...TeamOptionBase,
+    kind: z.literal('individual'),
+    plans: z.array(z.object({ planId: z.string(), agentHours: z.number().positive() })).min(1),
+  }),
+  z.object({ ...TeamOptionBase, kind: z.literal('api') }),
+]);
+const TeamSchema = z.object({
+  updatedAt: isoDate,
+  defaultWorkDays: z.number().min(1).max(31),
+  userTypes: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      description: z.string(),
+      modeId: z.string(),
+      defaultHours: z.number().positive(),
+      defaultCount: z.number().int().nonnegative(),
+    }),
+  ),
+  tools: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      vendor: z.string(),
+      defaultModel: z.string(),
+      overage: z.enum(['paid', 'wait']),
+      overageNote: z.string(),
+      options: z.array(TeamOptionSchema).min(1),
+    }),
+  ),
+});
+
 export type Vendor = z.infer<typeof VendorSchema>;
+export type Team = z.infer<typeof TeamSchema>;
+export type TeamTool = Team['tools'][number];
+export type TeamOption = TeamTool['options'][number];
 export type Advisor = z.infer<typeof AdvisorSchema>;
 export type LimitFrequency = Advisor['limitFrequencies'][number]['id'];
 export type Model = z.infer<typeof ModelSchema>;
@@ -135,3 +203,21 @@ export const advisor = AdvisorSchema.superRefine((a, ctx) => {
     }
   }
 }).parse(advisorJson);
+
+export const team = TeamSchema.superRefine((t, ctx) => {
+  const planIds = new Set(prices.plans.map((p) => p.id));
+  const modelIds = new Set(prices.models.map((m) => m.id));
+  const modeIds = new Set(advisor.modes.map((m) => m.id));
+  for (const u of t.userTypes) {
+    if (!modeIds.has(u.modeId)) ctx.addIssue({ code: 'custom', message: `알 수 없는 사용 방식: ${u.modeId}` });
+  }
+  for (const tool of t.tools) {
+    if (!modelIds.has(tool.defaultModel)) ctx.addIssue({ code: 'custom', message: `알 수 없는 모델: ${tool.defaultModel}` });
+    for (const o of tool.options) {
+      if (o.kind !== 'individual') continue;
+      for (const p of o.plans) {
+        if (!planIds.has(p.planId)) ctx.addIssue({ code: 'custom', message: `알 수 없는 요금제: ${p.planId}` });
+      }
+    }
+  }
+}).parse(teamJson);

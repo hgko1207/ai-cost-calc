@@ -1,0 +1,269 @@
+{
+  "updatedAt": "2026-10-06",
+  "defaultWorkDays": 22,
+  "userTypes": [
+    {
+      "id": "heavy",
+      "name": "헤비 사용자",
+      "description": "에이전트에게 기능 단위로 맡김",
+      "modeId": "agent",
+      "defaultHours": 7,
+      "defaultCount": 2
+    },
+    {
+      "id": "normal",
+      "name": "일반 사용자",
+      "description": "직접 보면서 같이 코딩",
+      "modeId": "pair",
+      "defaultHours": 3,
+      "defaultCount": 5
+    },
+    {
+      "id": "light",
+      "name": "가벼운 사용자",
+      "description": "막힐 때 질문하는 정도",
+      "modeId": "chat",
+      "defaultHours": 1.5,
+      "defaultCount": 3
+    }
+  ],
+  "tools": [
+    {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "vendor": "anthropic",
+      "defaultModel": "opus-5-5",
+      "overageNote": "한도를 넘는 사용량은 관리자가 허용하면 API 요금으로 추가 결제",
+      "options": [
+        {
+          "id": "claude-team",
+          "kind": "seats",
+          "name": "Claude Team",
+          "summary": "좌석제. 사람마다 기본·프리미엄 좌석을 섞어 살 수 있음",
+          "minSeats": 2,
+          "maxSeats": 150,
+          "seats": [
+            {
+              "id": "standard",
+              "name": "기본 좌석",
+              "monthlyUsd": 25,
+              "annualUsd": 20,
+              "agentHours": 1.5,
+              "basis": "개인 Pro의 1.25배 (공식)"
+            },
+            {
+              "id": "premium",
+              "name": "프리미엄 좌석",
+              "monthlyUsd": 125,
+              "annualUsd": 100,
+              "agentHours": 7.5,
+              "basis": "개인 Pro의 6.25배 (공식)"
+            }
+          ],
+          "features": [
+            "SSO",
+            "관리 콘솔·사용량 분석",
+            "회사 데이터 학습 제외(기본)",
+            "좌석별 추가 사용 한도 설정"
+          ],
+          "sourceUrl": "https://support.claude.com/en/articles/9266767-what-is-the-team-plan"
+        },
+        {
+          "id": "claude-enterprise",
+          "kind": "seat-plus-usage",
+          "name": "Claude Enterprise",
+          "summary": "좌석 $20(연간) + 사용량은 API 요금. 좌석별 한도 없음",
+          "minSeats": 20,
+          "seatAnnualUsd": 20,
+          "features": [
+            "Team 기능 전체",
+            "SCIM·권한 관리·감사 로그",
+            "데이터 보존 기간 설정",
+            "IP 허용 목록"
+          ],
+          "sourceUrl": "https://support.claude.com/en/articles/9797531-what-is-the-enterprise-plan"
+        },
+        {
+          "id": "claude-individual",
+          "kind": "individual",
+          "name": "개인 구독 회사 지원",
+          "summary": "각자 Pro·Max를 결제하고 회사가 비용 처리",
+          "plans": [
+            {
+              "planId": "claude-pro",
+              "agentHours": 1.2
+            },
+            {
+              "planId": "claude-max-5x",
+              "agentHours": 6
+            },
+            {
+              "planId": "claude-max-20x",
+              "agentHours": 24
+            }
+          ],
+          "features": [
+            "설정이 가장 간단",
+            "관리 콘솔·SSO 없음",
+            "개인 계정이라 퇴사 시 회수 어려움"
+          ],
+          "sourceUrl": "https://claude.com/pricing"
+        },
+        {
+          "id": "claude-api",
+          "kind": "api",
+          "name": "API 종량제 (Claude Console)",
+          "summary": "회사 API 키로 쓴 만큼 결제",
+          "features": [
+            "한도 없음, 쓴 만큼 청구",
+            "워크스페이스별 지출 한도 설정",
+            "사용자별 비용 대시보드"
+          ],
+          "sourceUrl": "https://code.claude.com/docs/en/costs"
+        }
+      ],
+      "overage": "paid"
+    },
+    {
+      "id": "codex",
+      "name": "Codex (ChatGPT)",
+      "vendor": "openai",
+      "defaultModel": "gpt-6-1-sol",
+      "overageNote": "한도를 넘는 사용량은 워크스페이스 크레딧으로 추가 결제 (크레딧 단가 비공개, API 요금으로 근사)",
+      "options": [
+        {
+          "id": "chatgpt-business",
+          "kind": "seats",
+          "name": "ChatGPT Business",
+          "summary": "좌석제. ChatGPT·Codex 포함",
+          "minSeats": 2,
+          "seats": [
+            {
+              "id": "standard",
+              "name": "Business 좌석",
+              "monthlyUsd": 25,
+              "annualUsd": 20,
+              "monthlyKrw": 36100,
+              "annualKrw": 28900,
+              "agentHours": 1.2,
+              "basis": "개인 Plus와 같은 수준 (공식)"
+            }
+          ],
+          "features": [
+            "SAML SSO",
+            "회사 데이터 학습 제외(기본)",
+            "전용 워크스페이스",
+            "크레딧으로 추가 사용"
+          ],
+          "sourceUrl": "https://chatgpt.com/ko-KR/pricing/?type=team"
+        },
+        {
+          "id": "chatgpt-individual",
+          "kind": "individual",
+          "name": "개인 구독 회사 지원",
+          "summary": "각자 Plus·Pro를 결제하고 회사가 비용 처리",
+          "plans": [
+            {
+              "planId": "chatgpt-plus",
+              "agentHours": 1.2
+            },
+            {
+              "planId": "chatgpt-pro-100",
+              "agentHours": 6
+            },
+            {
+              "planId": "chatgpt-pro-200",
+              "agentHours": 12
+            },
+            {
+              "planId": "chatgpt-pro-500",
+              "agentHours": 30
+            }
+          ],
+          "features": [
+            "설정이 가장 간단",
+            "관리 기능 없음"
+          ],
+          "sourceUrl": "https://learn.chatgpt.com/docs/pricing"
+        },
+        {
+          "id": "openai-api",
+          "kind": "api",
+          "name": "API 종량제",
+          "summary": "회사 API 키로 쓴 만큼 결제",
+          "features": [
+            "한도 없음, 쓴 만큼 청구",
+            "프로젝트별 지출 한도"
+          ],
+          "sourceUrl": "https://developers.openai.com/api/docs/pricing"
+        }
+      ],
+      "overage": "paid"
+    },
+    {
+      "id": "gemini",
+      "name": "Gemini Code Assist",
+      "vendor": "google",
+      "defaultModel": "gemini-3-1-pro",
+      "overageNote": "하루 요청 한도를 넘으면 다음 날까지 대기",
+      "options": [
+        {
+          "id": "code-assist-standard",
+          "kind": "seats",
+          "name": "Code Assist Standard",
+          "summary": "좌석제. IDE·Gemini CLI, 1인 하루 1,500회 요청",
+          "minSeats": 1,
+          "seats": [
+            {
+              "id": "standard",
+              "name": "Standard 좌석",
+              "monthlyUsd": 22.8,
+              "annualUsd": 19,
+              "agentHours": 13.6,
+              "basis": "하루 1,500회 ÷ 에이전트 작업 시간당 약 110회 (운영자 실측)"
+            }
+          ],
+          "features": [
+            "Google Cloud 보안·VPC-SC",
+            "IP 면책",
+            "소스 인용 표시"
+          ],
+          "sourceUrl": "https://cloud.google.com/products/gemini/pricing"
+        },
+        {
+          "id": "code-assist-enterprise",
+          "kind": "seats",
+          "name": "Code Assist Enterprise",
+          "summary": "Standard + 사내 저장소 기반 코드 맞춤화, 하루 2,000회",
+          "minSeats": 1,
+          "seats": [
+            {
+              "id": "enterprise",
+              "name": "Enterprise 좌석",
+              "monthlyUsd": 54,
+              "annualUsd": 45,
+              "agentHours": 18,
+              "basis": "하루 2,000회 ÷ 시간당 약 110회"
+            }
+          ],
+          "features": [
+            "Standard 기능 전체",
+            "사내 코드로 맞춤화"
+          ],
+          "sourceUrl": "https://cloud.google.com/products/gemini/pricing"
+        },
+        {
+          "id": "gemini-api",
+          "kind": "api",
+          "name": "API 종량제",
+          "summary": "Gemini API 키로 쓴 만큼 결제",
+          "features": [
+            "한도 없음, 쓴 만큼 청구"
+          ],
+          "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing"
+        }
+      ],
+      "overage": "wait"
+    }
+  ]
+}

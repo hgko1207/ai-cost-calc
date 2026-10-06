@@ -3,6 +3,7 @@
 하루 몇 시간, 어떻게 쓰는지만 고르면 AI 코딩 구독 요금제(Pro, Max 5x, Max 20x 등)를 추천하고, 같은 양을 API로 쓰면 얼마인지 원화로 비교하는 정적 사이트.
 
 - 스택: Astro 7 + React 19 (계산기만 React 아일랜드, 나머지는 정적 HTML)
+- 디자인: 원티드 디자인 시스템(Montage) 토큰 (`src/styles/global.css`)
 - 서버 없음. `dist/`를 정적 호스팅에 올리면 끝.
 
 ## 명령어
@@ -30,6 +31,7 @@ npm run usage     # 내 Claude Code 로그에서 토큰 사용량 집계 (숫자
 3. 커밋·푸시하면 자동 배포된다(아래 설정 후).
 
 요금제 추천 기준(사용 방식 계수, 요금제별 감당 가능 시간, 시간당 토큰)은 `src/data/advisor.json`,
+팀 요금제(좌석 가격·한도, 도입 방식)는 `src/data/team.json`,
 프리셋은 `src/data/presets.json`, 블로그 관련 글은 `src/data/related-posts.json`.
 
 ## URL 파라미터
@@ -44,6 +46,17 @@ npm run usage     # 내 Claude Code 로그에서 토큰 사용량 집계 (숫자
 | `c` | 지금 요금제 id (`none`, `claude-max-5x` 등) | `&c=claude-max-5x` |
 | `f` | 한도에 걸리는 빈도 (`none`, `sometimes`, `often`, `daily`) | `&f=often` |
 | `wd` | 한 달 작업일 | `&wd=20` |
+
+팀·회사 탭 (`tab=team`이면 팀 탭으로 열림):
+
+| 키 | 의미 | 예 |
+|---|---|---|
+| `tab` | `team`이면 팀·회사 탭 | `?tab=team` |
+| `tt` | 도구 (`claude-code`, `codex`, `gemini`) | `&tt=codex` |
+| `hc` / `nc` / `lc` | 헤비 / 일반 / 가벼운 사용자 인원 | `&hc=3&nc=10` |
+| `hh` / `nh` / `lh` | 유형별 하루 사용 시간 | `&hh=8` |
+| `b` | 결제 주기 (`annual`, `monthly`) | `&b=monthly` |
+| `twd` | 한 달 작업일 | `&twd=20` |
 
 모델별 API 비용 직접 계산(자세히, 아래 키가 있으면 자동으로 펼쳐짐):
 

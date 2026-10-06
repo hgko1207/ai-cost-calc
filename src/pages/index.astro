@@ -1,14 +1,15 @@
 ---
 import Advisor from '../components/Advisor';
 import Calculator from '../components/Calculator';
-import { advisor, prices, presets, relatedPosts } from '../lib/data';
+import TeamCalc from '../components/TeamCalc';
+import { advisor, prices, presets, relatedPosts, team } from '../lib/data';
 import { CALC_KEYS } from '../lib/url';
 import '../styles/global.css';
 
 const BLOG_URL = 'https://hgko-dev.tistory.com/';
-const title = 'AI 코딩 요금제 계산기 — Claude Pro·Max, ChatGPT, Gemini 뭐가 맞을까';
+const title = 'AI 코딩 요금제 계산기 — 개인 Pro·Max 추천, 팀·회사 도입 비용 비교';
 const description =
-  '하루 몇 시간, 어떻게 쓰는지만 고르면 Claude Pro·Max 5x·Max 20x 등 AI 코딩 구독 요금제 중 나에게 맞는 것을 추천합니다. 같은 양을 API로 쓰면 얼마인지 원화로 비교.';
+  '개인은 하루 사용 시간만 고르면 Claude Pro·Max 5x·Max 20x 중 맞는 요금제를, 팀·회사는 인원 구성에 따라 Claude Team·ChatGPT Business·Gemini Code Assist 도입 비용을 월·연 단위 원화로 비교합니다.';
 const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 const canonical = new URL(base, Astro.site).toString();
 const updated = prices.updatedAt;
@@ -37,6 +38,14 @@ const faqs = [
   {
     q: '추천 결과는 정확한가요?',
     a: '추정치입니다. Anthropic·OpenAI·Google 모두 구독 한도를 정확한 숫자로 공개하지 않습니다. 이 계산기는 공식 배수(예: Max 20x = Pro의 20배)와 운영자 실사용 경험으로 기준을 잡았고, 지금 요금제에서 한도에 걸리는 빈도를 알려 주면 그 경험을 우선 반영합니다.',
+  },
+  {
+    q: '회사에서 Claude Code를 도입하면 1인당 얼마나 드나요?',
+    a: 'Claude Team 연간 결제 기준 기본 좌석은 1인 월 $20, 많이 쓰는 사람용 프리미엄 좌석은 월 $100입니다. 10명(헤비 2, 일반 5, 가벼운 3) 팀이면 월 약 50만 원, 1인당 약 5만 원입니다. API로만 쓰면 Anthropic 공식 문서 기준 개발자 1인당 월 $150~250 정도가 듭니다.',
+  },
+  {
+    q: 'Claude Team 기본 좌석과 프리미엄 좌석은 뭐가 다른가요?',
+    a: '사용 한도가 다릅니다. 기본 좌석은 개인 Pro의 1.25배, 프리미엄 좌석은 6.25배(기본 좌석의 5배)입니다. 둘 다 Claude Code를 쓸 수 있고, 한 팀 안에서 섞어서 살 수 있어 많이 쓰는 사람만 프리미엄으로 배정하면 됩니다.',
   },
   {
     q: '내 실제 토큰 사용량은 어떻게 확인하나요?',
@@ -74,8 +83,8 @@ const jsonLd = [
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
-    <meta name="theme-color" content="#f7f5f2" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#16171a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f7f7f8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f0f10" media="(prefers-color-scheme: dark)" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="ko_KR" />
     <meta property="og:title" content={title} />
@@ -106,14 +115,20 @@ const jsonLd = [
         <p class="eyebrow">
           가격 기준 <time datetime={updated}>{updatedLabel}</time>
         </p>
-        <h1>내 사용량이면 어떤 AI 코딩 요금제가 맞을까?</h1>
+        <h1>AI 코딩 요금제 계산기</h1>
         <p class="lead no-embed">
-          하루 몇 시간, 어떻게 쓰는지만 고르면 Pro·Max 5x·Max 20x 중 맞는 요금제를 추천합니다. 같은 양을 쓴 만큼(API) 냈다면 얼마인지도 함께 보여 드려요.
+          개인은 Pro·Max 중 맞는 요금제를, 팀·회사는 인원 구성에 따른 도입 비용을 월·연 단위로 계산합니다.
         </p>
         <a class="embed-only open-full" href={base} target="_blank" rel="noopener">전체 화면에서 자세히 보기 ↗</a>
       </header>
 
       <main>
+        <div class="tabs" role="tablist" aria-label="계산 대상">
+          <button type="button" role="tab" id="tab-personal" aria-controls="panel-personal" aria-selected="true" data-tab="personal">개인</button>
+          <button type="button" role="tab" id="tab-team" aria-controls="panel-team" aria-selected="false" data-tab="team" tabindex="-1">팀·회사</button>
+        </div>
+
+        <div class="panel" id="panel-personal" role="tabpanel" aria-labelledby="tab-personal">
         <Advisor client:load advisor={advisor} models={prices.models} plans={prices.plans} />
 
         <details class="detail-calc" id="detail">
@@ -153,6 +168,80 @@ const jsonLd = [
             </li>
           </ol>
         </section>
+
+        </div>
+
+        <div class="panel" id="panel-team" role="tabpanel" aria-labelledby="tab-team" hidden>
+          <TeamCalc client:load team={team} advisor={advisor} models={prices.models} plans={prices.plans} />
+
+          <section class="prose no-embed" aria-labelledby="guide">
+            <h2 id="guide">회사 도입 가이드</h2>
+            <ol class="steps">
+              <li>
+                <strong>1단계 · 파일럿 (2~4주)</strong>
+                <span>3~5명이 월간 결제로 먼저 써 봅니다. 관리 콘솔의 사용량 화면에서 사람별 사용량과 한도 도달 빈도를 확인합니다.</span>
+              </li>
+              <li>
+                <strong>2단계 · 좌석 구성 확정</strong>
+                <span>파일럿 결과로 헤비·일반·가벼운 사용자를 나눕니다. 한도에 자주 걸리는 사람만 상위 좌석(프리미엄 등)을 배정합니다.</span>
+              </li>
+              <li>
+                <strong>3단계 · 확대와 연간 전환</strong>
+                <span>인원이 안정되면 연간 결제로 바꿔 좌석 단가를 약 20% 낮춥니다. 추가 사용량은 사람·팀별 지출 한도를 걸어 둡니다.</span>
+              </li>
+            </ol>
+
+            <h3>도입 방식별 장단점</h3>
+            <div class="table-wrap">
+              <table class="detail">
+                <thead>
+                  <tr>
+                    <th scope="col">방식</th>
+                    <th scope="col">이런 팀에 맞음</th>
+                    <th scope="col">장점</th>
+                    <th scope="col">주의할 점</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th scope="row">팀 요금제 (좌석제)</th>
+                    <td>2~150명, 매일 쓰는 개발팀</td>
+                    <td>비용 예측 쉬움, SSO·관리 콘솔, 데이터 학습 제외</td>
+                    <td>좌석 한도 초과분은 추가 결제</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">엔터프라이즈</th>
+                    <td>20명 이상, 보안·감사 요건이 있는 회사</td>
+                    <td>좌석별 한도 없음, SCIM·감사 로그</td>
+                    <td>사용량이 많으면 비용 상한이 없음</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">개인 구독 회사 지원</th>
+                    <td>1~3명, 빠르게 시작</td>
+                    <td>설정이 가장 간단</td>
+                    <td>관리·보안 기능 없음, 퇴사 시 계정 회수 어려움</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">API 종량제</th>
+                    <td>사용량이 들쭉날쭉하거나 자동화에 쓰는 팀</td>
+                    <td>쓴 만큼만 결제, 워크스페이스별 지출 한도</td>
+                    <td>매일 많이 쓰면 좌석제보다 몇 배 비쌈</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <h3>도입 전 체크리스트</h3>
+            <ul class="checklist">
+              <li>회사 코드·데이터가 모델 학습에 쓰이지 않는지 (팀·기업 요금제는 기본 제외)</li>
+              <li>회사 계정으로 로그인(SSO)과 퇴사자 계정 회수가 되는지</li>
+              <li>관리자가 사람별 사용량과 비용을 볼 수 있는지</li>
+              <li>추가 사용량에 지출 한도를 걸 수 있는지</li>
+              <li>세금계산서·법인카드 결제 등 회계 처리 방식</li>
+              <li>사내 보안 정책(외부 코드 전송, 저장소 접근 범위) 검토</li>
+            </ul>
+          </section>
+        </div>
 
         <section class="prose no-embed" aria-labelledby="data">
           <h2 id="data">가격 데이터 <span class="muted">(확인일 {updatedLabel})</span></h2>
@@ -279,5 +368,34 @@ const jsonLd = [
         </p>
       </footer>
     </div>
+    <script is:inline>
+      // 개인 / 팀·회사 탭 전환. ?tab=team 이면 팀 탭으로 시작
+      (() => {
+        const tabs = [...document.querySelectorAll('[role="tab"][data-tab]')];
+        const select = (name, focus) => {
+          for (const t of tabs) {
+            const on = t.dataset.tab === name;
+            t.setAttribute('aria-selected', String(on));
+            t.tabIndex = on ? 0 : -1;
+            document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+            if (on && focus) t.focus();
+          }
+          const q = new URLSearchParams(location.search);
+          if (name === 'team') q.set('tab', 'team');
+          else q.delete('tab');
+          const qs = q.toString();
+          history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
+        };
+        tabs.forEach((t, i) => {
+          t.addEventListener('click', () => select(t.dataset.tab, false));
+          t.addEventListener('keydown', (e) => {
+            if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+            const next = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+            select(next.dataset.tab, true);
+          });
+        });
+        if (new URLSearchParams(location.search).get('tab') === 'team') select('team', false);
+      })();
+    </script>
   </body>
 </html>
