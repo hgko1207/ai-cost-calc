@@ -1638,3 +1638,113 @@ table.detail tr.is-best-row strong {
     display: none;
   }
 }
+
+/* ── 팀 결과: 개인 구독 대비 한 줄 ── */
+.value-line {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--fill-alternative);
+  font-size: 15px;
+  line-height: 22px;
+}
+.value-line p {
+  margin: 0;
+}
+.value-line p + p {
+  margin-top: 2px;
+}
+.value-line.is-saving strong {
+  color: var(--positive-text);
+}
+
+/* ── 회사 관리 기능 비교표 ── */
+.feature-checks {
+  margin-top: 12px;
+}
+.feature-checks table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 20px;
+}
+.feature-checks th,
+.feature-checks td {
+  padding: 9px 8px;
+  text-align: left;
+  vertical-align: top;
+  box-shadow: inset 0 -1px 0 var(--line-alternative);
+}
+.feature-checks thead th {
+  color: var(--label-alternative);
+  font-size: 13px;
+  font-weight: 500;
+}
+.feature-checks thead th.is-hl {
+  color: var(--primary-normal);
+  font-weight: 600;
+}
+.feature-checks tbody th {
+  font-weight: 500;
+  color: var(--label-neutral);
+}
+.feature-checks td.is-hl {
+  background: var(--primary-a05);
+}
+.fc {
+  white-space: nowrap;
+  font-weight: 700;
+}
+.fc-yes {
+  color: var(--positive-text);
+}
+.fc-no {
+  color: var(--negative-text);
+}
+.fc-unknown {
+  color: var(--label-alternative);
+}
+.fc-note {
+  display: block;
+  color: var(--label-alternative);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  white-space: normal;
+}
+.fc-ref {
+  margin-left: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  vertical-align: super;
+}
+.fc-legend {
+  margin: 6px 0 0;
+  color: var(--label-alternative);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* ── 결과 버튼 묶음 ── */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.actions .share {
+  margin-top: 0;
+}
+.share.secondary {
+  background: transparent;
+  color: var(--primary-normal);
+  box-shadow: inset 0 0 0 1px var(--line-normal);
+}
+.share.secondary:hover {
+  background: var(--primary-a05);
+}
+@media (max-width: 767px) {
+  .actions .share {
+    flex: 1 1 100%;
+  }
+}

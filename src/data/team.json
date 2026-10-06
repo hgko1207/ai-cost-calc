@@ -56,13 +56,32 @@
               "proMultiplier": 6.25
             }
           ],
-          "features": [
+          "sourceUrl": "https://support.claude.com/ko/articles/9266767",
+          "checks": {
+            "no-training": {
+              "value": "yes",
+              "sourceUrl": "https://claude.com/ko/pricing"
+            },
+            "sso": {
+              "value": "yes",
+              "sourceUrl": "https://claude.com/ko/pricing"
+            },
+            "admin": {
+              "value": "yes",
+              "sourceUrl": "https://support.claude.com/ko/articles/9266767"
+            },
+            "spend-limits": {
+              "value": "yes",
+              "sourceUrl": "https://support.claude.com/ko/articles/9266767",
+              "note": "조직·개인별 상한"
+            }
+          },
+          "highlights": [
             "SSO",
             "관리 콘솔·사용량 분석",
             "회사 데이터 학습 제외(기본)",
             "좌석별 추가 사용 한도 설정"
-          ],
-          "sourceUrl": "https://support.claude.com/ko/articles/9266767"
+          ]
         },
         {
           "id": "claude-enterprise",
@@ -71,14 +90,33 @@
           "summary": "좌석 $20(연간) + 사용량은 API 요금. 좌석별 한도 없음. 직접 가입은 20명, 영업팀 계약은 50명부터",
           "minSeats": 20,
           "seatAnnualUsd": 20,
-          "features": [
+          "sourceUrl": "https://support.claude.com/ko/articles/9797531",
+          "limitNote": "좌석별 한도 없음, 사용량은 API 요금으로 결제",
+          "checks": {
+            "no-training": {
+              "value": "yes",
+              "sourceUrl": "https://support.claude.com/ko/articles/9797531",
+              "note": "Team 기능 포함"
+            },
+            "sso": {
+              "value": "yes",
+              "sourceUrl": "https://support.claude.com/ko/articles/9797531"
+            },
+            "admin": {
+              "value": "yes",
+              "sourceUrl": "https://support.claude.com/ko/articles/9797531"
+            },
+            "spend-limits": {
+              "value": "yes",
+              "sourceUrl": "https://support.claude.com/ko/articles/9797531"
+            }
+          },
+          "highlights": [
             "Team 기능 전체",
             "SCIM·권한 관리·감사 로그",
             "데이터 보존 기간 설정",
             "IP 허용 목록"
-          ],
-          "sourceUrl": "https://support.claude.com/ko/articles/9797531",
-          "limitNote": "좌석별 한도 없음, 사용량은 API 요금으로 결제"
+          ]
         },
         {
           "id": "claude-individual",
@@ -96,12 +134,33 @@
               "planId": "claude-max-20x"
             }
           ],
-          "features": [
+          "sourceUrl": "https://claude.com/ko/pricing",
+          "checks": {
+            "no-training": {
+              "value": "no",
+              "sourceUrl": "https://claude.com/ko/pricing",
+              "note": "기본은 학습 허용, 직접 꺼야 함"
+            },
+            "sso": {
+              "value": "no",
+              "sourceUrl": "https://claude.com/ko/pricing"
+            },
+            "admin": {
+              "value": "no",
+              "sourceUrl": "https://claude.com/ko/pricing",
+              "note": "각자 결제"
+            },
+            "spend-limits": {
+              "value": "no",
+              "sourceUrl": "https://claude.com/ko/pricing",
+              "note": "본인 상한만"
+            }
+          },
+          "highlights": [
             "설정이 가장 간단",
             "관리 콘솔·SSO 없음",
             "개인 계정이라 퇴사 시 회수 어려움"
-          ],
-          "sourceUrl": "https://claude.com/ko/pricing"
+          ]
         }
       ],
       "overage": "paid"
@@ -132,13 +191,32 @@
               "limitNote": "개인 Plus와 같은 수준 (5시간 단위 + 주간 한도)"
             }
           ],
-          "features": [
+          "sourceUrl": "https://chatgpt.com/ko-KR/pricing/?type=team",
+          "checks": {
+            "no-training": {
+              "value": "yes",
+              "sourceUrl": "https://learn.chatgpt.com/docs/pricing"
+            },
+            "sso": {
+              "value": "yes",
+              "sourceUrl": "https://learn.chatgpt.com/docs/pricing"
+            },
+            "admin": {
+              "value": "yes",
+              "sourceUrl": "https://learn.chatgpt.com/docs/pricing"
+            },
+            "spend-limits": {
+              "value": "yes",
+              "sourceUrl": "https://learn.chatgpt.com/codex/enterprise/usage-limits",
+              "note": "크레딧 한도"
+            }
+          },
+          "highlights": [
             "SAML SSO",
             "회사 데이터 학습 제외(기본)",
             "전용 워크스페이스",
             "크레딧으로 추가 사용"
-          ],
-          "sourceUrl": "https://chatgpt.com/ko-KR/pricing/?type=team"
+          ]
         },
         {
           "id": "chatgpt-individual",
@@ -159,11 +237,26 @@
               "planId": "chatgpt-pro-500"
             }
           ],
-          "features": [
+          "sourceUrl": "https://learn.chatgpt.com/docs/pricing",
+          "checks": {
+            "no-training": {
+              "value": "unknown",
+              "note": "공식 페이지 자동 확인 불가"
+            },
+            "sso": {
+              "value": "unknown"
+            },
+            "admin": {
+              "value": "unknown"
+            },
+            "spend-limits": {
+              "value": "unknown"
+            }
+          },
+          "highlights": [
             "설정이 가장 간단",
             "관리 기능 없음"
-          ],
-          "sourceUrl": "https://learn.chatgpt.com/docs/pricing"
+          ]
         }
       ],
       "overage": "paid"
@@ -192,12 +285,31 @@
               "limitNote": "1인 하루 1,500회 요청"
             }
           ],
-          "features": [
+          "sourceUrl": "https://cloud.google.com/products/gemini/pricing?hl=ko",
+          "checks": {
+            "no-training": {
+              "value": "yes",
+              "sourceUrl": "https://cloud.google.com/gemini/docs/discover/data-governance?hl=ko"
+            },
+            "sso": {
+              "value": "yes",
+              "sourceUrl": "https://docs.cloud.google.com/gemini/docs/codeassist/security-privacy-compliance?hl=ko"
+            },
+            "admin": {
+              "value": "yes",
+              "sourceUrl": "https://docs.cloud.google.com/gemini/docs/codeassist/manage-licenses?hl=ko",
+              "note": "라이선스 관리"
+            },
+            "spend-limits": {
+              "value": "unknown",
+              "note": "하루 요청 쿼터만 확인"
+            }
+          },
+          "highlights": [
             "Google Cloud 보안·VPC-SC",
             "IP 면책",
             "소스 인용 표시"
-          ],
-          "sourceUrl": "https://cloud.google.com/products/gemini/pricing?hl=ko"
+          ]
         },
         {
           "id": "code-assist-enterprise",
@@ -216,14 +328,51 @@
               "limitNote": "1인 하루 2,000회 요청"
             }
           ],
-          "features": [
+          "sourceUrl": "https://cloud.google.com/products/gemini/pricing?hl=ko",
+          "checks": {
+            "no-training": {
+              "value": "yes",
+              "sourceUrl": "https://cloud.google.com/gemini/docs/discover/data-governance?hl=ko"
+            },
+            "sso": {
+              "value": "yes",
+              "sourceUrl": "https://docs.cloud.google.com/gemini/docs/codeassist/security-privacy-compliance?hl=ko"
+            },
+            "admin": {
+              "value": "yes",
+              "sourceUrl": "https://docs.cloud.google.com/gemini/docs/codeassist/manage-licenses?hl=ko",
+              "note": "라이선스 관리"
+            },
+            "spend-limits": {
+              "value": "unknown",
+              "note": "하루 요청 쿼터만 확인"
+            }
+          },
+          "highlights": [
             "Standard 기능 전체",
             "사내 코드로 맞춤화"
-          ],
-          "sourceUrl": "https://cloud.google.com/products/gemini/pricing?hl=ko"
+          ]
         }
       ],
       "overage": "wait"
+    }
+  ],
+  "features": [
+    {
+      "id": "no-training",
+      "name": "회사 데이터 학습 제외 (기본값)"
+    },
+    {
+      "id": "sso",
+      "name": "회사 계정 로그인 (SSO)"
+    },
+    {
+      "id": "admin",
+      "name": "관리 콘솔·중앙 결제"
+    },
+    {
+      "id": "spend-limits",
+      "name": "사람별 사용·지출 한도 설정"
     }
   ]
 }

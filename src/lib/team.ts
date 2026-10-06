@@ -169,3 +169,45 @@ export function evaluateTeam(input: TeamInput, team: Team, advisor: Advisor, mod
   const recommended = (candidates.length ? candidates : options.filter((o) => o.applicable))[0] ?? null;
   return { headcount, totalLoadHours, options, recommended, apiUsdPerAgentHour };
 }
+
+export interface Alternative {
+  /** vs-individual: 추천(팀·기업)을 개인 구독 지원과 비교. vs-team: 추천(개인 구독)을 팀 요금제와 비교 */
+  kind: 'vs-individual' | 'vs-team';
+  alt: OptionResult;
+  /** 대안 월 비용 − 추천 월 비용. 양수면 추천이 더 쌈 */
+  monthlyDiff: number;
+  annualDiff: number;
+}
+
+/**
+ * 결재 판단에 필요한 "다른 선택지와의 차이"를 하나 고른다.
+ * - 추천이 팀·기업 요금제면 → 개인 구독 지원과 비교 (금액 차이 + 관리 기능)
+ * - 추천이 개인 구독 지원이면 → 적용 가능한 가장 싼 팀·기업 요금제와 비교 (얼마 더 내면 관리 기능이 생기는지)
+ * 비교할 대상이 없으면 null (예: Gemini는 개인 구독 방식이 없음, 1명이면 팀 좌석 불가).
+ */
+export function compareAlternative(r: TeamResult): Alternative | null {
+  const rec = r.recommended;
+  if (!rec) return null;
+  const pick = (o: OptionResult | undefined, kind: Alternative['kind']): Alternative | null => {
+    if (!o) return null;
+    const monthlyDiff = o.monthlyKrw - rec.monthlyKrw;
+    return { kind, alt: o, monthlyDiff, annualDiff: monthlyDiff * 12 };
+  };
+  if (rec.option.kind === 'individual') {
+    const teamOpt = r.options
+      .filter((o) => o.applicable && o.option.kind !== 'individual')
+      .sort((a, b) => a.monthlyKrw - b.monthlyKrw)[0];
+    return pick(teamOpt, 'vs-team');
+  }
+  return pick(
+    r.options.find((o) => o.option.kind === 'individual' && o.applicable),
+    'vs-individual',
+  );
+}
+
+/** "프리미엄 좌석 2명 + 기본 좌석 8명" 처럼 배정 결과 요약 */
+export function compositionText(o: OptionResult): string {
+  const m = new Map<string, number>();
+  for (const l of o.lines) m.set(l.choice, (m.get(l.choice) ?? 0) + l.count);
+  return [...m].map(([k, v]) => `${k} ${v}명`).join(' + ');
+}

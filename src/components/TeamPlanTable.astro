@@ -2,6 +2,8 @@
 // 팀·회사 요금제 가격표 (team.json의 좌석제·엔터프라이즈 옵션만)
 import { team } from '../lib/data';
 
+const yesFeatures = (checks: Record<string, { value: string }>) =>
+  team.features.filter((f) => checks[f.id]?.value === 'yes').map((f) => f.name.replace(/ \(.*\)$/, '')).join(', ') || '—';
 const usd = (n: number) => `$${Number.isInteger(n) ? n : n.toFixed(2)}`;
 const krw = (n: number) => `₩${n.toLocaleString('ko-KR')}`;
 
@@ -19,7 +21,7 @@ const rows = team.tools.flatMap((tool) =>
         // 최소 인원을 공식 페이지에 적지 않은 요금제는 team.json에 1로 둔다
         minSeats: o.minSeats > 1 ? `${o.minSeats}명` : '표기 없음',
         limit: s.limitNote,
-        features: o.features.slice(0, 3).join(', '),
+        features: yesFeatures(o.checks),
         sourceUrl: o.sourceUrl,
       }));
     }
@@ -35,7 +37,7 @@ const rows = team.tools.flatMap((tool) =>
           annualSub: '사용량은 API 요금',
           minSeats: `${o.minSeats}명`,
           limit: o.limitNote,
-          features: o.features.slice(0, 3).join(', '),
+          features: yesFeatures(o.checks),
           sourceUrl: o.sourceUrl,
         },
       ];

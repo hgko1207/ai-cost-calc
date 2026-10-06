@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { advisor, prices, team } from './data';
 import { krwShort } from './format';
-import { evaluateTeam, type TeamInput } from './team';
+import { compareAlternative, evaluateTeam, type TeamInput } from './team';
+import { buildTeamSummary } from './teamSummary';
 
 const base: TeamInput = {
   toolId: 'claude-code',
@@ -135,5 +136,52 @@ describe('evaluateTeam', () => {
       expect(std.lines[0].overageKrw).toBe(0);
       expect(r.recommended).not.toBeNull();
     });
+  });
+
+  describe('다른 선택지와 비교', () => {
+    it('기본값(연간): Team 추천, 개인 구독 지원보다 싸다 (양수)', () => {
+      const c = compareAlternative(run({}))!;
+      expect(c.kind).toBe('vs-individual');
+      expect(c.monthlyDiff).toBeGreaterThan(0);
+      expect(c.annualDiff).toBeCloseTo(c.monthlyDiff * 12);
+    });
+
+    it('추천이 개인 구독이면 가장 싼 팀 요금제와 비교해 "얼마 더 드는지"를 보여 준다 (Codex)', () => {
+      const r = run({ toolId: 'codex' });
+      expect(r.recommended?.option.kind).toBe('individual');
+      const c = compareAlternative(r)!;
+      expect(c.kind).toBe('vs-team');
+      expect(c.alt.option.id).toBe('chatgpt-business');
+      expect(c.monthlyDiff).toBeGreaterThan(0);
+    });
+
+    it('Gemini처럼 개인 구독 방식이 없으면 null', () => {
+      expect(compareAlternative(run({ toolId: 'gemini' }))).toBeNull();
+    });
+
+    it('1명이면 팀 좌석이 불가하므로 비교 대상 없음', () => {
+      const r = run({ groups: [{ typeId: 'normal', count: 1, hours: 2 }] });
+      expect(r.recommended?.option.kind).toBe('individual');
+      expect(compareAlternative(r)).toBeNull();
+    });
+  });
+
+  it('결재용 요약에 인원·추천·월/연 예산·출처 안내가 들어간다', () => {
+    const r = run({ vat: true });
+    const text = buildTeamSummary(r, {
+      toolName: 'Claude Code',
+      billing: 'annual',
+      vat: true,
+      fxRate: 1400,
+      groups: [{ name: '많이 쓰는 사람', count: 2, hours: 7 }, { name: '일반 사용자', count: 8, hours: 2 }],
+      checkedAt: '2026-10-06',
+      url: 'https://example.com/?tab=team',
+    });
+    expect(text).toContain('총 10명');
+    expect(text).toContain('Claude Team');
+    expect(text).toContain('프리미엄 좌석 2명 + 기본 좌석 8명');
+    expect(text).toMatch(/월 [\d,]+원 \/ 연 [\d,]+원/);
+    expect(text).toContain('부가세 포함');
+    expect(text).toContain('https://example.com/?tab=team');
   });
 });

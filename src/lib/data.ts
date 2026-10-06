@@ -126,11 +126,20 @@ const SeatSchema = z.object({
   limitNote: z.string(), // 공식 사용 한도 (가격표 표시용)
   proMultiplier: z.number().positive().optional(), // 개인 Pro 대비 사용량 배수 (공식)
 });
+// 회사 관리 기능 체크. 공식 페이지로 확인한 것만 yes/no, 확인 못 한 것은 unknown("—")
+const FeatureCheckSchema = z.object({
+  value: z.enum(['yes', 'no', 'unknown']),
+  sourceUrl: z.url().optional(),
+  note: z.string().optional(),
+});
+export type FeatureCheck = z.infer<typeof FeatureCheckSchema>;
+
 const TeamOptionBase = {
   id: z.string(),
   name: z.string(),
   summary: z.string(),
-  features: z.array(z.string()),
+  checks: z.record(z.string(), FeatureCheckSchema),
+  highlights: z.array(z.string()), // 체크 항목 외의 특징 (IP 면책 등)
   sourceUrl: z.url(),
 };
 const TeamOptionSchema = z.discriminatedUnion('kind', [
@@ -157,6 +166,7 @@ const TeamOptionSchema = z.discriminatedUnion('kind', [
 ]);
 const TeamSchema = z.object({
   updatedAt: isoDate,
+  features: z.array(z.object({ id: z.string(), name: z.string() })).min(1),
   defaultWorkDays: z.number().min(1).max(31),
   userTypes: z.array(
     z.object({
@@ -223,6 +233,16 @@ const TeamRefined = TeamSchema.superRefine((t, ctx) => {
   const planIds = new Set(prices.plans.map((p) => p.id));
   const modelIds = new Set(prices.models.map((m) => m.id));
   const modeIds = new Set(advisor.modes.map((m) => m.id));
+  // 모든 도입 방식은 기능 목록 전체를 정확히 체크해야 하고, yes/no에는 출처가 있어야 한다
+  const featureIds = t.features.map((f) => f.id).sort().join(',');
+  for (const tool of t.tools)
+    for (const o of tool.options) {
+      if (Object.keys(o.checks).sort().join(',') !== featureIds) {
+        ctx.addIssue({ code: 'custom', message: `${o.id}: checks 항목이 기능 목록과 다릅니다` });
+      }
+      for (const [k, v] of Object.entries(o.checks))
+        if (v.value !== 'unknown' && !v.sourceUrl) ctx.addIssue({ code: 'custom', message: `${o.id}.${k}: 출처 없음` });
+    }
   // URL 키를 유형 id의 첫 글자로 만들므로 첫 글자가 겹치면 안 된다
   const initials = t.userTypes.map((u) => u.id[0]);
   if (new Set(initials).size !== initials.length) ctx.addIssue({ code: 'custom', message: '사용자 유형 id의 첫 글자가 겹칩니다' });

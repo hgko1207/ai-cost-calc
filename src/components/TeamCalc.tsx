@@ -2,7 +2,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Advisor, Model, Plan, Team } from '../lib/data';
 import { krwShort } from '../lib/format';
-import { evaluateTeam, type Billing, type TeamGroup } from '../lib/team';
+import { compareAlternative, compositionText, evaluateTeam, type Billing, type TeamGroup } from '../lib/team';
+import { buildTeamSummary } from '../lib/teamSummary';
+import FeatureChecks from './FeatureChecks';
 import MobileResultBar from './MobileResultBar';
 import Segmented from './Segmented';
 import {
@@ -12,6 +14,7 @@ import {
   moneyFromQuery,
   onMoney,
   replaceOwnParams,
+  shareUrl,
   teamFromQuery,
   teamGroupKey as groupKey,
   teamToQuery,
@@ -47,6 +50,7 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
   const [money, setMoney] = useState(DEFAULT_MONEY);
   const [hydrated, setHydrated] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [copiedSummary, setCopiedSummary] = useState(false);
   const [openId, setOpenId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -67,7 +71,6 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
   );
   const tool = team.tools.find((t) => t.id === state.toolId) ?? team.tools[0];
   const rec = r.recommended;
-  const maxMonthly = Math.max(...r.options.filter((o) => o.applicable).map((o) => o.monthlyKrw), 1);
   const typeName = (id: string) => team.userTypes.find((t) => t.id === id)?.name ?? id;
 
   /** "1인 하루 7시간 사용 · 좌석 한도 약 7.5시간 (93%)" */
@@ -86,6 +89,26 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
     await copyShareUrl([...OWN_KEYS, 'tab']);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const cmp = compareAlternative(r);
+  const copySummary = async () => {
+    const text = buildTeamSummary(r, {
+      toolName: tool.name,
+      billing: state.billing,
+      vat: money.vat,
+      fxRate: money.fxRate,
+      groups: state.groups.map((g) => ({ name: typeName(g.typeId), count: g.count, hours: g.hours })),
+      checkedAt: team.updatedAt,
+      url: shareUrl([...OWN_KEYS, 'tab']),
+    });
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      window.prompt('아래 내용을 복사하세요', text);
+    }
+    setCopiedSummary(true);
+    setTimeout(() => setCopiedSummary(false), 2000);
   };
 
   return (
@@ -199,31 +222,14 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
             <h2 id="team-r" className="result-title">
               {rec.option.name}
             </h2>
-            <ul className="assign">
-              {rec.lines.map((l) => (
-                <li key={l.typeId}>
-                  <span className="assign-who">
-                    {typeName(l.typeId)} <strong>{l.count}명</strong>
-                  </span>
-                  <span className="assign-what">
-                    {l.choice}
-                    <span className={`assign-status st-${l.status}`}>{STATUS_LABEL[l.status]}</span>
-                  </span>
-                  <span className="assign-detail">{usageText(l)}</span>
-                </li>
-              ))}
-            </ul>
-            <p className="muted small hint">
-              상태는 <strong>1인 기준</strong>입니다. 한 사람의 하루 사용 시간이 좌석 한도의 70% 이하면 여유, 70% 초과~100%면 한도 근접(가끔 걸릴 수 있음)입니다. 인원 수가 아니라 하루 사용
-              시간을 바꾸면 달라집니다.
-            </p>
+            <p className="result-reason">{compositionText(rec)}</p>
             <dl className="totals">
               <div>
-                <dt>월 비용</dt>
+                <dt>월 예산</dt>
                 <dd>{krwShort(rec.monthlyKrw)}</dd>
               </div>
               <div>
-                <dt>연 비용</dt>
+                <dt>연 예산</dt>
                 <dd>{krwShort(rec.annualKrw)}</dd>
               </div>
               <div>
@@ -231,7 +237,54 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
                 <dd>{krwShort(rec.perUserKrw)}</dd>
               </div>
             </dl>
+
+            {cmp?.kind === 'vs-individual' && (
+              <div className={`value-line${cmp.monthlyDiff >= 0 ? ' is-saving' : ''}`}>
+                {cmp.monthlyDiff >= 0 ? (
+                  <p>
+                    개인 구독을 각자 결제해 지원할 때보다 <strong>월 {krwShort(cmp.monthlyDiff)} 절감</strong> (연 {krwShort(cmp.annualDiff)})
+                  </p>
+                ) : (
+                  <p>
+                    개인 구독을 각자 지원하면 <strong>월 {krwShort(-cmp.monthlyDiff)} 더 싸지만</strong>, 아래 회사 관리 기능은 쓸 수 없습니다.
+                  </p>
+                )}
+                <p className="muted small">
+                  비교 기준 · 개인 구독: {compositionText(cmp.alt)}
+                  {cmp.alt.hasOverage && ' (한도 초과분 추가 결제 포함)'}
+                </p>
+              </div>
+            )}
+            {cmp?.kind === 'vs-team' && (
+              <div className="value-line">
+                <p>
+                  회사용 요금제(<strong>{cmp.alt.option.name}</strong>)로 바꾸면 월 {krwShort(cmp.monthlyDiff)} 더 들지만 (연 {krwShort(cmp.annualDiff)}), 아래 회사 관리 기능을
+                  쓸 수 있습니다.
+                </p>
+                <p className="muted small">
+                  비교 기준 · {cmp.alt.option.name}: {compositionText(cmp.alt)}
+                </p>
+              </div>
+            )}
+
+            <FeatureChecks
+              features={team.features}
+              columns={[
+                { name: rec.option.name, checks: rec.option.checks, highlight: true },
+                ...(cmp ? [{ name: cmp.kind === 'vs-individual' ? '개인 구독 지원' : cmp.alt.option.name, checks: cmp.alt.option.checks }] : []),
+              ]}
+            />
+
             {rec.hasOverage && <p className="warn small">일부 인원은 좌석 한도를 넘어 추가 사용량 비용이 포함됐습니다. {tool.overageNote}.</p>}
+
+            <div className="actions">
+              <button type="button" className="share" onClick={copySummary}>
+                {copiedSummary ? '요약을 복사했습니다' : '결재용 요약 복사'}
+              </button>
+              <button type="button" className="share secondary" onClick={copyLink}>
+                {copied ? '링크를 복사했습니다' : '링크 복사'}
+              </button>
+            </div>
           </>
         ) : (
           <h2 id="team-r" className="result-title">
@@ -266,11 +319,6 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
                   ) : (
                     <span className="option-cost na">{o.notApplicableReason}</span>
                   )}
-                  {o.applicable && (
-                    <span className="meter" aria-hidden="true">
-                      <span style={{ width: `${Math.max(2, (o.monthlyKrw / maxMonthly) * 100)}%` }} />
-                    </span>
-                  )}
                 </button>
                 {open && (
                   <div className="option-body">
@@ -279,7 +327,7 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
                       <table className="lines">
                         <thead>
                           <tr>
-                            <th scope="col">유형</th>
+                            <th scope="col">그룹</th>
                             <th scope="col">배정</th>
                             <th scope="col">상태</th>
                             <th scope="col" className="num">1인 월</th>
@@ -302,12 +350,13 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
                         </tbody>
                       </table>
                     )}
-                    {o.billingNote && <p className="muted small">※ {o.billingNote}</p>}
-                    <ul className="features">
-                      {o.option.features.map((f) => (
-                        <li key={f}>{f}</li>
-                      ))}
-                    </ul>
+                    {o.option.highlights.length > 0 && (
+                      <ul className="features">
+                        {o.option.highlights.map((f) => (
+                          <li key={f}>{f}</li>
+                        ))}
+                      </ul>
+                    )}
                     <a className="small" href={o.option.sourceUrl} target="_blank" rel="noopener">
                       공식 안내 보기 ↗
                     </a>
@@ -318,29 +367,34 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
           })}
         </ol>
 
-        <p className="muted small api-excluded">
-          API 종량제(쓴 만큼 결제)는 비교에서 뺐습니다. 서비스 개발, 자동화(CI·사내 봇), 클라우드 계약처럼 코딩 도구 구독과 다른 용도에 주로 씁니다.
-        </p>
-
         <details className="why">
-          <summary>왜 이렇게 계산됐나요?</summary>
+          <summary>그룹별 배정과 계산 근거</summary>
+          {rec && (
+            <ul className="assign">
+              {rec.lines.map((l) => (
+                <li key={l.typeId}>
+                  <span className="assign-who">
+                    {typeName(l.typeId)} <strong>{l.count}명</strong>
+                  </span>
+                  <span className="assign-what">
+                    {l.choice}
+                    <span className={`assign-status st-${l.status}`}>{STATUS_LABEL[l.status]}</span>
+                  </span>
+                  <span className="assign-detail">{usageText(l)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
           <ul>
-            <li>사용 방식별로 하루 사용 시간을 "에이전트 작업 환산 시간"으로 바꾼 뒤, 각 좌석·요금제가 감당할 수 있는 시간과 비교했습니다 (개인 탭과 같은 기준).</li>
-            <li>사람마다 감당 가능한 가장 싼 좌석을 배정하고, 한도를 넘는 사용량은 {tool.overageNote}.</li>
+            <li>상태는 1인 기준입니다. 하루 사용 시간이 좌석 한도의 70% 이하면 여유, 100% 이하면 한도 근접입니다. 인원 수가 아니라 하루 사용 시간을 바꾸면 달라집니다.</li>
+            <li>사람마다 총비용(좌석 + 한도 초과분)이 가장 싼 좌석을 배정했습니다. 한도를 넘는 사용량은 {tool.overageNote}.</li>
             <li>
-              Enterprise 사용량과 좌석 한도 초과분은 API 요금({models.find((m) => m.id === tool.defaultModel)?.name} 기준, 에이전트 작업 하루 1시간당 월 약{' '}
-              {krwShort(r.apiUsdPerAgentHour * money.fxRate * (money.vat ? 1.1 : 1))})으로 계산했습니다.
+              Enterprise 사용량과 좌석 한도 초과분은 API 요금({models.find((m) => m.id === tool.defaultModel)?.name} 기준)으로 계산했습니다. 환율{' '}
+              {money.fxRate.toLocaleString('ko-KR')}원/$, 부가세 {money.vat ? '10% 포함' : '별도'}.
             </li>
-            <li>
-              달러 가격은 환율 {money.fxRate.toLocaleString('ko-KR')}원/$, 부가세 {money.vat ? '10% 포함' : '별도'}로 환산했습니다. 공식 원화 가격은 부가세 포함가로
-              보고 같은 기준에 맞췄습니다.
-            </li>
+            <li>API 종량제(쓴 만큼 결제)는 비교에서 뺐습니다. 서비스 개발·자동화처럼 코딩 도구 구독과 다른 용도에 주로 씁니다.</li>
           </ul>
         </details>
-
-        <button type="button" className="share" onClick={copyLink}>
-          {copied ? '링크를 복사했습니다' : '이 결과 링크 복사'}
-        </button>
       </section>
       {hydrated && rec && (
         <MobileResultBar targetId="team-result" label={`추천: ${rec.option.name} · 월 ${krwShort(rec.monthlyKrw)}`} />
