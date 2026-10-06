@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { compare, modelCost, planZones, uncachedPct, usdToKrw, type Settings } from '../lib/calc';
 import type { Model, Plan, Preset, UsageValues, Vendor } from '../lib/data';
 import { krw, krwShort, tokensM, usd } from '../lib/format';
-import { fromQuery, toQuery, type CalcState } from '../lib/url';
+import { CALC_KEYS, copyShareUrl, fromQuery, replaceOwnParams, toQuery, type CalcState } from '../lib/url';
 import BreakEvenChart from './BreakEvenChart';
 
 // 데이터는 빌드 시 zod로 검증한 뒤 props로 받는다 (클라이언트 번들에 zod를 넣지 않기 위해)
@@ -83,11 +83,7 @@ export default function Calculator({ data }: { data: CalculatorData }) {
   const activePreset = presets.find((p) => p.id === state.presetId);
   const query = toQuery(state, activePreset ? { ...DEFAULTS, ...activePreset.values } : DEFAULTS);
   useEffect(() => {
-    if (!hydrated) return;
-    const params = new URLSearchParams(query);
-    if (new URLSearchParams(window.location.search).get('embed') === '1') params.set('embed', '1');
-    const qs = params.toString();
-    window.history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
+    if (hydrated) replaceOwnParams(CALC_KEYS, query);
   }, [query, hydrated]);
 
   const setUsage = (patch: Partial<UsageValues>) => setState((s) => ({ ...s, ...patch, presetId: 'custom' }));
@@ -103,13 +99,8 @@ export default function Calculator({ data }: { data: CalculatorData }) {
   );
   const maxUsd = Math.max(...costs.filter((c) => c.available).map((c) => c.usd), 1e-9);
 
-  const shareUrl = () => `${window.location.origin}${window.location.pathname}${query ? `?${query}` : ''}`;
   const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl());
-    } catch {
-      window.prompt('아래 링크를 복사하세요', shareUrl());
-    }
+    await copyShareUrl();
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

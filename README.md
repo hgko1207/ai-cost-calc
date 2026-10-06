@@ -1,6 +1,6 @@
-# AI 코딩 비용 계산기
+# AI 코딩 요금제 계산기
 
-하루 사용량을 넣으면 Claude·GPT·Gemini 모델별 API 월 비용과 구독 요금제(Pro, Max 등) 중 무엇이 유리한지 원화로 계산하는 정적 사이트.
+하루 몇 시간, 어떻게 쓰는지만 고르면 AI 코딩 구독 요금제(Pro, Max 5x, Max 20x 등)를 추천하고, 같은 양을 API로 쓰면 얼마인지 원화로 비교하는 정적 사이트.
 
 - 스택: Astro 7 + React 19 (계산기만 React 아일랜드, 나머지는 정적 HTML)
 - 서버 없음. `dist/`를 정적 호스팅에 올리면 끝.
@@ -29,9 +29,23 @@ npm run usage     # 내 Claude Code 로그에서 토큰 사용량 집계 (숫자
 2. `npm test && npm run build`: 스키마가 맞지 않으면 빌드가 실패한다.
 3. 커밋·푸시하면 자동 배포된다(아래 설정 후).
 
+요금제 추천 기준(사용 방식 계수, 요금제별 감당 가능 시간, 시간당 토큰)은 `src/data/advisor.json`,
 프리셋은 `src/data/presets.json`, 블로그 관련 글은 `src/data/related-posts.json`.
 
 ## URL 파라미터
+
+요금제 추천(위쪽):
+
+| 키 | 의미 | 예 |
+|---|---|---|
+| `t` | 도구 (`claude-code`, `codex`, `antigravity`) | `?t=codex` |
+| `h` | 하루 사용 시간 | `&h=5` |
+| `u` | 사용 방식 (`chat`, `pair`, `agent`) | `&u=agent` |
+| `c` | 지금 요금제 id (`none`, `claude-max-5x` 등) | `&c=claude-max-5x` |
+| `f` | 한도에 걸리는 빈도 (`none`, `sometimes`, `often`, `daily`) | `&f=often` |
+| `wd` | 한 달 작업일 | `&wd=20` |
+
+모델별 API 비용 직접 계산(자세히, 아래 키가 있으면 자동으로 펼쳐짐):
 
 | 키 | 의미 | 예 |
 |---|---|---|
@@ -47,12 +61,12 @@ npm run usage     # 내 Claude Code 로그에서 토큰 사용량 집계 (숫자
 HTML 모드에서:
 
 ```html
-<iframe src="https://hgko1207.github.io/ai-cost-calc/?embed=1&p=daily&m=opus-5-5"
+<iframe src="https://hgko1207.github.io/ai-cost-calc/?embed=1&t=claude-code&h=5&u=agent"
         style="width:100%;height:1500px;border:0" loading="lazy"
         title="AI 코딩 비용 계산기"></iframe>
 ```
 
-글마다 `p`, `m`을 바꿔 글 주제에 맞는 상태로 열 수 있다.
+글마다 `t`, `h`, `u` 등을 바꿔 글 주제에 맞는 상태로 열 수 있다.
 
 ## 배포: GitHub Pages (현재 사용 중, 무료)
 

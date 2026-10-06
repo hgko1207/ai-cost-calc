@@ -61,3 +61,34 @@ export function fromQuery(search: string, defaults: CalcState, validIds: { prese
   }
   return state;
 }
+
+export const CALC_KEYS: readonly string[] = Object.values(KEYS);
+
+/**
+ * 한 페이지에 계산기가 둘(요금제 추천, 토큰 계산기)이라 서로의 파라미터를 지우지 않도록
+ * 자기 키만 바꿔서 주소창에 반영한다. embed 등 다른 키는 그대로 둔다.
+ */
+export function replaceOwnParams(ownKeys: readonly string[], ownQuery: string): void {
+  const params = new URLSearchParams(window.location.search);
+  for (const k of ownKeys) params.delete(k);
+  new URLSearchParams(ownQuery).forEach((v, k) => params.set(k, v));
+  const qs = params.toString();
+  window.history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
+}
+
+/** 공유용 주소: 현재 상태 그대로, embed 표시만 뺀다 */
+export function shareUrl(): string {
+  const params = new URLSearchParams(window.location.search);
+  params.delete('embed');
+  const qs = params.toString();
+  return `${window.location.origin}${window.location.pathname}${qs ? `?${qs}` : ''}`;
+}
+
+export async function copyShareUrl(): Promise<void> {
+  const url = shareUrl();
+  try {
+    await navigator.clipboard.writeText(url);
+  } catch {
+    window.prompt('아래 링크를 복사하세요', url);
+  }
+}

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import pricesJson from '../data/prices.json';
 import presetsJson from '../data/presets.json';
 import relatedJson from '../data/related-posts.json';
+import advisorJson from '../data/advisor.json';
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const price = z.number().nonnegative();
@@ -89,7 +90,30 @@ const RelatedPostSchema = z.object({
   description: z.string(),
 });
 
+const AdvisorSchema = z.object({
+  agentHourUsage: InputValuesSchema.omit({ workDays: true }).extend({ note: z.string() }),
+  defaultWorkDays: z.number().min(1).max(31),
+  modes: z.array(
+    z.object({ id: z.string(), name: z.string(), description: z.string(), intensity: z.number().positive() }),
+  ),
+  limitFrequencies: z.array(z.object({ id: z.enum(['none', 'sometimes', 'often', 'daily']), name: z.string() })),
+  tools: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      vendor: z.string(),
+      defaultModel: z.string(),
+      confidence: z.enum(['high', 'low']),
+      basis: z.string(),
+      // 요금제를 싼 것부터 비싼 것 순으로 나열 (업그레이드 = 다음 항목)
+      plans: z.array(z.object({ planId: z.string(), agentHours: z.number().positive() })).min(1),
+    }),
+  ),
+});
+
 export type Vendor = z.infer<typeof VendorSchema>;
+export type Advisor = z.infer<typeof AdvisorSchema>;
+export type LimitFrequency = Advisor['limitFrequencies'][number]['id'];
 export type Model = z.infer<typeof ModelSchema>;
 export type Plan = z.infer<typeof PlanSchema>;
 export type TokenPrices = z.infer<typeof tokenPrices>;
@@ -100,3 +124,14 @@ export type RelatedPost = z.infer<typeof RelatedPostSchema>;
 export const prices = PricesSchema.parse(pricesJson);
 export const presets = z.array(PresetSchema).min(1).parse(presetsJson);
 export const relatedPosts = z.array(RelatedPostSchema).parse(relatedJson);
+
+export const advisor = AdvisorSchema.superRefine((a, ctx) => {
+  const planIds = new Set(prices.plans.map((p) => p.id));
+  const modelIds = new Set(prices.models.map((m) => m.id));
+  for (const t of a.tools) {
+    if (!modelIds.has(t.defaultModel)) ctx.addIssue({ code: 'custom', message: `알 수 없는 모델: ${t.defaultModel}` });
+    for (const p of t.plans) {
+      if (!planIds.has(p.planId)) ctx.addIssue({ code: 'custom', message: `알 수 없는 요금제: ${p.planId}` });
+    }
+  }
+}).parse(advisorJson);
