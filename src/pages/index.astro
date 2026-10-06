@@ -124,7 +124,28 @@ const jsonLd = [
     />
     <script is:inline>
       // ?embed=1 이면 계산기만 보이게 (티스토리 iframe 삽입용)
-      if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.dataset.embed = '1';
+      if (new URLSearchParams(location.search).get('embed') === '1') {
+        document.documentElement.dataset.embed = '1';
+        // 블로그 쪽 스크립트가 iframe 높이를 맞출 수 있게 내용 높이를 알린다 (스크립트가 없으면 무시됨)
+        addEventListener('DOMContentLoaded', () => {
+          let last = 0;
+          const post = () => {
+            const h = Math.ceil(document.documentElement.scrollHeight);
+            if (Math.abs(h - last) > 4) {
+              last = h;
+              parent.postMessage({ type: 'aicalc:height', height: h }, '*');
+            }
+          };
+          new ResizeObserver(post).observe(document.body);
+          post();
+          // "전체 화면에서 보기"는 지금 입력한 값을 그대로 가져가게
+          document.querySelector('.open-full')?.addEventListener('click', (ev) => {
+            const q = new URLSearchParams(location.search);
+            q.delete('embed');
+            ev.currentTarget.href = location.pathname + (q.toString() ? '?' + q : '');
+          });
+        });
+      }
     </script>
     <script is:inline define:vars={{ calcKeys: CALC_KEYS }}>
       // 토큰 계산기 파라미터가 있는 공유 링크로 들어오면 "자세히" 영역을 펼친다

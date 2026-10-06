@@ -287,13 +287,18 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
             </div>
           </>
         ) : (
-          <h2 id="team-r" className="result-title">
-            인원을 입력하세요
-          </h2>
+          <>
+            <h2 id="team-r" className="result-title">
+              인원을 입력하세요
+            </h2>
+            <p className="result-reason">인원을 1명 이상 입력하면 도입 방식별 월·연 비용과 관리 기능을 비교해 드려요.</p>
+          </>
         )}
 
-        <p className="list-label">도입 방식 비교 ({state.billing === 'annual' ? '연간 결제' : '월간 결제'} 기준)</p>
-        <ol className="options-list">
+        {r.headcount > 0 && (
+          <p className="list-label">도입 방식 비교 ({state.billing === 'annual' ? '연간 결제' : '월간 결제'} 기준)</p>
+        )}
+        <ol className="options-list" hidden={r.headcount === 0}>
           {r.options.map((o) => {
             const isRec = rec?.option.id === o.option.id;
             const open = openId === o.option.id;

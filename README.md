@@ -81,15 +81,7 @@ npm run usage     # 내 Claude Code 로그에서 토큰 사용량 집계 (숫자
 
 ## 티스토리 글에 넣기
 
-HTML 모드에서:
-
-```html
-<iframe src="https://hgko1207.github.io/ai-cost-calc/?embed=1&t=claude-code&h=5&u=agent"
-        style="width:100%;height:1500px;border:0" loading="lazy"
-        title="AI 코딩 비용 계산기"></iframe>
-```
-
-글마다 `t`, `h`, `u` 등을 바꿔 글 주제에 맞는 상태로 열 수 있다.
+글별 삽입 코드(자동 높이 포함)와 추천 주소는 [docs/embed.md](docs/embed.md)에 있다.
 
 ## 배포: GitHub Pages (현재 사용 중, 무료)
 

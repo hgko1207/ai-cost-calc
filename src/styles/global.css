@@ -7,6 +7,7 @@
   --primary-normal: #0066ff;
   --primary-strong: #005eeb;
   --primary-heavy: #0054d1;
+  --primary-solid: #0066ff; /* 흰 글자를 올리는 버튼·배지 배경 */
   --primary-a05: rgba(0, 102, 255, 0.05);
   --primary-a08: rgba(0, 102, 255, 0.08);
   --primary-a43: rgba(0, 102, 255, 0.43);
@@ -57,7 +58,9 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --primary-normal: #3385ff;
+    /* 다크 배경 위 글자 대비 4.5:1을 넉넉히 넘도록 Montage blue 65 */
+    --primary-normal: #4f95ff;
+    --primary-solid: #0066ff;
     --primary-strong: #1a75ff;
     --primary-heavy: #0066ff;
     --primary-a05: rgba(51, 133, 255, 0.08);
@@ -589,7 +592,7 @@ button {
 }
 .pill.rec,
 .badge {
-  background: var(--primary-normal);
+  background: var(--primary-solid);
   color: #ffffff;
 }
 .warn-pill {
@@ -646,7 +649,7 @@ button {
   padding: 12px 28px;
   border: 0;
   border-radius: 12px;
-  background: var(--primary-normal);
+  background: var(--primary-solid);
   color: #ffffff;
   font-size: 16px;
   line-height: 24px;
@@ -1625,11 +1628,11 @@ table.detail tr.is-best-row strong {
   }
   .mobile-bar button {
     flex: none;
-    min-height: 40px;
+    min-height: 44px;
     padding: 8px 16px;
     border: 0;
     border-radius: 10px;
-    background: var(--primary-normal);
+    background: var(--primary-solid);
     color: #ffffff;
     font-weight: 600;
     cursor: pointer;
@@ -1713,7 +1716,12 @@ table.detail tr.is-best-row strong {
   white-space: normal;
 }
 .fc-ref {
-  margin-left: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  margin: -6px 0 -6px -2px;
   font-size: 11px;
   font-weight: 600;
   vertical-align: super;
@@ -1736,7 +1744,7 @@ table.detail tr.is-best-row strong {
   margin-top: 0;
 }
 .share.secondary {
-  background: transparent;
+  background: transparent !important;
   color: var(--primary-normal);
   box-shadow: inset 0 0 0 1px var(--line-normal);
 }
@@ -1825,4 +1833,8 @@ table.detail tr.is-best-row strong {
 }
 .vendor-group > .table-wrap {
   padding: 0 16px 12px;
+}
+
+.options-list[hidden] {
+  display: none;
 }
