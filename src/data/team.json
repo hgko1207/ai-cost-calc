@@ -4,8 +4,8 @@
   "userTypes": [
     {
       "id": "heavy",
-      "name": "헤비 사용자",
-      "description": "에이전트에게 기능 단위로 맡김",
+      "name": "많이 쓰는 사람",
+      "description": "에이전트에게 기능 단위로 맡김, 하루 5시간 이상",
       "modeId": "agent",
       "defaultHours": 7,
       "defaultCount": 2
@@ -13,18 +13,10 @@
     {
       "id": "normal",
       "name": "일반 사용자",
-      "description": "직접 보면서 같이 코딩",
+      "description": "같이 코딩하거나 막힐 때 질문하는 정도",
       "modeId": "pair",
-      "defaultHours": 3,
-      "defaultCount": 5
-    },
-    {
-      "id": "light",
-      "name": "가벼운 사용자",
-      "description": "막힐 때 질문하는 정도",
-      "modeId": "chat",
-      "defaultHours": 1.5,
-      "defaultCount": 3
+      "defaultHours": 2,
+      "defaultCount": 8
     }
   ],
   "tools": [
@@ -50,7 +42,8 @@
               "annualUsd": 20,
               "agentHours": 1.5,
               "basis": "개인 Pro의 1.25배 (공식)",
-              "limitNote": "개인 Pro의 1.25배"
+              "limitNote": "개인 Pro의 1.25배",
+              "proMultiplier": 1.25
             },
             {
               "id": "premium",
@@ -59,7 +52,8 @@
               "annualUsd": 100,
               "agentHours": 7.5,
               "basis": "개인 Pro의 6.25배 (공식)",
-              "limitNote": "개인 Pro의 6.25배 (기본 좌석의 5배)"
+              "limitNote": "개인 Pro의 6.25배 (기본 좌석의 5배)",
+              "proMultiplier": 6.25
             }
           ],
           "features": [
@@ -111,18 +105,6 @@
             "개인 계정이라 퇴사 시 회수 어려움"
           ],
           "sourceUrl": "https://claude.com/ko/pricing"
-        },
-        {
-          "id": "claude-api",
-          "kind": "api",
-          "name": "API 종량제 (Claude Console)",
-          "summary": "회사 API 키로 쓴 만큼 결제",
-          "features": [
-            "한도 없음, 쓴 만큼 청구",
-            "워크스페이스별 지출 한도 설정",
-            "사용자별 비용 대시보드"
-          ],
-          "sourceUrl": "https://code.claude.com/docs/ko/costs"
         }
       ],
       "overage": "paid"
@@ -189,17 +171,6 @@
             "관리 기능 없음"
           ],
           "sourceUrl": "https://learn.chatgpt.com/docs/pricing"
-        },
-        {
-          "id": "openai-api",
-          "kind": "api",
-          "name": "API 종량제",
-          "summary": "회사 API 키로 쓴 만큼 결제",
-          "features": [
-            "한도 없음, 쓴 만큼 청구",
-            "프로젝트별 지출 한도"
-          ],
-          "sourceUrl": "https://developers.openai.com/api/docs/pricing"
         }
       ],
       "overage": "paid"
@@ -257,16 +228,6 @@
             "사내 코드로 맞춤화"
           ],
           "sourceUrl": "https://cloud.google.com/products/gemini/pricing?hl=ko"
-        },
-        {
-          "id": "gemini-api",
-          "kind": "api",
-          "name": "API 종량제",
-          "summary": "Gemini API 키로 쓴 만큼 결제",
-          "features": [
-            "한도 없음, 쓴 만큼 청구"
-          ],
-          "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing?hl=ko"
         }
       ],
       "overage": "wait"

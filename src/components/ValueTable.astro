@@ -1,0 +1,67 @@
+---
+// Claude 개인 요금제와 Team 좌석을 "개인 Pro 사용량 1배어치 가격"으로 맞춰 비교
+import { prices, team } from '../lib/data';
+
+interface Row {
+  name: string;
+  billing: string;
+  usd: number;
+  multiplier: number;
+  admin: boolean;
+}
+
+const personal: Row[] = prices.plans
+  .filter((p) => p.vendor === 'anthropic' && p.proMultiplier)
+  .map((p) => ({ name: `개인 ${p.name.replace('Claude ', '')}`, billing: '월간', usd: p.usdMonthly, multiplier: p.proMultiplier!, admin: false }));
+
+const teamSeats: Row[] = team.tools
+  .flatMap((t) => t.options)
+  .flatMap((o) => (o.kind === 'seats' ? o.seats.map((s) => ({ o, s })) : []))
+  .filter(({ s }) => s.proMultiplier)
+  .flatMap(({ s }) => [
+    { name: `Team ${s.name}`, billing: '월간', usd: s.monthlyUsd, multiplier: s.proMultiplier!, admin: true },
+    { name: `Team ${s.name}`, billing: '연간', usd: s.annualUsd, multiplier: s.proMultiplier!, admin: true },
+  ]);
+
+const rows = [...personal, ...teamSeats]
+  .map((r) => ({ ...r, unit: r.usd / r.multiplier }))
+  .sort((a, b) => a.multiplier - b.multiplier || a.unit - b.unit);
+const minUnit = Math.min(...rows.map((r) => r.unit));
+const fmt = (n: number) => `$${Number.isInteger(n) ? n : n.toFixed(2)}`;
+---
+
+<div class="table-wrap">
+  <table class="detail">
+    <caption>사용량 대비 가격 (Claude, 1인 기준)</caption>
+    <thead>
+      <tr>
+        <th scope="col">요금제</th>
+        <th scope="col">결제</th>
+        <th scope="col" class="num">월 요금</th>
+        <th scope="col" class="num">사용량 (개인 Pro = 1)</th>
+        <th scope="col" class="num">Pro 1배어치 가격</th>
+        <th scope="col">회사 관리 기능</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        rows.map((r) => (
+          <tr class={r.unit === minUnit ? 'is-best-row' : undefined}>
+            <th scope="row">{r.name}</th>
+            <td>{r.billing}</td>
+            <td class="num">{fmt(r.usd)}</td>
+            <td class="num">{r.multiplier}배</td>
+            <td class="num">
+              <strong>{fmt(r.unit)}</strong>
+            </td>
+            <td>{r.admin ? 'SSO·관리 콘솔·데이터 학습 제외' : '없음'}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>
+<p class="muted small">
+  사용량 배수는 Anthropic 공식 안내 기준입니다(5시간 단위 사용량). 월 요금만 보면 Team 프리미엄 좌석(월간 $125)이 개인 Max 5x($100)보다 비싸지만, 사용량이 25% 더 많아 단가는 같고 연간 결제면 더
+  쌉니다. 사용량 대비 가장 싼 것은 개인 Max 20x지만 Team 요금제에는 같은 수준의 좌석이 없습니다.
+</p>

@@ -47,6 +47,7 @@ const PlanSchema = z.object({
   limitsNote: z.string(),
   capacityUsd: z.number().positive(),
   capacityBasis: z.string(),
+  proMultiplier: z.number().positive().optional(), // 개인 Pro 대비 사용량 배수 (공식)
   sourceUrl: z.url(),
   verifiedAt: isoDate,
 });
@@ -122,6 +123,7 @@ const SeatSchema = z.object({
   agentHours: z.number().positive(),
   basis: z.string(), // 계산에 쓴 감당 가능 시간의 근거
   limitNote: z.string(), // 공식 사용 한도 (가격표 표시용)
+  proMultiplier: z.number().positive().optional(), // 개인 Pro 대비 사용량 배수 (공식)
 });
 const TeamOptionBase = {
   id: z.string(),

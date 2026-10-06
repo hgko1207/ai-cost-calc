@@ -1492,3 +1492,50 @@ table.detail .note {
 .nowrap {
   white-space: nowrap;
 }
+
+/* 팀 결과: 그룹별 배정 */
+.assign {
+  display: grid;
+  gap: 6px;
+  margin: 4px 0 16px;
+  padding: 0;
+  list-style: none;
+}
+.assign li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--fill-alternative);
+  font-size: 15px;
+  line-height: 22px;
+}
+.assign-who strong {
+  font-weight: 600;
+}
+.assign-what {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+.assign-status {
+  font-size: 13px;
+  line-height: 18px;
+}
+.hint {
+  margin: -8px 0 16px;
+}
+.api-excluded {
+  margin: 12px 0 0;
+}
+table.detail tr.is-best-row th,
+table.detail tr.is-best-row td {
+  background: var(--primary-a05);
+}
+table.detail tr.is-best-row strong {
+  color: var(--primary-normal);
+}

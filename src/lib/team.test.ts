@@ -6,8 +6,7 @@ const base: TeamInput = {
   toolId: 'claude-code',
   groups: [
     { typeId: 'heavy', count: 2, hours: 7 },
-    { typeId: 'normal', count: 5, hours: 3 },
-    { typeId: 'light', count: 3, hours: 1.5 },
+    { typeId: 'normal', count: 8, hours: 3 },
   ],
   billing: 'annual',
   workDays: 22,
@@ -46,10 +45,20 @@ describe('evaluateTeam', () => {
   });
 
   it('ChatGPT Business 좌석 한도를 넘는 사용량은 추가 비용으로 잡는다', () => {
-    const b = opt(run({ toolId: 'codex' }), 'chatgpt-business');
+    const groups = [
+      { typeId: 'heavy', count: 2, hours: 7 },
+      { typeId: 'normal', count: 8, hours: 2 }, // 환산 1시간 → Business 좌석(1.2시간) 안
+    ];
+    const b = opt(run({ toolId: 'codex', groups }), 'chatgpt-business');
     expect(b.hasOverage).toBe(true);
-    expect(b.lines.find((l) => l.typeId === 'light')!.unitKrw).toBe(28_900); // 공식 원화가, 한도 안
+    expect(b.lines.find((l) => l.typeId === 'normal')!.unitKrw).toBe(28_900); // 공식 원화가, 한도 안
     expect(b.lines.find((l) => l.typeId === 'heavy')!.overageKrw).toBeGreaterThan(0);
+  });
+
+  it('API 종량제는 팀 비교 대상에서 빠져 있다', () => {
+    for (const toolId of ['claude-code', 'codex', 'gemini']) {
+      expect(run({ toolId }).options.some((o) => o.option.kind === 'api')).toBe(false);
+    }
   });
 
   it('1명이면 최소 2명인 팀 좌석은 해당 없음', () => {

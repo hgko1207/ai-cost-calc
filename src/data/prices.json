@@ -235,7 +235,8 @@
       "capacityUsd": 100,
       "capacityBasis": "Max 5x 추정치의 1/5 (공식: Max 5x = Pro의 5배)",
       "sourceUrl": "https://support.claude.com/ko/articles/8325606",
-      "verifiedAt": "2026-10-05"
+      "verifiedAt": "2026-10-05",
+      "proMultiplier": 1
     },
     {
       "id": "claude-max-5x",
@@ -248,7 +249,8 @@
       "capacityUsd": 500,
       "capacityBasis": "운영자 실측(하한): 집 PC에서만 Opus 5.5 API 환산 월 약 $490 사용, 같은 계정을 회사에서도 사용하며 5시간 한도에 자주·주간 한도에 가끔 도달",
       "sourceUrl": "https://support.claude.com/ko/articles/11049741",
-      "verifiedAt": "2026-10-05"
+      "verifiedAt": "2026-10-05",
+      "proMultiplier": 5
     },
     {
       "id": "claude-max-20x",
@@ -261,7 +263,8 @@
       "capacityUsd": 2000,
       "capacityBasis": "Max 5x 추정치 × 4 (공식 배수 기준)",
       "sourceUrl": "https://support.claude.com/ko/articles/11049741",
-      "verifiedAt": "2026-10-05"
+      "verifiedAt": "2026-10-05",
+      "proMultiplier": 20
     },
     {
       "id": "chatgpt-plus",

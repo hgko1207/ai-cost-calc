@@ -92,13 +92,6 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // "프리미엄 좌석 2 + 기본 좌석 8" 처럼 배정 결과 요약
-  const composition = (lines: { choice: string; count: number }[]) => {
-    const m = new Map<string, number>();
-    for (const l of lines) m.set(l.choice, (m.get(l.choice) ?? 0) + l.count);
-    return [...m].map(([k, v]) => `${k} ${v}명`).join(' + ');
-  };
-
   return (
     <div className="advisor">
       <section className="card" aria-labelledby="team-q">
@@ -224,7 +217,22 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
             <h2 id="team-r" className="result-title">
               {rec.option.name}
             </h2>
-            <p className="result-reason">{composition(rec.lines)}</p>
+            <ul className="assign">
+              {rec.lines.map((l) => (
+                <li key={l.typeId}>
+                  <span className="assign-who">
+                    {typeName(l.typeId)} <strong>{l.count}명</strong>
+                  </span>
+                  <span className="assign-what">
+                    {l.choice}
+                    <span className={`assign-status st-${l.status}`}>{STATUS_LABEL[l.status]}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+            {rec.lines.some((l) => l.status === 'tight') && (
+              <p className="muted small hint">빠듯한 그룹은 한도에 자주 걸리면 상위 좌석·요금제로 바꾸는 게 좋습니다.</p>
+            )}
             <dl className="totals">
               <div>
                 <dt>월 비용</dt>
@@ -326,14 +334,18 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
           })}
         </ol>
 
+        <p className="muted small api-excluded">
+          API 종량제(쓴 만큼 결제)는 비교에서 뺐습니다. 서비스 개발, 자동화(CI·사내 봇), 클라우드 계약처럼 코딩 도구 구독과 다른 용도에 주로 씁니다.
+        </p>
+
         <details className="why">
           <summary>왜 이렇게 계산됐나요?</summary>
           <ul>
             <li>사용 방식별로 하루 사용 시간을 "에이전트 작업 환산 시간"으로 바꾼 뒤, 각 좌석·요금제가 감당할 수 있는 시간과 비교했습니다 (개인 탭과 같은 기준).</li>
             <li>사람마다 감당 가능한 가장 싼 좌석을 배정하고, 한도를 넘는 사용량은 {tool.overageNote}.</li>
             <li>
-              API 비용은 {models.find((m) => m.id === tool.defaultModel)?.name} 기준, 에이전트 작업 하루 1시간당 월 약{' '}
-              {krwShort(r.apiUsdPerAgentHour * money.fxRate)}로 계산했습니다. Anthropic 공식 문서의 기업 평균은 개발자 1인당 월 $150~250입니다.
+              Enterprise 사용량과 좌석 한도 초과분은 API 요금({models.find((m) => m.id === tool.defaultModel)?.name} 기준, 에이전트 작업 하루 1시간당 월 약{' '}
+              {krwShort(r.apiUsdPerAgentHour * money.fxRate)})으로 계산했습니다.
             </li>
             <li>달러 가격은 환율 {money.fxRate.toLocaleString('ko-KR')}원/$, 부가세 별도로 환산했습니다.</li>
           </ul>

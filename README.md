@@ -53,8 +53,8 @@ npm run usage     # 내 Claude Code 로그에서 토큰 사용량 집계 (숫자
 |---|---|---|
 | `tab` | `team`이면 팀·회사 탭 | `?tab=team` |
 | `tt` | 도구 (`claude-code`, `codex`, `gemini`) | `&tt=codex` |
-| `hc` / `nc` / `lc` | 헤비 / 일반 / 가벼운 사용자 인원 | `&hc=3&nc=10` |
-| `hh` / `nh` / `lh` | 유형별 하루 사용 시간 | `&hh=8` |
+| `hc` / `nc` | 많이 쓰는 사람 / 일반 사용자 인원 | `&hc=3&nc=10` |
+| `hh` / `nh` | 그룹별 하루 사용 시간 | `&hh=8` |
 | `b` | 결제 주기 (`annual`, `monthly`) | `&b=monthly` |
 | `twd` | 한 달 작업일 | `&twd=20` |
 
