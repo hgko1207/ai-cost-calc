@@ -207,7 +207,7 @@
             },
             "spend-limits": {
               "value": "yes",
-              "sourceUrl": "https://learn.chatgpt.com/codex/enterprise/usage-limits",
+              "sourceUrl": "https://learn.chatgpt.com/docs/enterprise/usage-limits",
               "note": "크레딧 한도"
             }
           },

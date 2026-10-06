@@ -1,6 +1,9 @@
 ---
 // 모델별 API 토큰 단가 표. 개인·팀 탭 모두에서 접어서 보여준다.
 import { prices } from '../lib/data';
+import { isStale } from '../lib/priceCheck';
+
+const buildDay = new Date().toISOString().slice(0, 10); // 빌드한 날 기준
 
 const vendorName = (id: string) => prices.vendors.find((v) => v.id === id)?.name ?? id;
 const shortDate = (d: string) => d.replace(/^(\d{4})-0?(\d+)-0?(\d+)$/, '$1.$2.$3');
@@ -29,6 +32,7 @@ const shortDate = (d: string) => d.replace(/^(\d{4})-0?(\d+)-0?(\d+)$/, '$1.$2.$
             <tr>
               <th scope="row">
                 <a href={m.sourceUrl} rel="noopener" target="_blank">{m.name}</a>
+                {isStale(m.verifiedAt, buildDay) && <span class="pill warn-pill">확인 필요</span>}
                 {m.retiresAt && <span class="pill warn-pill">{shortDate(m.retiresAt)} 종료 예정</span>}
                 {m.priceChangesAt && <span class="pill">{shortDate(m.priceChangesAt)} 가격 변경</span>}
                 <span class="sub">{vendorName(m.vendor)} · 최대 {m.contextWindowK}K</span>

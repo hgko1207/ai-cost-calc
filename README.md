@@ -34,6 +34,16 @@ npm run usage     # 내 Claude Code 로그에서 토큰 사용량 집계 (숫자
 팀 요금제(좌석 가격·한도, 도입 방식)는 `src/data/team.json`,
 프리셋은 `src/data/presets.json`, 블로그 관련 글은 `src/data/related-posts.json`.
 
+## 월간 가격 점검 (자동)
+
+- `.github/workflows/price-check.yml`이 매월 1일 "가격 점검 YYYY-MM" 이슈를 만든다.
+  - 다가오는 종료·가격 변경일(`retiresAt`, `priceChangesAt`), 깨지거나 바뀐 출처 링크, 항목별 체크리스트(확인일 35일 초과는 "오래됨")
+  - 봇을 막는 사이트(chatgpt.com 등)는 "자동 확인 불가(직접 확인)"로 표시된다.
+- 로컬에서 미리 보기: `node scripts/price-check.ts`
+- 수동 실행: GitHub Actions → 월간 가격 점검 → Run workflow (`dry_run` 끄면 이슈 생성)
+- 주의: 공개 저장소는 60일간 커밋이 없으면 예약 실행이 자동으로 꺼진다(GitHub가 미리 메일로 알림). 메일을 받으면 Actions 화면에서 다시 켠다.
+- 페이지의 가격표는 빌드한 날 기준 확인일이 35일을 넘으면 "확인 필요"를 표시한다.
+
 ## URL 파라미터
 
 요금제 추천(위쪽):
