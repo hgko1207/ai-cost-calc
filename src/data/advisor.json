@@ -9,15 +9,42 @@
   },
   "defaultWorkDays": 22,
   "modes": [
-    { "id": "chat", "name": "질문 위주", "description": "막힐 때 물어보고 코드 조각을 받는 정도", "intensity": 0.2 },
-    { "id": "pair", "name": "같이 코딩", "description": "직접 보면서 수정·리팩터링을 요청", "intensity": 0.5 },
-    { "id": "agent", "name": "에이전트에게 맡김", "description": "기능 단위로 맡기고 결과를 검토", "intensity": 1 }
+    {
+      "id": "chat",
+      "name": "질문 위주",
+      "description": "막힐 때 물어보고 코드 조각을 받는 정도",
+      "intensity": 0.2
+    },
+    {
+      "id": "pair",
+      "name": "같이 코딩",
+      "description": "직접 보면서 수정·리팩터링을 요청",
+      "intensity": 0.5
+    },
+    {
+      "id": "agent",
+      "name": "에이전트에게 맡김",
+      "description": "기능 단위로 맡기고 결과를 검토",
+      "intensity": 1
+    }
   ],
   "limitFrequencies": [
-    { "id": "none", "name": "거의 안 걸림" },
-    { "id": "sometimes", "name": "가끔" },
-    { "id": "often", "name": "자주" },
-    { "id": "daily", "name": "매일" }
+    {
+      "id": "none",
+      "name": "거의 안 걸림"
+    },
+    {
+      "id": "sometimes",
+      "name": "가끔"
+    },
+    {
+      "id": "often",
+      "name": "자주"
+    },
+    {
+      "id": "daily",
+      "name": "매일"
+    }
   ],
   "tools": [
     {
@@ -26,11 +53,20 @@
       "vendor": "anthropic",
       "defaultModel": "opus-5-5",
       "confidence": "high",
-      "basis": "운영자 실사용: Max 5x로 하루 5~6시간 에이전트 작업 시 5시간 한도에 자주, 주간 한도에 가끔 도달. Pro·Max 20x는 공식 배수(1/5, 4배)로 환산.",
+      "basis": "운영자 1명이 82일 동안 Claude Code를 쓴 기록 기준: Max 5x로 에이전트에게 맡기는 작업을 하루 5~6시간 하면 5시간 한도에 자주 걸렸습니다. Pro는 그 1/5, Max 20x는 4배(공식 배수)로 계산했습니다.",
       "plans": [
-        { "planId": "claude-pro", "agentHours": 1.2 },
-        { "planId": "claude-max-5x", "agentHours": 6 },
-        { "planId": "claude-max-20x", "agentHours": 24 }
+        {
+          "planId": "claude-pro",
+          "agentHours": 1.2
+        },
+        {
+          "planId": "claude-max-5x",
+          "agentHours": 6
+        },
+        {
+          "planId": "claude-max-20x",
+          "agentHours": 24
+        }
       ]
     },
     {
@@ -39,12 +75,24 @@
       "vendor": "openai",
       "defaultModel": "gpt-6-1-sol",
       "confidence": "low",
-      "basis": "실사용 데이터 없음. Claude 요금제와 같은 가격대는 같은 수준으로 가정한 참고값.",
+      "basis": "Codex는 실사용 기록이 없어, 같은 가격대의 Claude 요금제와 비슷하다고 가정한 참고값입니다.",
       "plans": [
-        { "planId": "chatgpt-plus", "agentHours": 1.2 },
-        { "planId": "chatgpt-pro-100", "agentHours": 6 },
-        { "planId": "chatgpt-pro-200", "agentHours": 12 },
-        { "planId": "chatgpt-pro-500", "agentHours": 30 }
+        {
+          "planId": "chatgpt-plus",
+          "agentHours": 1.2
+        },
+        {
+          "planId": "chatgpt-pro-100",
+          "agentHours": 6
+        },
+        {
+          "planId": "chatgpt-pro-200",
+          "agentHours": 12
+        },
+        {
+          "planId": "chatgpt-pro-500",
+          "agentHours": 30
+        }
       ]
     },
     {
@@ -53,11 +101,20 @@
       "vendor": "google",
       "defaultModel": "gemini-3-1-pro",
       "confidence": "low",
-      "basis": "실사용 데이터 없음. AI Pro를 Claude Pro 수준으로 가정하고 공식 배수(5배, 20배)로 환산한 참고값.",
+      "basis": "Gemini는 실사용 기록이 없어, AI Pro를 Claude Pro와 비슷하다고 보고 공식 배수(5배·20배)로 계산한 참고값입니다.",
       "plans": [
-        { "planId": "google-ai-pro", "agentHours": 1.2 },
-        { "planId": "google-ai-ultra-5x", "agentHours": 6 },
-        { "planId": "google-ai-ultra-20x", "agentHours": 24 }
+        {
+          "planId": "google-ai-pro",
+          "agentHours": 1.2
+        },
+        {
+          "planId": "google-ai-ultra-5x",
+          "agentHours": 6
+        },
+        {
+          "planId": "google-ai-ultra-20x",
+          "agentHours": 24
+        }
       ]
     }
   ]

@@ -79,7 +79,7 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
     if (!l.capacityAgentHours || l.loadHours <= 0) return `1인 하루 ${hours}시간 사용 · 좌석별 한도 없음`;
     const cap = (l.capacityAgentHours * hours) / l.loadHours; // 이 그룹의 사용 방식 기준 시간으로 환산
     if (cap >= 16) return `1인 하루 ${hours}시간 사용 · 한도 넉넉함`;
-    return `1인 하루 ${hours}시간 사용 · 한도 약 ${+cap.toFixed(1)}시간 (${Math.round((l.loadHours / l.capacityAgentHours) * 100)}%)`;
+    return `1인 하루 ${hours}시간 사용 · 이 좌석은 하루 약 ${Math.round(cap * 2) / 2}시간까지(추정)`;
   };
 
   const setGroup = (i: number, patch: Partial<TeamGroup>) =>

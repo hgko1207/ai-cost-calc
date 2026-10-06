@@ -1,7 +1,7 @@
 // 요금제 추천: 독자가 아는 값(도구·시간·방식·지금 요금제·한도 빈도)만 받아 요금제를 추천한다.
 import { useEffect, useMemo, useState } from 'react';
 import { advise, type Advice, type AdvisorInput, type PlanFit, type PlanStatus } from '../lib/advisor';
-import type { Advisor as AdvisorData, LimitFrequency, Model, Plan } from '../lib/data';
+import type { Advisor as AdvisorData, LimitFrequency, Model, Plan, RelatedPost } from '../lib/data';
 import { krwShort, tokensM } from '../lib/format';
 import MobileResultBar from './MobileResultBar';
 import Segmented from './Segmented';
@@ -11,6 +11,7 @@ export interface AdvisorProps {
   advisor: AdvisorData;
   models: Model[];
   plans: Plan[];
+  relatedPosts: RelatedPost[];
 }
 
 type State = Omit<AdvisorInput, 'fxRate' | 'vat'>;
@@ -75,7 +76,28 @@ function reasonText(a: Advice, s: State, modeName: string, current: PlanFit | un
   }
 }
 
-export default function Advisor({ advisor, models, plans }: AdvisorProps) {
+/** 하루 사용 가능 시간을 범위로: 추정치라 한 점 대신 ±15% (예: 6 → "약 5~7시간") */
+function hoursRange(h: number): string {
+  if (h >= 16) return '하루 종일 써도 여유';
+  const lo = Math.max(0.5, Math.round(h * 0.85 * 2) / 2);
+  const hi = Math.round(h * 1.15 * 2) / 2;
+  return lo === hi ? `하루 약 ${lo}시간까지` : `하루 약 ${lo}~${hi}시간까지`;
+}
+
+/** 상황에 맞는 블로그 글 하나 */
+function pickPost(posts: RelatedPost[], toolId: string, planId: string | undefined): RelatedPost | undefined {
+  const want = toolId !== 'claude-code' ? 'compare' : planId?.includes('max') ? 'max' : 'opus';
+  return posts.find((p) => p.tags.includes(want)) ?? posts[0];
+}
+
+const withUtm = (url: string) => {
+  const u = new URL(url);
+  u.searchParams.set('utm_source', 'ai-cost-calc');
+  u.searchParams.set('utm_medium', 'result');
+  return u.toString();
+};
+
+export default function Advisor({ advisor, models, plans, relatedPosts }: AdvisorProps) {
   const DEFAULTS: State = {
     toolId: advisor.tools[0].id,
     hours: 4,
@@ -107,6 +129,7 @@ export default function Advisor({ advisor, models, plans }: AdvisorProps) {
   const mode = advisor.modes.find((m) => m.id === state.modeId) ?? advisor.modes[0];
   const freq = advisor.limitFrequencies.find((f) => f.id === state.frequency) ?? advisor.limitFrequencies[0];
   const freqChosen = state.frequency !== null;
+  const lowConfidence = tool.confidence === 'low';
   const a = useMemo(() => advise({ ...state, ...money }, advisor, models, plans), [state, money, advisor, models, plans]);
   const current = a.fits.find((f) => f.isCurrent);
   const rec = a.recommended;
@@ -126,6 +149,8 @@ export default function Advisor({ advisor, models, plans }: AdvisorProps) {
   };
 
   const recPrice = rec ? rec.krw : a.api.krw;
+  const resultPost = pickPost(relatedPosts, state.toolId, rec?.plan.id ?? (current ? current.plan.id : undefined));
+  const comparePost = relatedPosts.find((p) => p.tags.includes('compare'));
   const saving = a.api.krw - recPrice;
 
   return (
@@ -138,6 +163,14 @@ export default function Advisor({ advisor, models, plans }: AdvisorProps) {
         <div className="q">
           <p className="q-label">1. 어떤 도구로 코딩하나요?</p>
           <Segmented label="코딩 도구" value={state.toolId} options={advisor.tools} onChange={setTool} />
+          {comparePost && (
+            <p className="q-help">
+              아직 못 정했다면?{' '}
+              <a href={withUtm(comparePost.url)} target="_blank" rel="noopener">
+                도구별 가격·성능 비교 글 ↗
+              </a>
+            </p>
+          )}
         </div>
 
         <div className="q">
@@ -230,9 +263,11 @@ export default function Advisor({ advisor, models, plans }: AdvisorProps) {
                 {rec?.plan.id === f.plan.id && <span className="pill rec">추천</span>}
               </div>
               <div className="fit-price">{krwShort(f.krw)}</div>
-              <div className="meter" aria-hidden="true">
-                <span style={{ width: `${Math.min(100, f.utilization * 100)}%` }} />
-              </div>
+              {lowConfidence ? null : (
+                <div className="meter" aria-hidden="true">
+                  <span style={{ width: `${Math.min(100, f.utilization * 100)}%` }} />
+                </div>
+              )}
               <div className="fit-status">
                 {f.isCurrent && freqChosen
                   ? state.frequency === 'none'
@@ -241,15 +276,14 @@ export default function Advisor({ advisor, models, plans }: AdvisorProps) {
                   : STATUS_LABEL[f.status]}
               </div>
               <div className="fit-cap">
-                {f.agentHours / mode.intensity >= 16
-                  ? `하루 ${state.hours}시간 사용 · 한도 넉넉함`
-                  : `하루 ${state.hours}시간 사용 · 한도 약 ${+(f.agentHours / mode.intensity).toFixed(1)}시간 (${Math.round(f.utilization * 100)}%)`}
+                {hoursRange(f.agentHours / mode.intensity)}
+                {lowConfidence && <span className="pill">참고값</span>}
               </div>
             </li>
           ))}
         </ol>
         <p className="muted small legend">
-          여유: 한도의 70% 이하 · 한도 근접: 70% 초과~100%, 가끔 한도에 걸릴 수 있음 · 한도 초과: 하루 사용량이 한도를 넘음. 한도는 공식 배수와 운영자 경험으로 잡은 추정치입니다.
+          '{mode.name}' 방식으로 이 요금제를 하루 몇 시간까지 쓸 수 있는지(추정)와 비교했습니다. 한도는 운영자 1명의 실사용 기록 기준입니다.
         </p>
 
         <div className="api-note">
@@ -270,12 +304,19 @@ export default function Advisor({ advisor, models, plans }: AdvisorProps) {
           <p className="warn small">{tool.name} 쪽은 실사용 데이터가 없어 Claude Code 기준을 빌려 쓴 참고값입니다.</p>
         )}
 
+        {resultPost && (
+          <a className="result-post" href={withUtm(resultPost.url)} target="_blank" rel="noopener">
+            <span>관련 글</span>
+            <strong>{resultPost.title}</strong>
+          </a>
+        )}
+
         <details className="why">
           <summary>왜 이렇게 계산됐나요?</summary>
           <ul>
             <li>
-              '{mode.name}' 방식의 토큰 사용량을 기준(에이전트 작업)과 비교해, 하루 {state.hours}시간을 에이전트 작업 약{' '}
-              {+a.loadHours.toFixed(1)}시간으로 환산했습니다.
+              '{mode.name}' 방식은 에이전트에게 맡길 때보다 사용량이 적어서, 하루 {state.hours}시간을 에이전트 작업 약 {+a.loadHours.toFixed(1)}
+              시간 분량으로 계산했습니다.
             </li>
             <li>{tool.basis}</li>
             <li>

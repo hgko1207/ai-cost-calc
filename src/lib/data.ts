@@ -91,6 +91,7 @@ const RelatedPostSchema = z.object({
   title: z.string(),
   url: z.url(),
   description: z.string(),
+  tags: z.array(z.string()).default([]), // 결과 화면에서 상황에 맞는 글을 고를 때 사용
 });
 
 const AdvisorSchema = z.object({

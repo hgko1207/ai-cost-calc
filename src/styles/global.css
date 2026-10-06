@@ -1748,3 +1748,81 @@ table.detail tr.is-best-row strong {
     flex: 1 1 100%;
   }
 }
+
+/* ── C단계: 문구·신뢰 표현 ── */
+.q-help {
+  margin: 8px 0 0;
+  color: var(--label-alternative);
+  font-size: 13px;
+  line-height: 18px;
+}
+.fit-cap .pill {
+  margin-left: 6px;
+}
+.result-post {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  box-shadow: inset 0 0 0 1px var(--line-neutral);
+  color: var(--label-normal);
+  text-decoration: none;
+  font-size: 15px;
+  line-height: 22px;
+}
+.result-post span {
+  color: var(--primary-normal);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+}
+.result-post strong {
+  font-weight: 600;
+}
+.result-post:hover {
+  text-decoration: none;
+  background: var(--fill-alternative);
+}
+.method > summary {
+  cursor: pointer;
+  list-style: none;
+}
+.method > summary::-webkit-details-marker {
+  display: none;
+}
+.method > summary h2 {
+  display: inline;
+}
+.method > summary::after {
+  content: ' +';
+  color: var(--label-alternative);
+  font-size: 24px;
+  font-weight: 400;
+}
+.method[open] > summary::after {
+  content: ' −';
+}
+.method ol {
+  margin-top: 16px;
+}
+.vendor-group {
+  margin-top: 8px;
+  border-radius: 12px;
+  background: var(--bg-elevated);
+  box-shadow: inset 0 0 0 1px var(--line-alternative);
+}
+.vendor-group > summary {
+  padding: 12px 16px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.vendor-group > summary .muted {
+  margin-left: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.vendor-group > .table-wrap {
+  padding: 0 16px 12px;
+}

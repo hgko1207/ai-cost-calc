@@ -3,45 +3,60 @@
 import { planAgentHours } from '../lib/advisor';
 import { advisor, prices } from '../lib/data';
 
-const basisOf = (planId: string) => advisor.tools.find((t) => t.plans.some((p) => p.planId === planId))?.basis;
+// 에이전트에게 맡기는 방식 기준 하루 사용 가능 시간. 추정치라 ±15% 범위로 보여 준다
+const rangeText = (h?: number) => {
+  if (h == null) return '-';
+  if (h >= 16) return '하루 종일 써도 여유';
+  const lo = Math.max(0.5, Math.round(h * 0.85 * 2) / 2);
+  const hi = Math.round(h * 1.15 * 2) / 2;
+  return `에이전트 작업 하루 약 ${lo}~${hi}시간`;
+};
 ---
 
-<div class="table-wrap">
-  <table class="detail">
-    <caption>개인 구독 요금제</caption>
-    <thead>
-      <tr>
-        <th scope="col">요금제</th>
-        <th scope="col" class="num">월 요금</th>
-        <th scope="col">코딩 도구</th>
-        <th scope="col">공식 한도</th>
-        <th scope="col">계산기의 하루 한도 추정</th>
-      </tr>
-    </thead>
-    <tbody>
-      {
-        prices.plans.map((p) => (
-          <tr>
-            <th scope="row">
-              <a href={p.sourceUrl} rel="noopener" target="_blank">{p.name}</a>
-            </th>
-            <td class="num">
-              ${p.usdMonthly}
-              {p.krwMonthly && <span class="sub">₩{p.krwMonthly.toLocaleString('ko-KR')}</span>}
-            </td>
-            <td>{p.codingTools}</td>
-            <td class="note">{p.limitsNote}</td>
-            <td class="note">
-              {planAgentHours(advisor, p.id) != null ? `에이전트 작업 하루 약 ${planAgentHours(advisor, p.id)}시간` : '-'}
-            </td>
-          </tr>
-        ))
-      }
-    </tbody>
-  </table>
-</div>
+{
+  prices.vendors.map((v, idx) => (
+    <details class="vendor-group" open={idx === 0}>
+      <summary>
+        {v.name} <span class="muted">{prices.plans.filter((p) => p.vendor === v.id).length}개 요금제</span>
+      </summary>
+      <div class="table-wrap">
+        <table class="detail">
+          <thead>
+            <tr>
+              <th scope="col">요금제</th>
+              <th scope="col" class="num">월 요금</th>
+              <th scope="col">코딩 도구</th>
+              <th scope="col">공식 한도</th>
+              <th scope="col">하루 사용 가능 시간 (추정)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {prices.plans
+              .filter((p) => p.vendor === v.id)
+              .map((p) => (
+                <tr>
+                  <th scope="row">
+                    <a href={p.sourceUrl} rel="noopener" target="_blank">
+                      {p.name}
+                    </a>
+                  </th>
+                  <td class="num">
+                    ${p.usdMonthly}
+                    {p.krwMonthly && <span class="sub">₩{p.krwMonthly.toLocaleString('ko-KR')}</span>}
+                  </td>
+                  <td>{p.codingTools}</td>
+                  <td class="note">{p.limitsNote}</td>
+                  <td class="note">{rangeText(planAgentHours(advisor, p.id))}</td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+    </details>
+  ))
+}
 <p class="muted small">
-  하루 한도 추정의 근거: {advisor.tools.map((t) => `${t.name} — ${t.basis}`).join(' ')}
+  하루 사용 가능 시간 추정의 근거: {advisor.tools.map((t) => t.basis).join(' ')}
 </p>
 <p class="muted small">
   출처:{' '}
