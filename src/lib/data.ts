@@ -120,7 +120,8 @@ const SeatSchema = z.object({
   monthlyKrw: z.number().positive().optional(),
   annualKrw: z.number().positive().optional(),
   agentHours: z.number().positive(),
-  basis: z.string(),
+  basis: z.string(), // 계산에 쓴 감당 가능 시간의 근거
+  limitNote: z.string(), // 공식 사용 한도 (가격표 표시용)
 });
 const TeamOptionBase = {
   id: z.string(),
@@ -142,6 +143,7 @@ const TeamOptionSchema = z.discriminatedUnion('kind', [
     kind: z.literal('seat-plus-usage'),
     minSeats: z.number().int().positive(),
     seatAnnualUsd: price,
+    limitNote: z.string(),
   }),
   z.object({
     ...TeamOptionBase,

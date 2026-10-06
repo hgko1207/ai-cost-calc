@@ -1,0 +1,58 @@
+---
+// 모델별 API 토큰 단가 표. 개인·팀 탭 모두에서 접어서 보여준다.
+import { prices } from '../lib/data';
+
+const vendorName = (id: string) => prices.vendors.find((v) => v.id === id)?.name ?? id;
+---
+
+<details class="price-more">
+  <summary>
+    <strong>API 토큰 단가 표</strong>
+    <span>쓴 만큼 결제(API)할 때의 모델별 가격 · USD / 100만 토큰</span>
+  </summary>
+  <div class="table-wrap">
+    <table class="detail">
+      <thead>
+        <tr>
+          <th scope="col">모델</th>
+          <th scope="col" class="num">입력</th>
+          <th scope="col" class="num">캐시 쓰기</th>
+          <th scope="col" class="num">캐시 읽기</th>
+          <th scope="col" class="num">출력</th>
+          <th scope="col">비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          prices.models.map((m) => (
+            <tr>
+              <th scope="row">
+                <a href={m.sourceUrl} rel="noopener" target="_blank">{m.name}</a>
+                <span class="sub">{vendorName(m.vendor)} · 최대 {m.contextWindowK}K</span>
+              </th>
+              <td class="num">${m.prices.input}</td>
+              <td class="num">${m.prices.cacheWrite}</td>
+              <td class="num">${m.prices.cacheRead}</td>
+              <td class="num">${m.prices.output}</td>
+              <td class="note">
+                {m.longContext && `${m.longContext.thresholdK}K 초과 시 입력 $${m.longContext.prices.input} / 출력 $${m.longContext.prices.output}. `}
+                {m.note}
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+  <p class="muted small">
+    출처:{' '}
+    {
+      prices.vendors.map((v, i) => (
+        <>
+          {i > 0 && ' · '}
+          <a href={v.apiPricingUrl} rel="noopener" target="_blank">{v.name} API 가격</a>
+        </>
+      ))
+    }
+  </p>
+</details>

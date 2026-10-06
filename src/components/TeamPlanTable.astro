@@ -1,0 +1,90 @@
+---
+// 팀·회사 요금제 가격표 (team.json의 좌석제·엔터프라이즈 옵션만)
+import { team } from '../lib/data';
+
+const usd = (n: number) => `$${Number.isInteger(n) ? n : n.toFixed(2)}`;
+const krw = (n: number) => `₩${n.toLocaleString('ko-KR')}`;
+
+const rows = team.tools.flatMap((tool) =>
+  tool.options.flatMap((o) => {
+    if (o.kind === 'seats') {
+      return o.seats.map((s) => ({
+        key: `${o.id}-${s.id}`,
+        name: o.seats.length > 1 ? `${o.name} ${s.name}` : o.name,
+        tool: tool.name,
+        monthly: s.monthlyKrw ? krw(s.monthlyKrw) : usd(s.monthlyUsd),
+        monthlySub: s.monthlyKrw ? usd(s.monthlyUsd) : undefined,
+        annual: s.annualKrw ? krw(s.annualKrw) : usd(s.annualUsd),
+        annualSub: s.annualKrw ? usd(s.annualUsd) : undefined,
+        // 최소 인원을 공식 페이지에 적지 않은 요금제는 team.json에 1로 둔다
+        minSeats: o.minSeats > 1 ? `${o.minSeats}명` : '표기 없음',
+        limit: s.limitNote,
+        features: o.features.slice(0, 3).join(', '),
+        sourceUrl: o.sourceUrl,
+      }));
+    }
+    if (o.kind === 'seat-plus-usage') {
+      return [
+        {
+          key: o.id,
+          name: o.name,
+          tool: tool.name,
+          monthly: '연간 계약만',
+          monthlySub: undefined,
+          annual: `${usd(o.seatAnnualUsd)} + 사용량`,
+          annualSub: '사용량은 API 요금',
+          minSeats: `${o.minSeats}명`,
+          limit: o.limitNote,
+          features: o.features.slice(0, 3).join(', '),
+          sourceUrl: o.sourceUrl,
+        },
+      ];
+    }
+    return [];
+  }),
+);
+---
+
+<div class="table-wrap">
+  <table class="detail">
+    <caption>팀·회사 요금제 (1인당 월 요금)</caption>
+    <thead>
+      <tr>
+        <th scope="col">요금제</th>
+        <th scope="col" class="num">월간 결제</th>
+        <th scope="col" class="num">연간 결제</th>
+        <th scope="col" class="nowrap">최소 인원</th>
+        <th scope="col">공식 사용 한도</th>
+        <th scope="col">코딩 도구</th>
+        <th scope="col">주요 관리 기능</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        rows.map((r) => (
+          <tr>
+            <th scope="row">
+              <a href={r.sourceUrl} rel="noopener" target="_blank">{r.name}</a>
+            </th>
+            <td class="num">
+              {r.monthly}
+              {r.monthlySub && <span class="sub">{r.monthlySub}</span>}
+            </td>
+            <td class="num">
+              {r.annual}
+              {r.annualSub && <span class="sub">{r.annualSub}</span>}
+            </td>
+            <td class="nowrap">{r.minSeats}</td>
+            <td class="note">{r.limit}</td>
+            <td>{r.tool}</td>
+            <td class="note">{r.features}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>
+<p class="muted small">
+  연간 결제 가격은 1년 약정 시 월 환산 금액입니다. 원화 표기가 없는 요금제는 달러 가격(부가세 별도)입니다. 좌석 한도를 넘는 사용량은 Claude는 API 요금, ChatGPT는
+  워크스페이스 크레딧으로 추가 결제합니다.
+</p>

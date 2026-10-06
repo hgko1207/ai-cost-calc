@@ -49,7 +49,8 @@
               "monthlyUsd": 25,
               "annualUsd": 20,
               "agentHours": 1.5,
-              "basis": "개인 Pro의 1.25배 (공식)"
+              "basis": "개인 Pro의 1.25배 (공식)",
+              "limitNote": "개인 Pro의 1.25배"
             },
             {
               "id": "premium",
@@ -57,7 +58,8 @@
               "monthlyUsd": 125,
               "annualUsd": 100,
               "agentHours": 7.5,
-              "basis": "개인 Pro의 6.25배 (공식)"
+              "basis": "개인 Pro의 6.25배 (공식)",
+              "limitNote": "개인 Pro의 6.25배 (기본 좌석의 5배)"
             }
           ],
           "features": [
@@ -81,7 +83,8 @@
             "데이터 보존 기간 설정",
             "IP 허용 목록"
           ],
-          "sourceUrl": "https://support.claude.com/en/articles/9797531-what-is-the-enterprise-plan"
+          "sourceUrl": "https://support.claude.com/en/articles/9797531-what-is-the-enterprise-plan",
+          "limitNote": "좌석별 한도 없음, 사용량은 API 요금으로 결제"
         },
         {
           "id": "claude-individual",
@@ -146,7 +149,8 @@
               "monthlyKrw": 36100,
               "annualKrw": 28900,
               "agentHours": 1.2,
-              "basis": "개인 Plus와 같은 수준 (공식)"
+              "basis": "개인 Plus와 같은 수준 (공식)",
+              "limitNote": "개인 Plus와 같은 수준 (5시간 단위 + 주간 한도)"
             }
           ],
           "features": [
@@ -220,7 +224,8 @@
               "monthlyUsd": 22.8,
               "annualUsd": 19,
               "agentHours": 13.6,
-              "basis": "하루 1,500회 ÷ 에이전트 작업 시간당 약 110회 (운영자 실측)"
+              "basis": "하루 1,500회 ÷ 에이전트 작업 시간당 약 110회 (운영자 실측)",
+              "limitNote": "1인 하루 1,500회 요청"
             }
           ],
           "features": [
@@ -243,7 +248,8 @@
               "monthlyUsd": 54,
               "annualUsd": 45,
               "agentHours": 18,
-              "basis": "하루 2,000회 ÷ 시간당 약 110회"
+              "basis": "하루 2,000회 ÷ 시간당 약 110회",
+              "limitNote": "1인 하루 2,000회 요청"
             }
           ],
           "features": [

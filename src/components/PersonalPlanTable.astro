@@ -1,0 +1,52 @@
+---
+// 개인 구독 요금제 표
+import { prices } from '../lib/data';
+---
+
+<div class="table-wrap">
+  <table class="detail">
+    <caption>개인 구독 요금제</caption>
+    <thead>
+      <tr>
+        <th scope="col">요금제</th>
+        <th scope="col" class="num">월 요금</th>
+        <th scope="col">코딩 도구</th>
+        <th scope="col">공식 한도</th>
+        <th scope="col">계산기 한도 가정 (API 환산)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        prices.plans.map((p) => (
+          <tr>
+            <th scope="row">
+              <a href={p.sourceUrl} rel="noopener" target="_blank">{p.name}</a>
+            </th>
+            <td class="num">
+              ${p.usdMonthly}
+              {p.krwMonthly && <span class="sub">₩{p.krwMonthly.toLocaleString('ko-KR')}</span>}
+            </td>
+            <td>{p.codingTools}</td>
+            <td class="note">{p.limitsNote}</td>
+            <td class="note">
+              월 ${p.capacityUsd.toLocaleString('en-US')}
+              <span class="sub">{p.capacityBasis}</span>
+            </td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>
+<p class="muted small">
+  출처:{' '}
+  {
+    prices.vendors.map((v, i) => (
+      <>
+        {i > 0 && ' · '}
+        <a href={v.planPricingUrl} rel="noopener" target="_blank">{v.name} 요금제</a>
+      </>
+    ))
+  }
+  . 원화 표기가 없는 요금제는 달러 가격(부가세 별도)입니다. Gemini CLI·Code Assist의 개인 구독 사용은 2026-06-18부로 종료되어 Antigravity로 이전되었습니다.
+</p>

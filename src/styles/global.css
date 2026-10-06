@@ -1458,3 +1458,37 @@ table.detail .note {
     transition: none !important;
   }
 }
+
+/* 접는 가격표 (API 토큰 단가) */
+.price-more {
+  margin-top: 24px;
+  border-radius: 16px;
+  background: var(--bg-elevated);
+  box-shadow: inset 0 0 0 1px var(--line-alternative);
+}
+.price-more > summary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 16px 20px;
+  cursor: pointer;
+}
+.price-more > summary strong {
+  color: var(--label-normal);
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+}
+.price-more > summary span {
+  color: var(--label-alternative);
+  font-size: 13px;
+  line-height: 18px;
+}
+.price-more > .table-wrap,
+.price-more > p {
+  margin: 0;
+  padding: 0 20px 16px;
+}
+.nowrap {
+  white-space: nowrap;
+}
