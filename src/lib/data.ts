@@ -168,7 +168,7 @@ const TeamOptionSchema = z.discriminatedUnion('kind', [
 ]);
 const TeamSchema = z.object({
   updatedAt: isoDate,
-  features: z.array(z.object({ id: z.string(), name: z.string() })).min(1),
+  features: z.array(z.object({ id: z.string(), name: z.string(), short: z.string() })).min(1), // short: 표 안 짧은 이름
   defaultWorkDays: z.number().min(1).max(31),
   userTypes: z.array(
     z.object({

@@ -360,19 +360,23 @@
   "features": [
     {
       "id": "no-training",
-      "name": "회사 데이터 학습 제외 (기본값)"
+      "name": "회사 데이터 학습 제외 (기본값)",
+      "short": "학습 제외"
     },
     {
       "id": "sso",
-      "name": "회사 계정 로그인 (SSO)"
+      "name": "회사 계정 로그인 (SSO)",
+      "short": "SSO"
     },
     {
       "id": "admin",
-      "name": "관리 콘솔·중앙 결제"
+      "name": "관리 콘솔·중앙 결제",
+      "short": "관리 콘솔"
     },
     {
       "id": "spend-limits",
-      "name": "사람별 사용·지출 한도 설정"
+      "name": "사람별 사용·지출 한도 설정",
+      "short": "지출 한도"
     }
   ]
 }

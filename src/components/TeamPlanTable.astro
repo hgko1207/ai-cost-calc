@@ -3,7 +3,7 @@
 import { team } from '../lib/data';
 
 const yesFeatures = (checks: Record<string, { value: string }>) =>
-  team.features.filter((f) => checks[f.id]?.value === 'yes').map((f) => f.name.replace(/ \(.*\)$/, '')).join(', ') || '—';
+  team.features.filter((f) => checks[f.id]?.value === 'yes').map((f) => f.short).join(' · ') || '—';
 const usd = (n: number) => `$${Number.isInteger(n) ? n : n.toFixed(2)}`;
 const krw = (n: number) => `₩${n.toLocaleString('ko-KR')}`;
 

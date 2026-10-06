@@ -679,15 +679,18 @@ button {
   gap: 8px;
 }
 .group {
+  /* 이름·설명은 윗줄, 인원·시간 조절은 아랫줄 (좁은 입력 패널에서도 깨지지 않게) */
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: 'name name' 'count hours';
   align-items: center;
-  gap: 12px;
+  gap: 10px 12px;
   padding: 12px 14px;
   border-radius: 12px;
   box-shadow: inset 0 0 0 1px var(--line-neutral);
 }
 .group-name {
+  grid-area: name;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -1439,12 +1442,6 @@ table.detail .note {
     font-size: 15px;
     line-height: 22px;
     white-space: nowrap;
-  }
-  .group {
-    grid-template-columns: 1fr auto;
-  }
-  .group-hours {
-    grid-column: 1 / -1;
   }
   .presets,
   .fields {
@@ -2242,4 +2239,51 @@ table.detail tr.is-best-row strong {
   .kpis {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+.group .stepper {
+  grid-area: count;
+}
+.group .group-hours {
+  grid-area: hours;
+  justify-self: end;
+}
+
+/* 계산기 페이지: 왼쪽 입력 패널 폭 조정 + 정렬 통일 */
+@media (min-width: 992px) {
+  .is-wide .advisor {
+    grid-template-columns: 420px minmax(0, 1fr);
+  }
+  .is-wide .advisor .q-options[data-wide] .opt {
+    justify-content: flex-start;
+    text-align: left;
+  }
+  .is-wide .advisor .fit {
+    align-items: flex-start;
+    text-align: left;
+  }
+}
+
+/* 모든 페이지 본문 폭을 상단 메뉴(1200px, 좌우 24px)와 맞춘다 */
+.page,
+.page.is-wide {
+  max-width: 1200px;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+/* 읽는 글(가이드·가격표 설명)은 줄 길이를 제한 */
+.prose > p,
+.prose > ul,
+.prose > ol {
+  max-width: 860px;
+}
+/* 홈 "최근 변경" 카드: 분류 배지는 빼고 날짜·제목 위주로 간결하게 */
+.changes-card .cl-body > .pill {
+  display: none;
+}
+.changes-card .cl-detail {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }

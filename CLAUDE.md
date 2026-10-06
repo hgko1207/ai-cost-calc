@@ -26,7 +26,8 @@ Astro 7 + Preact(compat, React 문법 그대로) 정적 사이트(계산기만 �
   1. `npx tsc --noEmit -p .`
   2. `npm test` (계산 로직은 손계산 값과 맞는지 테스트로 고정)
   3. `npm run build`
-  4. `npm run preview` 후 브라우저에서 PC(1280px)와 모바일(375px) 확인: 콘솔 오류 없음, 가로 스크롤 없음
+  4. `npm run preview` 후 **모든 페이지**(홈·/personal/·/team/·/prices/·/guide/·삽입 모드)를 1280px·1920px(필요 시 375px)로 **스크린샷을 찍어 직접 본다**: 레이아웃 깨짐, 글자 줄바꿈, 정렬, 콘솔 오류. 수치 검사만으로 끝내지 않는다.
+  5. 레이아웃을 바꿨다면 디자인 스킬(`/arrange`, `/polish`, `/critique`)로 점검한 뒤 배포한다.
 - 실패나 건너뛴 단계는 숨기지 않고 그대로 보고한다.
 
 ## 프로젝트 규칙

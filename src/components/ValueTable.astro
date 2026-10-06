@@ -29,7 +29,7 @@ const rows = [...personal, ...teamSeats]
 const minUnit = Math.min(...rows.map((r) => r.unit));
 // Team 좌석의 관리 기능은 team.json 체크 데이터에서 가져온다 (문구 중복 방지)
 const claudeTeam = team.tools.flatMap((t) => t.options).find((o) => o.id === 'claude-team');
-const teamAdmin = team.features.filter((f) => claudeTeam?.checks[f.id]?.value === 'yes').map((f) => f.name.replace(/ \(.*\)$/, '')).join('·');
+const teamAdmin = team.features.filter((f) => claudeTeam?.checks[f.id]?.value === 'yes').map((f) => f.short).join(' · ');
 const fmt = (n: number) => `$${Number.isInteger(n) ? n : n.toFixed(2)}`;
 ---
 
