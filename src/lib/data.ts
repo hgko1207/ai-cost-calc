@@ -6,6 +6,7 @@ import presetsJson from '../data/presets.json';
 import relatedJson from '../data/related-posts.json';
 import advisorJson from '../data/advisor.json';
 import teamJson from '../data/team.json';
+import changelogJson from '../data/changelog.json';
 import { planAgentHours } from './advisor';
 
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
@@ -266,3 +267,18 @@ const TeamRefined = TeamSchema.superRefine((t, ctx) => {
 });
 
 export const team = parseTeam(teamJson);
+
+// 가격·요금제 변경 기록 (홈·가격표의 "최근 변경"). 날짜 내림차순으로 둔다.
+const ChangelogSchema = z
+  .array(
+    z.object({
+      date: isoDate,
+      kind: z.enum(['price', 'retire', 'plan', 'site']),
+      title: z.string(),
+      detail: z.string().optional(),
+      sourceUrl: z.url().optional(),
+    }),
+  )
+  .refine((a) => a.every((x, i) => i === 0 || a[i - 1].date >= x.date), '변경 기록은 날짜 내림차순이어야 합니다');
+export type ChangeEntry = z.infer<typeof ChangelogSchema>[number];
+export const changelog = ChangelogSchema.parse(changelogJson);

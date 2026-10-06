@@ -1,0 +1,49 @@
+---
+import ApiPriceTable from '../components/ApiPriceTable.astro';
+import Changelog from '../components/Changelog.astro';
+import PersonalPlanTable from '../components/PersonalPlanTable.astro';
+import TeamPlanTable from '../components/TeamPlanTable.astro';
+import ValueTable from '../components/ValueTable.astro';
+import Base from '../layouts/Base.astro';
+import { prices, team } from '../lib/data';
+
+const title = 'AI 코딩 요금제·모델 가격표 — Claude·ChatGPT·Gemini 구독과 API 단가';
+const description =
+  'Claude Pro·Max·Team, ChatGPT Plus·Pro·Business, Google AI Pro·Ultra·Gemini Code Assist 요금과 Claude·GPT·Gemini 모델별 API 단가를 공식 페이지 기준으로 정리하고, 가격 변경 기록을 남깁니다.';
+const fmt = (d: string) => d.replace(/^(\d{4})-0?(\d+)-0?(\d+)$/, '$1년 $2월 $3일');
+---
+
+<Base title={title} description={description} path="prices/" active="prices">
+  <header class="page-head">
+    <h1>요금제·모델 가격표</h1>
+    <p class="muted">모든 숫자는 각 회사 공식 페이지에서 확인했습니다. 요금제 이름을 누르면 공식 안내로 이동합니다. (확인일 {fmt(prices.updatedAt)})</p>
+    <nav class="toc" aria-label="이 페이지 목차">
+      <a href="#personal">개인 요금제</a><a href="#team">팀·회사 요금제</a><a href="#value">사용량 대비 가격</a><a href="#api">API 단가</a><a href="#changes">변경 기록</a>
+    </nav>
+  </header>
+
+  <section class="prose" aria-labelledby="personal">
+    <h2 id="personal">개인 구독 요금제</h2>
+    <PersonalPlanTable />
+  </section>
+
+  <section class="prose" aria-labelledby="team">
+    <h2 id="team">팀·회사 요금제 <span class="muted">(확인일 {fmt(team.updatedAt)})</span></h2>
+    <TeamPlanTable />
+  </section>
+
+  <section class="prose" aria-labelledby="value">
+    <h2 id="value">개인 Max와 Team 좌석, 뭐가 더 싸요?</h2>
+    <ValueTable />
+  </section>
+
+  <section class="prose" aria-labelledby="api">
+    <h2 id="api">API 토큰 단가</h2>
+    <ApiPriceTable open />
+  </section>
+
+  <section class="prose" aria-labelledby="changes">
+    <h2 id="changes">가격·요금제 변경 기록</h2>
+    <Changelog />
+  </section>
+</Base>

@@ -1,371 +1,142 @@
 ---
-import Advisor from '../components/Advisor';
-import Calculator from '../components/Calculator';
-import TeamCalc from '../components/TeamCalc';
-import ApiPriceTable from '../components/ApiPriceTable.astro';
-import FaqList from '../components/FaqList.astro';
-import PersonalPlanTable from '../components/PersonalPlanTable.astro';
-import TeamPlanTable from '../components/TeamPlanTable.astro';
-import ValueTable from '../components/ValueTable.astro';
-import { advisor, prices, presets, relatedPosts, team } from '../lib/data';
+import Changelog from '../components/Changelog.astro';
+import Base from '../layouts/Base.astro';
+import { prices, relatedPosts, team } from '../lib/data';
 import { CALC_KEYS } from '../lib/url';
-import '../styles/global.css';
 
-const BLOG_URL = 'https://hgko-dev.tistory.com/';
-const title = 'AI 코딩 요금제 계산기 — 개인 Pro·Max 추천, 팀·회사 도입 비용 비교';
-const description =
-  '개인은 하루 사용 시간만 고르면 Claude Pro·Max 5x·Max 20x 중 맞는 요금제를, 팀·회사는 인원 구성에 따라 Claude Team·ChatGPT Business·Gemini Code Assist 도입 비용을 월·연 단위 원화로 비교합니다.';
 const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
-const canonical = new URL(base, Astro.site).toString();
-const ogImage = new URL(`${base}og.png`, Astro.site).toString();
-const updated = prices.updatedAt;
-const toLabel = (d: string) => d.replace(/^(\d{4})-(\d{2})-(\d{2})$/, '$1년 $2월 $3일').replace(/ 0/g, ' ');
-const updatedLabel = toLabel(updated);
-const teamUpdatedLabel = toLabel(team.updatedAt);
+const title = 'AI 코딩 요금제 계산기 — Claude·ChatGPT·Gemini 요금제 추천과 가격 비교';
+const description =
+  '개인은 하루 사용 시간만 고르면 Claude Pro·Max 5x·Max 20x 중 맞는 요금제를, 회사는 인원에 맞는 도입 비용을 원화로 계산합니다. 3사 요금제와 모델 가격, 변경 기록을 한곳에서.';
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'AI 코딩 요금제 계산기',
+    url: new URL(base, Astro.site).toString(),
+    inLanguage: 'ko',
+    description,
+  },
+];
+
+// 예전 한 페이지 시절의 공유·삽입 링크(?tab=team, ?h=5, ?embed=1 …)를 새 페이지로 옮긴다
+const PERSONAL_KEYS = ['t', 'h', 'u', 'c', 'f', 'wd', ...CALC_KEYS];
+const TEAM_KEYS = ['tt', 'b', 'twd', 'hc', 'nc', 'hh', 'nh', 'lc', 'lh'];
+
+// 가격 보드: 회사별 대표 모델(최상위·주력)만
+const boardIds = ['fable-5-1', 'opus-5-5', 'sonnet-5-5', 'gpt-6-astra', 'gpt-6-1-sol', 'gemini-3-1-pro', 'gemini-3-8-flash'];
+const board = boardIds.map((id) => prices.models.find((m) => m.id === id)!).filter(Boolean);
+const vendorName = (id: string) => prices.vendors.find((v) => v.id === id)?.name ?? id;
+const fmtDate = (d: string) => d.replace(/^(\d{4})-0?(\d+)-0?(\d+)$/, '$1.$2.$3');
+const usd = (n: number) => `$${n}`;
+const seatCount = team.tools.flatMap((t) => t.options).filter((o) => o.kind !== 'individual').length;
 const withUtm = (url: string) => {
   const u = new URL(url);
   u.searchParams.set('utm_source', 'ai-cost-calc');
   u.searchParams.set('utm_medium', 'referral');
   return u.toString();
 };
-
-const faqs: { scope: 'personal' | 'team' | 'both'; q: string; a: string }[] = [
-  {
-    scope: 'both',
-    q: '구독과 API는 뭐가 다른가요?',
-    a: '구독(Pro, Max 등)은 매달 정해진 금액을 내고 사용 한도 안에서 쓰는 방식입니다. VS Code나 터미널에서 계정으로 로그인해 쓰면 구독입니다. API는 발급받은 API 키로 연결해, 쓴 토큰 양만큼 나중에 청구되는 종량제 방식으로 주로 회사나 서비스를 만드는 개발자가 씁니다.',
-  },
-  {
-    scope: 'personal',
-    q: 'Claude Max 5x면 하루 몇 시간까지 쓸 수 있나요?',
-    a: '운영자 경험으로는 에이전트에게 맡기는 방식으로 하루 5~6시간 쓰면 5시간 단위 한도에 자주, 주간 한도에 가끔 걸립니다. 직접 보면서 같이 코딩하는 방식이면 그보다 훨씬 오래 쓸 수 있습니다.',
-  },
-  {
-    scope: 'personal',
-    q: '"같은 양을 API로 냈다면"은 왜 보여주나요?',
-    a: '구독이 실제로 얼마나 이득인지 감을 잡기 위해서입니다. 운영자의 실제 사용량은 Opus 5.5 API 기준 월 약 $490(약 68만 원, 부가세 별도)어치였지만, 실제로 낸 돈은 Max 5x 월 $100이었습니다.',
-  },
-  {
-    scope: 'both',
-    q: '추천 결과는 정확한가요?',
-    a: '추정치입니다. Anthropic·OpenAI·Google 모두 구독 한도를 정확한 숫자로 공개하지 않습니다. 이 계산기는 공식 배수(예: Max 20x = Pro의 20배)와 운영자 실사용 경험으로 기준을 잡았고, 지금 요금제에서 한도에 걸리는 빈도를 알려 주면 그 경험을 우선 반영합니다.',
-  },
-  {
-    scope: 'team',
-    q: '회사에서 Claude Code를 도입하면 1인당 얼마나 드나요?',
-    a: 'Claude Team 연간 결제 기준 기본 좌석은 1인 월 $20, 많이 쓰는 사람용 프리미엄 좌석은 월 $100입니다. 10명(많이 쓰는 사람 2, 일반 사용자 8) 팀이면 월 약 55만 원, 1인당 약 5.5만 원입니다(부가세 포함). API로만 쓰면 Anthropic 공식 문서 기준 개발자 1인당 월 $150~250 정도가 듭니다.',
-  },
-  {
-    scope: 'team',
-    q: 'Claude Team 기본 좌석과 프리미엄 좌석은 뭐가 다른가요?',
-    a: '사용 한도가 다릅니다. 기본 좌석은 개인 Pro의 1.25배, 프리미엄 좌석은 6.25배(기본 좌석의 5배)입니다. 둘 다 Claude Code를 쓸 수 있고, 한 팀 안에서 섞어서 살 수 있어 많이 쓰는 사람만 프리미엄으로 배정하면 됩니다.',
-  },
-  {
-    scope: 'both',
-    q: 'API(종량제)는 언제 쓰나요?',
-    a: '코딩 도구로 매일 쓰는 개인과 팀은 대부분 구독(Pro·Max·Team)을 씁니다. API는 내 서비스에 AI 기능을 넣을 때, GitHub PR 자동 리뷰 같은 자동화에 쓸 때, AWS·Google Cloud 계약 안에서 쓸 때처럼 코딩 도구 구독과 다른 용도에 주로 씁니다. Claude Enterprise는 좌석비와 별도로 사용량을 API 요금으로 냅니다.',
-  },
-  {
-    scope: 'personal',
-    q: '내 실제 토큰 사용량은 어떻게 확인하나요?',
-    a: 'Claude Code는 내 컴퓨터의 ~/.claude/projects 폴더에 사용량을 기록합니다. 터미널에서 npx ccusage를 실행하면 날짜별 토큰 사용량을 볼 수 있고, 이 값을 아래 "모델별 API 비용 직접 계산"에 넣으면 더 정확하게 계산됩니다.',
-  },
-];
-
-const faqsFor = (tab: 'personal' | 'team') => faqs.filter((f) => f.scope === tab || f.scope === 'both');
-
-const jsonLd = [
-  {
-    '@context': 'https://schema.org',
-    '@type': 'WebApplication',
-    name: 'AI 코딩 요금제 계산기',
-    url: canonical,
-    applicationCategory: 'UtilitiesApplication',
-    operatingSystem: 'Any',
-    inLanguage: 'ko',
-    dateModified: updated,
-    offers: { '@type': 'Offer', price: '0', priceCurrency: 'KRW' },
-    description,
-  },
-  {
-    '@context': 'https://schema.org',
-    '@type': 'FAQPage',
-    mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
-  },
-];
 ---
 
-<!doctype html>
-<html lang="ko">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
-    <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
-    <meta name="theme-color" content="#f7f7f8" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0f0f10" media="(prefers-color-scheme: dark)" />
-    <meta property="og:type" content="website" />
-    <meta property="og:locale" content="ko_KR" />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonical} />
-    <meta property="og:image" content={ogImage} />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="AI 코딩 요금제 계산기 — 내 사용량에 맞는 요금제 추천" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content={ogImage} />
-    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
-    />
-    <script is:inline>
-      // ?embed=1 이면 계산기만 보이게 (티스토리 iframe 삽입용)
-      if (new URLSearchParams(location.search).get('embed') === '1') {
-        document.documentElement.dataset.embed = '1';
-        // 블로그 쪽 스크립트가 iframe 높이를 맞출 수 있게 내용 높이를 알린다 (스크립트가 없으면 무시됨)
-        addEventListener('DOMContentLoaded', () => {
-          let last = 0;
-          const post = () => {
-            const h = Math.ceil(document.documentElement.scrollHeight);
-            if (Math.abs(h - last) > 4) {
-              last = h;
-              parent.postMessage({ type: 'aicalc:height', height: h }, '*');
-            }
-          };
-          new ResizeObserver(post).observe(document.body);
-          post();
-          // "전체 화면에서 보기"는 지금 입력한 값을 그대로 가져가게
-          document.querySelector('.open-full')?.addEventListener('click', (ev) => {
-            const q = new URLSearchParams(location.search);
-            q.delete('embed');
-            ev.currentTarget.href = location.pathname + (q.toString() ? '?' + q : '');
-          });
-        });
-      }
-    </script>
-    <script is:inline define:vars={{ calcKeys: CALC_KEYS }}>
-      // 토큰 계산기 파라미터가 있는 공유 링크로 들어오면 "자세히" 영역을 펼친다
-      document.addEventListener('DOMContentLoaded', () => {
-        const q = new URLSearchParams(location.search);
-        if (calcKeys.some((k) => k !== 'fx' && k !== 'vat' && q.has(k))) document.getElementById('detail')?.setAttribute('open', '');
-      });
-    </script>
-    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
-  </head>
-  <body>
-    <div class="page">
-      <header class="hero">
-        <p class="eyebrow">
-          가격 기준 <time datetime={updated}>{updatedLabel}</time>
-        </p>
-        <h1>AI 코딩 요금제 계산기</h1>
-        <p class="lead no-embed">
-          개인은 Pro·Max 중 맞는 요금제를, 팀·회사는 인원 구성에 따른 도입 비용을 월·연 단위로 계산합니다.
-        </p>
-        <a class="embed-only open-full" href={base} target="_blank" rel="noopener">전체 화면에서 자세히 보기 ↗</a>
-      </header>
+<Base title={title} description={description} path="" active="home" jsonLd={jsonLd}>
+  <script is:inline slot="head" define:vars={{ base, personalKeys: PERSONAL_KEYS, teamKeys: TEAM_KEYS }}>
+    (() => {
+      const q = new URLSearchParams(location.search);
+      if (![...q.keys()].length) return;
+      const isTeam = q.get('tab') === 'team' || teamKeys.some((k) => q.has(k));
+      const isPersonal = q.has('embed') || personalKeys.some((k) => q.has(k));
+      if (!isTeam && !isPersonal) return;
+      q.delete('tab');
+      const qs = q.toString();
+      location.replace(base + (isTeam ? 'team/' : 'personal/') + (qs ? '?' + qs : '') + location.hash);
+    })();
+  </script>
 
-      <main>
-        <div class="tabs" role="tablist" aria-label="계산 대상">
-          <button type="button" role="tab" id="tab-personal" aria-controls="panel-personal" aria-selected="true" data-tab="personal">개인</button>
-          <button type="button" role="tab" id="tab-team" aria-controls="panel-team" aria-selected="false" data-tab="team" tabindex="-1">팀·회사</button>
-        </div>
+  <section class="home-hero">
+    <div class="home-hero-text">
+      <h1>AI 코딩, 어떤 요금제가<br />나한테 맞을까?</h1>
+      <p class="lead">Claude·ChatGPT·Gemini 요금제와 모델 가격을 한곳에서. 공식 가격을 다시 확인해 변경 기록으로 남깁니다.</p>
+      <dl class="home-stats">
+        <div><dt>추적 중인 모델</dt><dd>{prices.models.length}개</dd></div>
+        <div><dt>개인·팀 요금제</dt><dd>{prices.plans.length + seatCount}개</dd></div>
+        <div><dt>마지막 가격 확인</dt><dd>{fmtDate(prices.updatedAt)}</dd></div>
+      </dl>
+    </div>
+    <div class="home-entries">
+      <a class="card entry" href={`${base}personal/`}>
+        <span class="entry-kicker">개인</span>
+        <strong>내 요금제 추천</strong>
+        <span class="muted">하루 사용 시간과 방식만 고르면 Pro·Max 중 맞는 요금제와 API 대비 절약액을 알려 드려요.</span>
+        <span class="entry-go">1분 계산하기 →</span>
+      </a>
+      <a class="card entry" href={`${base}team/`}>
+        <span class="entry-kicker">팀·회사</span>
+        <strong>도입 비용 견적</strong>
+        <span class="muted">인원과 사용 정도로 Claude Team·ChatGPT Business 등 월·연 예산과 관리 기능을 비교해요.</span>
+        <span class="entry-go">견적 내기 →</span>
+      </a>
+    </div>
+  </section>
 
-        <div class="panel" id="panel-personal" role="tabpanel" aria-labelledby="tab-personal">
-        <Advisor client:load advisor={advisor} models={prices.models} plans={prices.plans} relatedPosts={relatedPosts} />
-
-        <details class="detail-calc" id="detail">
-          <summary>
-            <strong>자세히: 모델별 API 비용 직접 계산</strong>
-            <span>토큰 사용량을 알고 있는 개발자·회사 담당자용</span>
-          </summary>
-          <Calculator client:idle data={{ vendors: prices.vendors, models: prices.models, plans: prices.plans, presets, advisor }} />
-        </details>
-
-        <section class="prose no-embed" aria-labelledby="terms">
-          <h2 id="terms">구독 vs API, 뭐가 다른가요?</h2>
-          <ul>
-            <li><strong>구독</strong>: 매달 정해진 금액(Pro $20, Max $100~200). 사용 한도 안에서 무제한처럼 씁니다. VS Code·터미널에서 계정으로 로그인해 쓰면 이 방식입니다.</li>
-            <li><strong>API 종량제</strong>: API 키로 연결해 쓴 토큰 양만큼 청구됩니다. 한도는 없지만 많이 쓰면 요금이 크게 늘어납니다. 주로 회사나 서비스를 만드는 개발자가 씁니다.</li>
-            <li><strong>결론</strong>: 매일 몇 시간씩 코딩한다면 대부분 구독이 훨씬 쌉니다. 가끔 질문하는 정도라면 API가 더 쌀 수 있습니다.</li>
-          </ul>
-        </section>
-
-        <section class="prose no-embed" aria-labelledby="how">
-          <details class="method">
-            <summary><h2 id="how">이 계산기는 어떻게 추천하나요?</h2></summary>
-            <ol>
-              <li>
-                <strong>사용량</strong>: 하루 사용 시간에 사용 방식을 반영합니다. 같은 1시간이라도 에이전트에게 맡기면 질문만 할 때보다 훨씬 많이 씁니다
-                (같이 코딩은 약 절반, 질문 위주는 약 1/5로 추정).
-              </li>
-              <li>
-                <strong>요금제 한도</strong>: 운영자 1명이 82일 동안 쓴 기록을 기준으로 잡았습니다. Max 5x로 에이전트 작업을 하루 5~6시간 하면 5시간 한도에 자주
-                걸렸습니다. Pro는 그 1/5, Max 20x는 4배(공식 배수)입니다. 정확한 한도는 회사들이 공개하지 않아 추정치입니다.
-              </li>
-              <li>
-                <strong>추천</strong>: 한도 안에서 가장 싼 요금제를 고릅니다. 지금 요금제에서 한도에 자주 걸린다고 답하면 계산보다 그 경험을 우선해 한 단계 위를,
-                거의 안 걸리면 한 단계 아래를 권합니다.
-              </li>
-              <li>
-                <strong>"API로 냈다면"</strong>: 같은 양을 쓴 만큼 결제했을 때의 금액입니다. 운영자 기록(입력의 93%가 캐시 재사용)과 각 회사 공식 단가로 계산합니다.
-              </li>
-              <li>
-                <strong>Codex·Gemini</strong>: 실사용 기록이 없어 같은 가격대의 Claude 요금제와 비슷하다고 가정한 참고값입니다.
-              </li>
-            </ol>
-          </details>
-        </section>
-
-          <section class="prose no-embed" aria-labelledby="data-personal">
-            <h2 id="data-personal">요금제 가격표 <span class="muted">(확인일 {updatedLabel})</span></h2>
-            <PersonalPlanTable />
-            <ApiPriceTable />
-          </section>
-
-          <FaqList id="faq-personal" items={faqsFor('personal')} />
-        </div>
-
-        <div class="panel" id="panel-team" role="tabpanel" aria-labelledby="tab-team" hidden>
-          <TeamCalc client:load team={team} advisor={advisor} models={prices.models} plans={prices.plans} />
-
-          <section class="prose no-embed" aria-labelledby="guide">
-            <h2 id="guide">회사 도입 가이드</h2>
-            <ol class="steps">
-              <li>
-                <strong>1단계 · 파일럿 (2~4주)</strong>
-                <span>3~5명이 월간 결제로 먼저 써 봅니다. 관리 콘솔의 사용량 화면에서 사람별 사용량과 한도 도달 빈도를 확인합니다.</span>
-              </li>
-              <li>
-                <strong>2단계 · 좌석 구성 확정</strong>
-                <span>파일럿 결과로 많이 쓰는 사람과 일반 사용자를 나눕니다. 한도에 자주 걸리는 사람만 상위 좌석(프리미엄 등)을 배정합니다.</span>
-              </li>
-              <li>
-                <strong>3단계 · 확대와 연간 전환</strong>
-                <span>인원이 안정되면 연간 결제로 바꿔 좌석 단가를 약 20% 낮춥니다. 추가 사용량은 사람·팀별 지출 한도를 걸어 둡니다.</span>
-              </li>
-            </ol>
-
-            <h3>도입 방식별 장단점</h3>
-            <div class="table-wrap">
-              <table class="detail">
-                <thead>
-                  <tr>
-                    <th scope="col">방식</th>
-                    <th scope="col">이런 팀에 맞음</th>
-                    <th scope="col">장점</th>
-                    <th scope="col">주의할 점</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <th scope="row">팀 요금제 (좌석제)</th>
-                    <td>2~150명, 매일 쓰는 개발팀</td>
-                    <td>비용 예측 쉬움, SSO·관리 콘솔, 데이터 학습 제외</td>
-                    <td>좌석 한도 초과분은 추가 결제</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">엔터프라이즈</th>
-                    <td>20명 이상, 보안·감사 요건이 있는 회사</td>
-                    <td>좌석별 한도 없음, SCIM·감사 로그</td>
-                    <td>사용량이 많으면 비용 상한이 없음</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">개인 구독 회사 지원</th>
-                    <td>1~3명, 빠르게 시작</td>
-                    <td>설정이 가장 간단</td>
-                    <td>관리·보안 기능 없음, 퇴사 시 계정 회수 어려움</td>
-                  </tr>
-                  <tr>
-                    <th scope="row">API 종량제</th>
-                    <td>사용량이 들쭉날쭉하거나 자동화에 쓰는 팀</td>
-                    <td>쓴 만큼만 결제, 워크스페이스별 지출 한도</td>
-                    <td>매일 많이 쓰면 좌석제보다 몇 배 비쌈</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <h3>도입 전 체크리스트</h3>
-            <ul class="checklist">
-              <li>회사 코드·데이터가 모델 학습에 쓰이지 않는지 (팀·기업 요금제는 기본 제외)</li>
-              <li>회사 계정으로 로그인(SSO)과 퇴사자 계정 회수가 되는지</li>
-              <li>관리자가 사람별 사용량과 비용을 볼 수 있는지</li>
-              <li>추가 사용량에 지출 한도를 걸 수 있는지</li>
-              <li>세금계산서·법인카드 결제 등 회계 처리 방식</li>
-              <li>사내 보안 정책(외부 코드 전송, 저장소 접근 범위) 검토</li>
-            </ul>
-          </section>
-
-          <section class="prose no-embed" aria-labelledby="data-team">
-            <h2 id="data-team">팀·회사 요금제 가격표 <span class="muted">(확인일 {teamUpdatedLabel})</span></h2>
-            <TeamPlanTable />
-            <h3>개인 Max와 Team 좌석, 뭐가 더 싸요?</h3>
-            <ValueTable />
-            <ApiPriceTable />
-          </section>
-
-          <FaqList id="faq-team" items={faqsFor('team')} />
-        </div>
-
-        <section class="prose no-embed" aria-labelledby="related">
-          <h2 id="related">블로그 관련 글</h2>
-          <ul class="related">
+  <section class="home-grid">
+    <div>
+      <div class="sec-head">
+        <h2>모델 가격 보드</h2>
+        <a href={`${base}prices/#api`}>전체 가격표 →</a>
+      </div>
+      <div class="card board">
+        <table>
+          <caption class="sr-only">대표 모델 API 단가 (USD / 100만 토큰)</caption>
+          <thead>
+            <tr><th scope="col">모델</th><th scope="col" class="num">입력</th><th scope="col" class="num">출력</th><th scope="col" class="num">캐시 읽기</th><th scope="col">메모</th></tr>
+          </thead>
+          <tbody>
             {
-              relatedPosts.map((p) => (
-                <li>
-                  <a href={withUtm(p.url)} target="_blank" rel="noopener">
-                    <strong>{p.title}</strong>
-                    <span>{p.description}</span>
-                  </a>
-                </li>
+              board.map((m) => (
+                <tr>
+                  <th scope="row">
+                    <a href={m.sourceUrl} target="_blank" rel="noopener">{m.name}</a>
+                    <span class="sub">{vendorName(m.vendor)}</span>
+                  </th>
+                  <td class="num">{usd(m.prices.input)}</td>
+                  <td class="num">{usd(m.prices.output)}</td>
+                  <td class="num">{usd(m.prices.cacheRead)}</td>
+                  <td>
+                    {m.priceChangesAt && <span class="pill warn-pill">{fmtDate(m.priceChangesAt)} 가격 변경</span>}
+                    {m.longContext && <span class="pill">{m.longContext.thresholdK}K 초과 할증</span>}
+                  </td>
+                </tr>
               ))
             }
-          </ul>
-        </section>
-      </main>
-
-      <footer class="footer no-embed">
-        <p>
-          만든 사람: <a href={withUtm(BLOG_URL)} target="_blank" rel="noopener">hgko-dev 블로그</a> · Claude Code·AI 코딩 실전 기록
-        </p>
-        <p class="muted small">
-          모든 결과는 추정치이며 실제 청구액과 다를 수 있습니다. 가격은 각 회사 공식 페이지 기준({updatedLabel} 확인)이며, 이후 변경될 수 있습니다.
-        </p>
-      </footer>
+          </tbody>
+        </table>
+        <p class="muted small board-note">USD / 100만 토큰 · 이름을 누르면 공식 가격 페이지로 이동</p>
+      </div>
     </div>
-    <script is:inline>
-      // 개인 / 팀·회사 탭 전환. ?tab=team 이면 팀 탭으로 시작
-      (() => {
-        const tabs = [...document.querySelectorAll('[role="tab"][data-tab]')];
-        const select = (name, focus) => {
-          for (const t of tabs) {
-            const on = t.dataset.tab === name;
-            t.setAttribute('aria-selected', String(on));
-            t.tabIndex = on ? 0 : -1;
-            document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
-            if (on && focus) t.focus();
-          }
-          const q = new URLSearchParams(location.search);
-          if (name === 'team') q.set('tab', 'team');
-          else q.delete('tab');
-          const qs = q.toString();
-          history.replaceState(null, '', qs ? `?${qs}` : location.pathname);
-        };
-        tabs.forEach((t, i) => {
-          t.addEventListener('click', () => select(t.dataset.tab, false));
-          t.addEventListener('keydown', (e) => {
-            if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-            const next = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
-            select(next.dataset.tab, true);
-          });
-        });
-        if (new URLSearchParams(location.search).get('tab') === 'team') select('team', false);
-      })();
-    </script>
-  </body>
-</html>
+    <div>
+      <div class="sec-head">
+        <h2>최근 변경</h2>
+        <a href={`${base}prices/#changes`}>전체 기록 →</a>
+      </div>
+      <div class="card changes-card">
+        <Changelog limit={4} />
+      </div>
+    </div>
+  </section>
+
+  <section class="home-posts">
+    <div class="sec-head"><h2>블로그에서 더 보기</h2></div>
+    <ul class="related">
+      {
+        relatedPosts.map((p) => (
+          <li>
+            <a href={withUtm(p.url)} target="_blank" rel="noopener">
+              <strong>{p.title}</strong>
+              <span>{p.description}</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</Base>

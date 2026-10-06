@@ -1,0 +1,36 @@
+---
+// 가격·요금제 변경 기록. 빌드한 날보다 뒤 날짜는 "예정"으로 표시한다.
+import { changelog } from '../lib/data';
+
+interface Props {
+  limit?: number;
+}
+const { limit } = Astro.props;
+const today = new Date().toISOString().slice(0, 10);
+const items = limit ? changelog.slice(0, limit) : changelog;
+const KIND = { price: '가격', retire: '종료', plan: '요금제', site: '사이트' } as const;
+const fmt = (d: string) => d.replace(/^(\d{4})-0?(\d+)-0?(\d+)$/, '$1.$2.$3');
+---
+
+<ol class="changelog">
+  {
+    items.map((c) => (
+      <li class={c.date > today ? 'is-upcoming' : undefined}>
+        <span class="cl-date">
+          {fmt(c.date)}
+          {c.date > today && <span class="pill warn-pill">예정</span>}
+        </span>
+        <span class="cl-body">
+          <span class="pill">{KIND[c.kind]}</span>
+          <strong>{c.title}</strong>
+          {c.detail && <span class="cl-detail">{c.detail}</span>}
+          {c.sourceUrl && (
+            <a class="small" href={c.sourceUrl} target="_blank" rel="noopener">
+              공식 안내 ↗
+            </a>
+          )}
+        </span>
+      </li>
+    ))
+  }
+</ol>

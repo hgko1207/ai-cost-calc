@@ -1,0 +1,122 @@
+---
+// 모든 페이지 공통: <head>(SEO·OG), 상단 메뉴, 꼬리말, 블로그 삽입(?embed=1) 처리
+import { prices } from '../lib/data';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description: string;
+  path: string; // base 기준 경로. 예: '' (홈), 'personal/'
+  active?: 'home' | 'personal' | 'team' | 'prices' | 'guide';
+  jsonLd?: unknown[];
+  wide?: boolean; // 계산기 페이지처럼 넓게
+}
+const { title, description, path, active, jsonLd = [], wide } = Astro.props;
+
+const BLOG_URL = 'https://hgko-dev.tistory.com/';
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const canonical = new URL(`${base}${path}`, Astro.site).toString();
+const ogImage = new URL(`${base}og.png`, Astro.site).toString();
+const updatedLabel = prices.updatedAt.replace(/^(\d{4})-0?(\d+)-0?(\d+)$/, '$1.$2.$3');
+const withUtm = (url: string) => {
+  const u = new URL(url);
+  u.searchParams.set('utm_source', 'ai-cost-calc');
+  u.searchParams.set('utm_medium', 'referral');
+  return u.toString();
+};
+const nav = [
+  { id: 'home', label: '홈', href: base },
+  { id: 'personal', label: '개인 요금제', href: `${base}personal/` },
+  { id: 'team', label: '팀·회사 도입', href: `${base}team/` },
+  { id: 'prices', label: '가격표', href: `${base}prices/` },
+  { id: 'guide', label: '가이드·FAQ', href: `${base}guide/` },
+];
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={`${base}favicon.svg`} type="image/svg+xml" />
+    <meta name="theme-color" content="#f7f7f8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0f0f10" media="(prefers-color-scheme: dark)" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="AI 코딩 요금제 계산기 — 내 사용량에 맞는 요금제 추천" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content={ogImage} />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+    />
+    <script is:inline>
+      // ?embed=1 이면 계산기만 보이게 (티스토리 iframe 삽입용)
+      if (new URLSearchParams(location.search).get('embed') === '1') {
+        document.documentElement.dataset.embed = '1';
+        // 블로그 쪽 스크립트가 iframe 높이를 맞출 수 있게 내용 높이를 알린다 (스크립트가 없으면 무시됨)
+        addEventListener('DOMContentLoaded', () => {
+          let last = 0;
+          const post = () => {
+            const h = Math.ceil(document.documentElement.scrollHeight);
+            if (Math.abs(h - last) > 4) {
+              last = h;
+              parent.postMessage({ type: 'aicalc:height', height: h }, '*');
+            }
+          };
+          new ResizeObserver(post).observe(document.body);
+          post();
+          // "전체 화면에서 보기"는 지금 입력한 값을 그대로 가져가게
+          document.querySelector('.open-full')?.addEventListener('click', (ev) => {
+            const q = new URLSearchParams(location.search);
+            q.delete('embed');
+            ev.currentTarget.href = location.pathname + (q.toString() ? '?' + q : '');
+          });
+        });
+      }
+    </script>
+    <slot name="head" />
+    {jsonLd.length > 0 && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+  </head>
+  <body>
+    <header class="site-top no-embed">
+      <div class="site-top-in">
+        <a class="logo" href={base}>AI 코딩 <b>요금제</b> 계산기</a>
+        <nav class="site-nav" aria-label="주요 메뉴">
+          {
+            nav.map((n) => (
+              <a href={n.href} aria-current={active === n.id ? 'page' : undefined}>
+                {n.label}
+              </a>
+            ))
+          }
+        </nav>
+        <span class="site-upd">가격 확인 {updatedLabel}</span>
+      </div>
+    </header>
+
+    <div class={`page${wide ? ' is-wide' : ''}`}>
+      <a class="embed-only open-full" href={`${base}${path}`} target="_blank" rel="noopener">전체 화면에서 자세히 보기 ↗</a>
+      <slot />
+
+      <footer class="footer no-embed">
+        <p>
+          만든 사람: <a href={withUtm(BLOG_URL)} target="_blank" rel="noopener">hgko-dev 블로그</a> · Claude Code·AI 코딩 실전 기록
+        </p>
+        <p class="muted small">
+          모든 결과는 추정치이며 실제 청구액과 다를 수 있습니다. 가격은 각 회사 공식 페이지 기준({updatedLabel} 확인)이며, 이후 변경될 수 있습니다.
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>

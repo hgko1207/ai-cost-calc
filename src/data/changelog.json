@@ -1,0 +1,35 @@
+[
+  {
+    "date": "2027-01-01",
+    "kind": "price",
+    "title": "Gemini 3.8 Flash API 가격 2배 인상 예정",
+    "detail": "프로모션 종료: 입력 $0.75 → $1.50, 출력 $3.75 → $7.50 (100만 토큰당)",
+    "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing?hl=ko"
+  },
+  {
+    "date": "2026-10-15",
+    "kind": "retire",
+    "title": "Claude Haiku 4.5 지원 종료 예정",
+    "detail": "공식 모델 개요 기준 2026-10-15 이후 종료",
+    "sourceUrl": "https://platform.claude.com/docs/ko/about-claude/models/overview"
+  },
+  {
+    "date": "2026-10-06",
+    "kind": "site",
+    "title": "가격 전체 재확인, 팀·회사 요금제 추가",
+    "detail": "공식 페이지와 113개 항목 대조. Claude Team·Enterprise, ChatGPT Business, Gemini Code Assist 좌석 가격 추가"
+  },
+  {
+    "date": "2026-06-18",
+    "kind": "plan",
+    "title": "Gemini CLI·Code Assist 개인 구독 사용 종료",
+    "detail": "Google AI Pro·Ultra 구독으로는 더 이상 사용 불가, Antigravity로 이전",
+    "sourceUrl": "https://developers.google.com/gemini-code-assist/resources/faqs"
+  },
+  {
+    "date": "2026-05-19",
+    "kind": "price",
+    "title": "Google AI Ultra(20x) 월 $250 → $199.99 인하",
+    "sourceUrl": "https://antigravity.google/blog/changes-to-antigravity-plans"
+  }
+]

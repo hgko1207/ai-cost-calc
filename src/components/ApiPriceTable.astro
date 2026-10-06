@@ -1,6 +1,11 @@
 ---
 // 모델별 API 토큰 단가 표. 개인·팀 탭 모두에서 접어서 보여준다.
 import { prices } from '../lib/data';
+
+interface Props {
+  open?: boolean;
+}
+const { open } = Astro.props;
 import { isStale } from '../lib/priceCheck';
 
 const buildDay = new Date().toISOString().slice(0, 10); // 빌드한 날 기준
@@ -9,7 +14,7 @@ const vendorName = (id: string) => prices.vendors.find((v) => v.id === id)?.name
 const shortDate = (d: string) => d.replace(/^(\d{4})-0?(\d+)-0?(\d+)$/, '$1.$2.$3');
 ---
 
-<details class="price-more">
+<details class="price-more" open={open}>
   <summary>
     <strong>API 토큰 단가 표</strong>
     <span>쓴 만큼 결제(API)할 때의 모델별 가격 · USD / 100만 토큰</span>

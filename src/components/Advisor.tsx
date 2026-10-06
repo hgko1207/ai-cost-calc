@@ -246,6 +246,29 @@ export default function Advisor({ advisor, models, plans, relatedPosts }: Adviso
         </h2>
         <p className="result-reason">{reasonText(a, state, mode.name, current, freq.name)}</p>
 
+        <dl className="kpis">
+          <div>
+            <dt>월 비용</dt>
+            <dd>{krwShort(recPrice)}</dd>
+            <span>{rec ? `$${rec.plan.usdMonthly} · 부가세 ${money.vat ? '포함' : '별도'}` : '쓴 만큼 결제'}</span>
+          </div>
+          <div>
+            <dt>같은 양을 API로 내면</dt>
+            <dd>{krwShort(a.api.krw)}</dd>
+            <span>{a.api.model.name} 기준</span>
+          </div>
+          <div className={rec && saving > 0 ? 'is-good' : undefined}>
+            <dt>구독 효과</dt>
+            <dd>{!rec ? 'API가 유리' : saving > 0 ? `월 ${krwShort(saving)} 절약` : '금액 비슷'}</dd>
+            <span>{!rec ? '사용량이 적음' : saving > 0 ? 'API 대비' : '한도 걱정을 덜어 줌'}</span>
+          </div>
+          <div>
+            <dt>{rec ? `${shortName(rec.plan.name)}로 하루` : '추천 요금제로 하루'}</dt>
+            <dd>{rec ? hoursRange(rec.agentHours / mode.intensity).replace(/^하루 (약 )?/, '').replace('까지', '') : '-'}</dd>
+            <span>'{mode.name}' 기준, 추정</span>
+          </div>
+        </dl>
+
         <ol className="plan-fits">
           {a.fits.map((f) => (
             <li key={f.plan.id} className={`fit s-${f.status}${rec?.plan.id === f.plan.id ? ' is-rec' : ''}`}>
@@ -278,19 +301,6 @@ export default function Advisor({ advisor, models, plans, relatedPosts }: Adviso
           '{mode.name}' 방식으로 이 요금제를 하루 몇 시간까지 쓸 수 있는지(추정)와 비교했습니다. 한도는 운영자 1명의 실사용 기록 기준입니다.
         </p>
 
-        <div className="api-note">
-          <p>
-            <strong>같은 양을 쓴 만큼(API) 냈다면?</strong> 월 약 <strong>{krwShort(a.api.krw)}</strong>
-            <span className="muted"> ({a.api.model.name} 기준)</span>
-          </p>
-          <p className="muted small">
-            {!rec
-              ? '→ 이 정도 사용량이면 쓴 만큼 내는 쪽이 더 쌉니다.'
-              : saving > 0
-                ? `→ 구독으로 월 약 ${krwShort(saving)} 아끼는 셈입니다. 사용량이 많을수록 구독이 유리합니다.`
-                : '→ 금액만 보면 API가 비슷하거나 조금 싸지만, 구독은 정해진 금액으로 한도 걱정을 덜 수 있습니다.'}
-          </p>
-        </div>
 
         {tool.confidence === 'low' && (
           <p className="warn small">{tool.name} 쪽은 실사용 데이터가 없어 Claude Code 기준을 빌려 쓴 참고값입니다.</p>

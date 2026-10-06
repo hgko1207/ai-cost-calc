@@ -1,0 +1,67 @@
+---
+import Advisor from '../components/Advisor';
+import Calculator from '../components/Calculator';
+import FaqList from '../components/FaqList.astro';
+import Base from '../layouts/Base.astro';
+import { faqsFor } from '../lib/content';
+import { advisor, presets, prices, relatedPosts } from '../lib/data';
+import { CALC_KEYS } from '../lib/url';
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const title = '개인 AI 코딩 요금제 추천 — Claude Pro·Max 5x·Max 20x 뭐가 맞을까';
+const description =
+  '하루 사용 시간과 사용 방식만 고르면 Claude Pro·Max 5x·Max 20x, ChatGPT, Gemini 요금제 중 나에게 맞는 것을 추천하고, 같은 양을 API로 쓰면 얼마인지 원화로 비교합니다.';
+const faqs = faqsFor('personal');
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebApplication',
+    name: '개인 AI 코딩 요금제 추천',
+    url: new URL(`${base}personal/`, Astro.site).toString(),
+    applicationCategory: 'UtilitiesApplication',
+    operatingSystem: 'Any',
+    inLanguage: 'ko',
+    dateModified: prices.updatedAt,
+    offers: { '@type': 'Offer', price: '0', priceCurrency: 'KRW' },
+    description,
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+---
+
+<Base title={title} description={description} path="personal/" active="personal" jsonLd={jsonLd} wide>
+  <script is:inline slot="head" define:vars={{ calcKeys: CALC_KEYS }}>
+    // 토큰 계산기 파라미터가 있는 공유 링크로 들어오면 "자세히" 영역을 펼친다
+    document.addEventListener('DOMContentLoaded', () => {
+      const q = new URLSearchParams(location.search);
+      if (calcKeys.some((k) => k !== 'fx' && k !== 'vat' && q.has(k))) document.getElementById('detail')?.setAttribute('open', '');
+    });
+  </script>
+
+  <header class="page-head no-embed">
+    <h1>내 사용량에 맞는 AI 코딩 요금제</h1>
+    <p class="muted">질문 몇 개에 답하면 바로 추천합니다. 같은 양을 API로 쓰면 얼마인지도 함께 보여 드려요.</p>
+  </header>
+
+  <Advisor client:load advisor={advisor} models={prices.models} plans={prices.plans} relatedPosts={relatedPosts} />
+
+  <details class="detail-calc no-embed" id="detail">
+    <summary>
+      <strong>자세히: 모델별 API 비용 직접 계산</strong>
+      <span>토큰 사용량을 알고 있는 개발자용</span>
+    </summary>
+    <Calculator client:idle data={{ vendors: prices.vendors, models: prices.models, plans: prices.plans, presets, advisor }} />
+  </details>
+
+  <section class="page-links no-embed">
+    <a class="card link-card" href={`${base}prices/`}><strong>요금제·모델 가격표</strong><span>3사 요금제와 API 단가, 변경 기록</span></a>
+    <a class="card link-card" href={`${base}guide/`}><strong>계산 방법과 FAQ</strong><span>구독 vs API, 한도 추정 근거</span></a>
+    <a class="card link-card" href={`${base}team/`}><strong>회사에 도입한다면</strong><span>인원별 월·연 예산과 결재용 요약</span></a>
+  </section>
+
+  <FaqList id="faq" items={faqs.slice(0, 4)} />
+</Base>

@@ -1,0 +1,106 @@
+---
+import FaqList from '../components/FaqList.astro';
+import Base from '../layouts/Base.astro';
+import { faqs } from '../lib/content';
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const title = 'AI 코딩 요금제 가이드 — 구독 vs API, 한도 추정 방법, 회사 도입 체크리스트';
+const description =
+  '구독과 API 종량제의 차이, 요금제 한도를 추정한 방법, 회사에 AI 코딩 도구를 도입하는 단계와 체크리스트, 자주 묻는 질문을 정리했습니다.';
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+  },
+];
+---
+
+<Base title={title} description={description} path="guide/" active="guide" jsonLd={jsonLd}>
+  <header class="page-head">
+    <h1>가이드·FAQ</h1>
+    <nav class="toc" aria-label="이 페이지 목차">
+      <a href="#terms">구독 vs API</a><a href="#how">계산 방법</a><a href="#adopt">회사 도입 가이드</a><a href="#faq">자주 묻는 질문</a>
+    </nav>
+  </header>
+
+  <section class="prose" aria-labelledby="terms">
+    <h2 id="terms">구독 vs API, 뭐가 다른가요?</h2>
+    <ul>
+      <li><strong>구독</strong>: 매달 정해진 금액(Pro $20, Max $100~200). 사용 한도 안에서 무제한처럼 씁니다. VS Code·터미널에서 계정으로 로그인해 쓰면 이 방식입니다.</li>
+      <li><strong>API 종량제</strong>: API 키로 연결해 쓴 토큰 양만큼 청구됩니다. 한도는 없지만 많이 쓰면 요금이 크게 늘어납니다. 주로 회사나 서비스를 만드는 개발자가 씁니다.</li>
+      <li><strong>결론</strong>: 매일 몇 시간씩 코딩한다면 대부분 구독이 훨씬 쌉니다. 가끔 질문하는 정도라면 API가 더 쌀 수 있습니다.</li>
+    </ul>
+  </section>
+
+  <section class="prose" aria-labelledby="how">
+    <h2 id="how">이 계산기는 어떻게 추천하나요?</h2>
+    <ol>
+      <li>
+        <strong>사용량</strong>: 하루 사용 시간에 사용 방식을 반영합니다. 같은 1시간이라도 에이전트에게 맡기면 질문만 할 때보다 훨씬 많이 씁니다 (같이 코딩은 약
+        절반, 질문 위주는 약 1/5로 추정).
+      </li>
+      <li>
+        <strong>요금제 한도</strong>: 운영자 1명이 82일 동안 쓴 기록을 기준으로 잡았습니다. Max 5x로 에이전트 작업을 하루 5~6시간 하면 5시간 한도에 자주
+        걸렸습니다. Pro는 그 1/5, Max 20x는 4배(공식 배수)입니다. 정확한 한도는 회사들이 공개하지 않아 추정치입니다.
+      </li>
+      <li>
+        <strong>추천</strong>: 한도 안에서 가장 싼 요금제를 고릅니다. 지금 요금제에서 한도에 자주 걸린다고 답하면 계산보다 그 경험을 우선해 한 단계 위를, 거의 안
+        걸리면 한 단계 아래를 권합니다.
+      </li>
+      <li><strong>"API로 냈다면"</strong>: 같은 양을 쓴 만큼 결제했을 때의 금액입니다. 운영자 기록(입력의 93%가 캐시 재사용)과 각 회사 공식 단가로 계산합니다.</li>
+      <li><strong>Codex·Gemini</strong>: 실사용 기록이 없어 같은 가격대의 Claude 요금제와 비슷하다고 가정한 참고값입니다.</li>
+    </ol>
+  </section>
+
+  <section class="prose" aria-labelledby="adopt">
+    <h2 id="adopt">회사 도입 가이드</h2>
+    <ol class="steps">
+      <li>
+        <strong>1단계 · 파일럿 (2~4주)</strong>
+        <span>3~5명이 월간 결제로 먼저 써 봅니다. 관리 콘솔의 사용량 화면에서 사람별 사용량과 한도 도달 빈도를 확인합니다.</span>
+      </li>
+      <li>
+        <strong>2단계 · 좌석 구성 확정</strong>
+        <span>파일럿 결과로 많이 쓰는 사람과 일반 사용자를 나눕니다. 한도에 자주 걸리는 사람만 상위 좌석(프리미엄 등)을 배정합니다.</span>
+      </li>
+      <li>
+        <strong>3단계 · 확대와 연간 전환</strong>
+        <span>인원이 안정되면 연간 결제로 바꿔 좌석 단가를 약 20% 낮춥니다. 추가 사용량은 사람·팀별 지출 한도를 걸어 둡니다.</span>
+      </li>
+    </ol>
+
+    <h3>도입 방식별 장단점</h3>
+    <div class="table-wrap">
+      <table class="detail">
+        <thead>
+          <tr>
+            <th scope="col">방식</th>
+            <th scope="col">이런 팀에 맞음</th>
+            <th scope="col">장점</th>
+            <th scope="col">주의할 점</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><th scope="row">팀 요금제 (좌석제)</th><td>2~150명, 매일 쓰는 개발팀</td><td>비용 예측 쉬움, SSO·관리 콘솔, 데이터 학습 제외</td><td>좌석 한도 초과분은 추가 결제</td></tr>
+          <tr><th scope="row">엔터프라이즈</th><td>20명 이상, 보안·감사 요건이 있는 회사</td><td>좌석별 한도 없음, SCIM·감사 로그</td><td>사용량이 많으면 비용 상한이 없음</td></tr>
+          <tr><th scope="row">개인 구독 회사 지원</th><td>1~3명, 빠르게 시작</td><td>설정이 가장 간단</td><td>관리·보안 기능 없음, 퇴사 시 계정 회수 어려움</td></tr>
+          <tr><th scope="row">API 종량제 (참고)</th><td>자동화(CI·사내 봇)나 서비스 개발</td><td>쓴 만큼만 결제, 워크스페이스별 지출 한도</td><td>매일 많이 쓰면 좌석제보다 몇 배 비쌈</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>도입 전 체크리스트</h3>
+    <ul class="checklist">
+      <li>회사 코드·데이터가 모델 학습에 쓰이지 않는지 (팀·기업 요금제는 기본 제외)</li>
+      <li>회사 계정으로 로그인(SSO)과 퇴사자 계정 회수가 되는지</li>
+      <li>관리자가 사람별 사용량과 비용을 볼 수 있는지</li>
+      <li>추가 사용량에 지출 한도를 걸 수 있는지</li>
+      <li>세금계산서·법인카드 결제 등 회계 처리 방식</li>
+      <li>사내 보안 정책(외부 코드 전송, 저장소 접근 범위) 검토</li>
+    </ul>
+    <p><a href={`${base}team/`}>→ 우리 회사 인원으로 도입 비용 계산하기</a></p>
+  </section>
+
+  <FaqList id="faq" items={faqs} />
+</Base>
