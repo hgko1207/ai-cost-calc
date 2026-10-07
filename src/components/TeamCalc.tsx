@@ -4,6 +4,7 @@ import type { Advisor, Model, Plan, Team } from '../lib/data';
 import { krwShort } from '../lib/format';
 import { compareAlternative, evaluateTeam, type Billing, type GroupLine, type TeamGroup } from '../lib/team';
 import { buildTeamSummary } from '../lib/teamSummary';
+import { track } from '../lib/track';
 import FeatureChecks from './FeatureChecks';
 import MobileResultBar from './MobileResultBar';
 import NumberInput from './NumberInput';
@@ -114,6 +115,7 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
 
   const copyLink = async () => {
     await copyShareUrl([...OWN_KEYS, 'tab']);
+    track('팀: 링크 복사');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -134,6 +136,7 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
     } catch {
       window.prompt('아래 내용을 복사하세요', text);
     }
+    track('팀: 결재용 요약 복사');
     setCopiedSummary(true);
     setTimeout(() => setCopiedSummary(false), 2000);
   };

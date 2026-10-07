@@ -118,5 +118,17 @@ const nav = [
         </p>
       </footer>
     </div>
+
+    <!-- 방문 측정: GoatCounter (쿠키 없음). 블로그 iframe 안에서도 세고, 삽입 화면은 경로 끝에 "(삽입)"을 붙여 따로 본다.
+         경로는 쿼리 없이 센다: 공유 링크의 설정값(?h=5 등)마다 페이지가 쪼개지지 않게 -->
+    <script is:inline>
+      window.goatcounter = {
+        allow_frame: true,
+        path: function () {
+          return location.pathname + (new URLSearchParams(location.search).get('embed') === '1' ? ' (삽입)' : '');
+        },
+      };
+    </script>
+    <script is:inline data-goatcounter="https://hgko-calc.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
   </body>
 </html>

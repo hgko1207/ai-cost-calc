@@ -6,6 +6,7 @@ import { krwShort, tokensM } from '../lib/format';
 import MobileResultBar from './MobileResultBar';
 import NumberInput from './NumberInput';
 import Segmented from './Segmented';
+import { track } from '../lib/track';
 import { DEFAULT_MONEY, copyShareUrl, moneyFromQuery, onMoney, replaceOwnParams } from '../lib/url';
 
 export interface AdvisorProps {
@@ -149,6 +150,7 @@ export default function Advisor({ advisor, models, plans, relatedPosts }: Adviso
 
   const copyLink = async () => {
     await copyShareUrl(Object.values(KEYS));
+    track('개인: 결과 링크 복사');
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -300,7 +302,7 @@ export default function Advisor({ advisor, models, plans, relatedPosts }: Adviso
         {resultPost && (
           <p className="result-post">
             <span>관련 글</span>
-            <a href={withUtm(resultPost.url)} target="_blank" rel="noopener">
+            <a href={withUtm(resultPost.url)} target="_blank" rel="noopener" onClick={() => track('개인: 관련 글 클릭')}>
               {resultPost.title} ›
             </a>
           </p>

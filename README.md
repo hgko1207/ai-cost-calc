@@ -111,6 +111,20 @@ npm run usage     # 내 Claude Code 로그에서 토큰 사용량 집계 (숫자
 3. 환경 변수: `SITE_URL` = 새 주소(예: `https://ai-cost-calc.pages.dev`), `BASE_PATH` = `/`
 4. 옮긴 뒤에는 GitHub Pages 워크플로를 끄거나 지운다.
 
+## 방문 측정 (GoatCounter, 쿠키 없음)
+
+- 집계 화면: https://hgko-calc.goatcounter.com (코드는 `src/layouts/Base.astro` 하단)
+- 페이지는 쿼리 없이 경로로 센다. 블로그 iframe 안의 계산기는 `/ai-cost-calc/personal/ (삽입)`처럼 따로 보이고, 어느 글에서 왔는지는 Top referrers에 나온다.
+- 이벤트(`src/lib/track.ts`, iframe 안이면 이름 끝에 "(삽입)"):
+
+| 이벤트 | 위치 |
+|---|---|
+| `홈: 1분 계산하기`, `홈: 견적 내기` | 홈 입구 카드 |
+| `개인: 결과 링크 복사`, `개인: 관련 글 클릭` | 개인 계산기 |
+| `팀: 결재용 요약 복사`, `팀: 링크 복사` | 팀 계산기 |
+
+- localhost 방문은 GoatCounter가 세지 않는다(콘솔에 "not counting because of: localhost"가 뜨는 건 정상).
+
 ## 검색 노출
 
 - Google Search Console, 네이버 서치어드바이저에 사이트 등록 후 `sitemap-index.xml` 제출
