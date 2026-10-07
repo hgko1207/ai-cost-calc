@@ -5,6 +5,7 @@
 - 스택: Astro 7 + Preact(React 호환 모드). 계산기만 아일랜드, 나머지는 정적 HTML
 - 디자인: 원티드 디자인 시스템(Montage) 토큰 (`src/styles/global.css`)
 - 서버 없음. `dist/`를 정적 호스팅에 올리면 끝.
+- 방문 측정: GoatCounter(쿠키 없음). 블로그 iframe 안의 계산기도 집계 (아래 "방문 측정")
 
 ## 명령어
 

@@ -46,6 +46,12 @@ Astro 7 + Preact(compat, React 문법 그대로) 정적 사이트(계산기만 �
 - 공유 URL: 한 페이지에 계산기가 여럿이므로 `replaceOwnParams`로 **자기 키만** 바꾼다. 새 키는 기존 키와 겹치지 않게 짓고 README 표에 추가한다.
 - 디자인은 원티드 디자인 시스템(Montage) 토큰을 따른다(`src/styles/global.css`의 `:root`). 색은 토큰 변수만 쓰고 다크 모드 값도 함께 넣는다.
 - 경로는 `/ai-cost-calc/` 하위다. 링크·에셋은 `import.meta.env.BASE_URL`을 기준으로 만든다.
+- 방문 측정은 GoatCounter(`src/layouts/Base.astro` 하단, 사이트 코드 `hgko-calc`)다.
+  - 아래 두 설정은 유지한다.
+    - `allow_frame: true`: 블로그 iframe 안에서도 센다.
+    - 경로는 쿼리를 빼고 센다: 공유 링크 설정값마다 페이지가 쪼개지지 않게 한다.
+  - 새 버튼·링크 이벤트는 `src/lib/track.ts`의 `track('페이지: 행동')` 형식으로 넣는다. 정적 링크에는 `data-goatcounter-click`을 붙인다. 넣은 이벤트는 README의 이벤트 표에도 추가한다.
+  - localhost는 집계되지 않는다. 로컬에서는 `goatcounter.url({})`로 보낼 경로만 확인하고, 실제 집계 확인은 배포 후 네트워크 요청(`hgko-calc.goatcounter.com/count` → 200)으로 한다.
 
 ## 하지 말 것
 - `main` 푸시는 곧 실제 배포다(GitHub Actions). 커밋·푸시는 사용자가 요청할 때만 한다.
