@@ -8,7 +8,7 @@
 
 ```html
 <iframe class="aicalc" src="https://hgko1207.github.io/ai-cost-calc/personal/?embed=1"
-        style="width:100%;height:1900px;border:0" loading="lazy" title="AI 코딩 요금제 계산기"></iframe>
+        style="width:100%;height:1400px;border:0" loading="lazy" title="AI 코딩 요금제 계산기"></iframe>
 <script>
 addEventListener('message', function (e) {
   if (e.origin !== 'https://hgko1207.github.io' || !e.data || e.data.type !== 'aicalc:height') return;
@@ -20,7 +20,7 @@ addEventListener('message', function (e) {
 ```
 
 - 한 글에 계산기를 여러 개 넣어도 된다(`class="aicalc"`만 지키면 됨). `<script>`는 글당 한 번만 넣으면 된다.
-- 티스토리가 `<script>`를 지우는 경우에도 `height:1900px` 고정 높이로 동작한다. 실측 높이는 PC 약 1,950~2,150px, 모바일 약 2,150~2,300px이다.
+- 티스토리가 `<script>`를 지우는 경우에도 `height:1400px` 고정 높이로 동작한다. 실측 높이(2026.10.7)는 글 폭 760px에서 개인 약 1,030px·팀 약 1,370px, 모바일(375px)에서 개인 약 1,420px·팀 약 1,820px이다. 팀 계산기를 모바일까지 고려하면 1,850px로 넣는다.
 
 ## 2. 글별 추천 주소
 

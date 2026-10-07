@@ -38,7 +38,14 @@ export default function Segmented<T extends string>(props: {
   };
 
   return (
-    <div className="q-options" role="radiogroup" aria-label={label} data-wide={wide || undefined}>
+    <div
+      className="q-options"
+      role="radiogroup"
+      aria-label={label}
+      data-wide={wide || undefined}
+      // 설명 없는 짧은 선택지는 회색 트랙 위 세그먼트 컨트롤로 보여 준다
+      data-seg={!wide && options.every((o) => !o.description) ? '' : undefined}
+    >
       {options.map((o, i) => (
         <button
           key={o.id}

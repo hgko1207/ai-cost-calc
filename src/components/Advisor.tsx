@@ -51,38 +51,41 @@ function fromQuery(search: string, d: State, data: AdvisorData, plans: Plan[]): 
 
 /** "Claude Max 20x" → 화면 폭이 좁을 때 쓰는 짧은 이름 */
 const shortName = (name: string) => name.replace(/^(Claude|ChatGPT|Google AI)\s+/, '');
+/** "Gemini (Antigravity)" → "Gemini": 선택 버튼에 들어가는 짧은 도구 이름 */
+const toolLabel = (name: string) => name.replace(/\s*\(.*\)$/, '');
 
+/** 추천 아래 한 줄: 지금 상황에서 무엇을 하면 되는지 */
 function reasonText(a: Advice, s: State, modeName: string, current: PlanFit | undefined, freqName: string): string {
   const rec = a.recommended;
-  const usage = `하루 ${s.hours}시간, '${modeName}' 방식`;
+  const usage = `하루 ${s.hours}시간, '${modeName}' 방식이면`;
   switch (a.reason) {
     case 'api-cheaper':
-      return `${usage} 정도면 구독보다 쓴 만큼 내는 API가 조금 더 저렴합니다. 다만 매번 결제 걱정 없이 쓰고 싶다면 ${(a.fits.find((f) => f.status !== 'short') ?? a.fits.at(-1)!).plan.name} 요금제도 괜찮습니다.`;
+      return `${usage} 쓴 만큼 내는 API가 조금 더 싸요. 결제 걱정 없이 쓰고 싶다면 ${(a.fits.find((f) => f.status !== 'short') ?? a.fits.at(-1)!).plan.name}도 괜찮아요.`;
     case 'fits':
       return rec!.status === 'tight'
-        ? `${usage} 기준으로 ${rec!.plan.name} 요금제가 가장 경제적입니다. 다만 한도에 가끔 걸릴 수 있습니다.`
-        : `${usage} 기준으로 ${rec!.plan.name} 요금제면 한도 걱정 없이 쓸 수 있습니다.`;
+        ? `${usage} 이 요금제가 가장 경제적이에요. 다만 한도에 가끔 걸릴 수 있어요.`
+        : `${usage} 이 요금제로 한도 걱정 없이 쓸 수 있어요.`;
     case 'exceeds-all':
-      return `${usage}이면 최상위 요금제로도 빠듯한 사용량입니다. ${rec!.plan.name} 요금제를 쓰면서, 한도에 걸릴 때는 API를 함께 쓰는 방법을 고려해 보세요.`;
+      return `${usage} 최상위 요금제로도 빠듯해요. ${rec!.plan.name}를 쓰고, 한도에 걸릴 때는 API를 함께 쓰세요.`;
     case 'upgrade':
-      return `지금 ${current!.plan.name}에서 한도에 ${freqName} 걸린다면 ${rec!.plan.name} 요금제로 올리는 걸 추천합니다. 월 ${krwShort(rec!.krw - current!.krw)} 더 내면 한도 걱정이 크게 줄어듭니다.`;
+      return `지금 ${current!.plan.name}에서 한도에 ${freqName} 걸린다면 ${rec!.plan.name}로 올리세요. 월 ${krwShort(rec!.krw - current!.krw)} 더 내면 한도 걱정이 크게 줄어요.`;
     case 'upgrade-top':
-      return `이미 최상위 요금제입니다. 한도에 걸릴 때는 API를 함께 쓰거나, 가벼운 작업을 더 저렴한 모델로 나눠 보세요.`;
+      return `이미 최상위 요금제예요. 한도에 걸릴 때는 API를 함께 쓰거나, 가벼운 작업을 더 저렴한 모델로 나눠 보세요.`;
     case 'keep':
       return s.frequency === 'sometimes'
-        ? `한도에 가끔 걸리는 정도라면 지금 ${current!.plan.name} 요금제를 유지하는 게 가장 경제적입니다.`
-        : `지금 ${current!.plan.name} 요금제가 사용량에 잘 맞습니다.`;
+        ? `한도에 가끔 걸리는 정도라면 지금 ${current!.plan.name}를 유지하는 게 가장 경제적이에요.`
+        : `지금 ${current!.plan.name}가 사용량에 잘 맞아요. 그대로 쓰세요.`;
     case 'downgrade':
-      return `한도에 거의 걸리지 않는다면 ${rec!.plan.name} 요금제로 내려도 충분할 가능성이 높습니다. 월 ${krwShort(current!.krw - rec!.krw)} 아낄 수 있습니다.`;
+      return `한도에 거의 걸리지 않는다면 ${rec!.plan.name}로 내려도 충분해요. 월 ${krwShort(current!.krw - rec!.krw)} 아낄 수 있어요.`;
   }
 }
 
-/** 하루 사용 가능 시간을 범위로: 추정치라 한 점 대신 ±15% (예: 6 → "약 5~7시간") */
+/** 하루 사용 가능 시간을 범위로: 추정치라 한 점 대신 ±15% (예: 6 → "하루 약 5~7시간") */
 function hoursRange(h: number): string {
-  if (h >= 16) return '하루 종일 써도 여유';
+  if (h >= 16) return '하루 종일';
   const lo = Math.max(0.5, Math.round(h * 0.85 * 2) / 2);
   const hi = Math.round(h * 1.15 * 2) / 2;
-  return lo === hi ? `하루 약 ${lo}시간까지` : `하루 약 ${lo}~${hi}시간까지`;
+  return lo === hi ? `하루 약 ${lo}시간` : `하루 약 ${lo}~${hi}시간`;
 }
 
 /** 상황에 맞는 블로그 글 하나 */
@@ -111,6 +114,7 @@ export default function Advisor({ advisor, models, plans, relatedPosts }: Adviso
   const [money, setMoney] = useState(DEFAULT_MONEY);
   const [hydrated, setHydrated] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showWhy, setShowWhy] = useState(false);
 
   useEffect(() => {
     setState(fromQuery(window.location.search, DEFAULTS, advisor, plans));
@@ -151,32 +155,28 @@ export default function Advisor({ advisor, models, plans, relatedPosts }: Adviso
 
   const recPrice = rec ? rec.krw : a.api.krw;
   const resultPost = pickPost(relatedPosts, state.toolId, rec?.plan.id ?? (current ? current.plan.id : undefined));
-  const comparePost = relatedPosts.find((p) => p.tags.includes('compare'));
   const saving = a.api.krw - recPrice;
 
   return (
     <div className="advisor">
-      <section className="card" aria-labelledby="q-title">
-        <h2 id="q-title" className="card-title">
-          내 사용 패턴 <span className="muted small">5가지만 고르세요</span>
+      <section className="card inputs" aria-labelledby="q-title">
+        <h2 id="q-title" className="sr-only">
+          내 사용 패턴
         </h2>
 
-        <div className="q">
-          <p className="q-label">1. 어떤 도구로 코딩하나요?</p>
-          <Segmented label="코딩 도구" value={state.toolId} options={advisor.tools} onChange={setTool} />
-          {comparePost && (
-            <p className="q-help">
-              아직 못 정했다면?{' '}
-              <a href={withUtm(comparePost.url)} target="_blank" rel="noopener">
-                도구별 가격·성능 비교 글 ↗
-              </a>
-            </p>
-          )}
+        <div className="qf">
+          <p className="qf-label">코딩 도구</p>
+          <Segmented
+            label="코딩 도구"
+            value={state.toolId}
+            options={advisor.tools.map((t) => ({ id: t.id, name: toolLabel(t.name) }))}
+            onChange={setTool}
+          />
         </div>
 
-        <div className="q">
-          <label className="q-label" htmlFor="hours">
-            2. 하루에 몇 시간 쓰나요? <strong className="q-value">{state.hours}시간</strong>
+        <div className="qf">
+          <label className="qf-label" htmlFor="hours">
+            하루 사용 시간 <strong className="q-value">{state.hours}시간</strong>
           </label>
           <input
             id="hours"
@@ -189,29 +189,23 @@ export default function Advisor({ advisor, models, plans, relatedPosts }: Adviso
             aria-valuetext={`하루 ${state.hours}시간`}
             onChange={(e) => set({ hours: Number(e.target.value) })}
           />
-          <div className="range-scale" aria-hidden="true">
-            {[0.5, 4, 8, 12].map((h) => (
-              <span key={h} style={{ left: `${((h - 0.5) / 11.5) * 100}%` }}>
-                {h < 1 ? '30분' : `${h}시간`}
-              </span>
-            ))}
-          </div>
-          <label className="inline-field">
-            한 달 작업일
-            <NumberInput value={state.workDays} min={1} max={31} integer unit="일" onChange={(workDays) => set({ workDays })} />
-            일
-          </label>
         </div>
 
-        <div className="q">
-          <p className="q-label">3. 주로 어떻게 쓰나요?</p>
-          <Segmented label="사용 방식" value={state.modeId} options={advisor.modes} onChange={(modeId) => set({ modeId })} wide />
-        </div>
-
-        <div className="q">
-          <p className="q-label">4. 지금 쓰는 요금제는?</p>
+        <div className="qf">
+          <p className="qf-label">사용 방식</p>
           <Segmented
-            label="지금 요금제"
+            label="사용 방식"
+            value={state.modeId}
+            options={advisor.modes.map((m) => ({ id: m.id, name: m.name }))}
+            onChange={(modeId) => set({ modeId })}
+          />
+          <p className="qf-hint">{mode.description}</p>
+        </div>
+
+        <div className="qf">
+          <p className="qf-label">지금 쓰는 요금제</p>
+          <Segmented
+            label="지금 쓰는 요금제"
             value={state.currentPlanId}
             options={[{ id: 'none', name: '없음' }, ...tool.plans.map((p) => ({ id: p.planId, name: shortName(planName(p.planId)) }))]}
             onChange={(currentPlanId) => set({ currentPlanId, frequency: null })}
@@ -219,119 +213,124 @@ export default function Advisor({ advisor, models, plans, relatedPosts }: Adviso
         </div>
 
         {state.currentPlanId !== 'none' && (
-          <div className="q">
-            <p className="q-label">
-              5. 그 요금제에서 사용 한도에 얼마나 자주 걸리나요? <span className="muted small">(선택하면 경험을 우선 반영)</span>
-            </p>
+          <div className="qf">
+            <p className="qf-label">그 요금제에서 한도에 얼마나 자주 걸리나요?</p>
             <Segmented
               label="한도에 걸리는 빈도"
               value={state.frequency}
               options={advisor.limitFrequencies}
               onChange={(frequency) => set({ frequency })}
             />
+            <p className="qf-hint">고르면 계산보다 직접 겪은 경험을 우선 반영해요.</p>
           </div>
         )}
+
+        <label className="qf qf-row">
+          <span className="qf-label">한 달 작업일</span>
+          <span className="qf-row-input">
+            <NumberInput value={state.workDays} min={1} max={31} integer unit="일" onChange={(workDays) => set({ workDays })} />일
+          </span>
+        </label>
       </section>
 
       <section className="card result" id="advisor-result" aria-labelledby="r-title">
         <p className="sr-only" aria-live="polite">
           {hydrated && `추천: ${rec ? `${rec.plan.name}, 월 ${krwShort(rec.krw)}` : `API 종량제, 월 약 ${krwShort(a.api.krw)}`}`}
         </p>
-        <p className="eyebrow-inline">추천</p>
-        <h2 id="r-title" className="result-title">
-          {rec ? rec.plan.name : 'API 종량제 (쓴 만큼 결제)'}
-          <span className="result-price">
-            {rec ? `월 $${rec.plan.usdMonthly} · ${krwShort(rec.krw)}` : `월 약 ${krwShort(a.api.krw)}`}
-          </span>
-        </h2>
-        <p className="result-reason">{reasonText(a, state, mode.name, current, freq.name)}</p>
-
-        <dl className="kpis">
+        <div className="result-head">
           <div>
-            <dt>월 비용</dt>
-            <dd>{krwShort(recPrice)}</dd>
+            <p className="eyebrow-inline">추천</p>
+            <h2 id="r-title" className="result-title">
+              {rec ? rec.plan.name : 'API 종량제 (쓴 만큼 결제)'}
+            </h2>
+            <p className="result-reason">{reasonText(a, state, mode.name, current, freq.name)}</p>
+          </div>
+          <div className="result-total">
+            <strong>{rec ? `월 ${krwShort(rec.krw)}` : `월 약 ${krwShort(a.api.krw)}`}</strong>
             <span>{rec ? `$${rec.plan.usdMonthly} · 부가세 ${money.vat ? '포함' : '별도'}` : '쓴 만큼 결제'}</span>
           </div>
-          <div>
-            <dt>같은 양을 API로 내면</dt>
-            <dd>{krwShort(a.api.krw)}</dd>
-            <span>{a.api.model.name} 기준</span>
-          </div>
-          <div className={rec && saving > 0 ? 'is-good' : undefined}>
-            <dt>구독 효과</dt>
-            <dd>{!rec ? 'API가 유리' : saving > 0 ? `월 ${krwShort(saving)} 절약` : '금액 비슷'}</dd>
-            <span>{!rec ? '사용량이 적음' : saving > 0 ? 'API 대비' : '한도 걱정을 덜어 줌'}</span>
-          </div>
-          <div>
-            <dt>{rec ? `${shortName(rec.plan.name)}로 하루` : '추천 요금제로 하루'}</dt>
-            <dd>{rec ? hoursRange(rec.agentHours / mode.intensity).replace(/^하루 (약 )?/, '').replace('까지', '') : '-'}</dd>
-            <span>'{mode.name}' 기준, 추정</span>
-          </div>
-        </dl>
+        </div>
 
-        <ol className="plan-fits">
+        <p className="fits-label">{lowConfidence ? '요금제별 하루 사용 가능 시간 (참고값)' : '요금제별 한도 대비 내 사용량 (추정)'}</p>
+        <ol className="plan-fits" data-n={a.fits.length} style={{ gridTemplateColumns: `repeat(${a.fits.length}, minmax(0, 1fr))` }}>
           {a.fits.map((f) => (
             <li key={f.plan.id} className={`fit s-${f.status}${rec?.plan.id === f.plan.id ? ' is-rec' : ''}`}>
               <div className="fit-head">
-                <strong>{shortName(f.plan.name)}</strong>
-                {f.isCurrent && <span className="pill">지금</span>}
-                {rec?.plan.id === f.plan.id && <span className="pill rec">추천</span>}
+                <span className="fit-name">
+                  <strong>{shortName(f.plan.name)}</strong>
+                  {f.isCurrent && <span className="pill">지금</span>}
+                  {rec?.plan.id === f.plan.id && <span className="pill rec">추천</span>}
+                </span>
+                <span className="fit-price">{krwShort(f.krw)}</span>
               </div>
-              <div className="fit-price">{krwShort(f.krw)}</div>
-              {lowConfidence ? null : (
+              {!lowConfidence && (
                 <div className="meter" aria-hidden="true">
                   <span style={{ width: `${Math.min(100, f.utilization * 100)}%` }} />
                 </div>
               )}
-              <div className="fit-status">
-                {f.isCurrent && freqChosen
-                  ? state.frequency === 'none'
-                    ? '한도에 거의 안 걸림 (입력하신 경험)'
-                    : `한도에 ${freq.name} 걸림 (입력하신 경험)`
-                  : STATUS_LABEL[f.status]}
-              </div>
-              <div className="fit-cap">
-                {hoursRange(f.agentHours / mode.intensity)}
-                {lowConfidence && <span className="pill">참고값</span>}
-              </div>
+              <p className="fit-status">
+                <strong>
+                  {f.isCurrent && freqChosen
+                    ? state.frequency === 'none'
+                      ? '한도에 거의 안 걸림'
+                      : `한도에 ${freq.name} 걸림`
+                    : STATUS_LABEL[f.status]}
+                </strong>
+                <span>{hoursRange(f.agentHours / mode.intensity)}</span>
+              </p>
             </li>
           ))}
         </ol>
-        <p className="muted small legend">
-          '{mode.name}' 방식으로 이 요금제를 하루 몇 시간까지 쓸 수 있는지(추정)와 비교했습니다. 한도는 운영자 1명의 실사용 기록 기준입니다.
+
+        {lowConfidence && <p className="warn small">{tool.name} 쪽은 실사용 데이터가 없어 Claude Code 기준을 빌려 쓴 참고값입니다.</p>}
+
+        <p className="api-line">
+          <span className="muted">같은 양을 API로 내면</span>
+          <strong>월 {krwShort(a.api.krw)}</strong>
+          <span className={rec && saving > 0 ? 'good' : 'muted'}>
+            →{' '}
+            {!rec
+              ? '구독보다 API가 더 싸요'
+              : saving > 0
+                ? `구독이 월 ${krwShort(saving)} 싸요`
+                : '금액은 비슷하지만 구독이 한도 걱정을 덜어 줘요'}
+          </span>
         </p>
 
-
-        {tool.confidence === 'low' && (
-          <p className="warn small">{tool.name} 쪽은 실사용 데이터가 없어 Claude Code 기준을 빌려 쓴 참고값입니다.</p>
-        )}
-
         {resultPost && (
-          <a className="result-post" href={withUtm(resultPost.url)} target="_blank" rel="noopener">
+          <p className="result-post">
             <span>관련 글</span>
-            <strong>{resultPost.title}</strong>
-          </a>
+            <a href={withUtm(resultPost.url)} target="_blank" rel="noopener">
+              {resultPost.title} ›
+            </a>
+          </p>
         )}
 
-        <details className="why">
-          <summary>왜 이렇게 계산됐나요?</summary>
-          <ul>
+        <div className="result-actions">
+          <button type="button" className="share" onClick={copyLink}>
+            {copied ? '링크를 복사했습니다' : '결과 링크 복사'}
+          </button>
+          <button type="button" className="link-btn sub" aria-expanded={showWhy} aria-controls="advisor-why" onClick={() => setShowWhy((v) => !v)}>
+            계산 방법·추정치 안내 {showWhy ? '▴' : '▾'}
+          </button>
+        </div>
+        {showWhy && (
+          <ul className="why-list" id="advisor-why">
+            <li>
+              결과는 추정치입니다. 요금제별 하루 사용 시간은 '{mode.name}' 방식 기준이며, 한도는 운영자 1명의 실사용 기록으로 추정했습니다.
+            </li>
             <li>
               '{mode.name}' 방식은 에이전트에게 맡길 때보다 사용량이 적어서, 하루 {state.hours}시간을 에이전트 작업 약 {+a.loadHours.toFixed(1)}
               시간 분량으로 계산했습니다.
             </li>
             <li>{tool.basis}</li>
             <li>
-              API 환산: 한 달 입력 약 {tokensM(a.monthlyTokens.inputM)}·출력 {tokensM(a.monthlyTokens.outputM)} 토큰, 프롬프트 캐싱
-              반영, 환율 {money.fxRate.toLocaleString('ko-KR')}원/$, 부가세 {money.vat ? '포함' : '별도'}.
+              API 환산: {a.api.model.name} 기준, 한 달 입력 약 {tokensM(a.monthlyTokens.inputM)}·출력 {tokensM(a.monthlyTokens.outputM)} 토큰, 프롬프트
+              캐싱 반영, 환율 {money.fxRate.toLocaleString('ko-KR')}원/$, 부가세 {money.vat ? '포함' : '별도'}.
             </li>
             {current && freqChosen && <li>지금 요금제의 상태는 계산 대신 알려 주신 "한도에 걸리는 빈도"로 판단했습니다.</li>}
           </ul>
-        </details>
-
-        <button type="button" className="share" onClick={copyLink}>
-          {copied ? '링크를 복사했습니다' : '이 결과 링크 복사'}
-        </button>
+        )}
       </section>
       {hydrated && (
         <MobileResultBar
