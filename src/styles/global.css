@@ -1154,6 +1154,13 @@ table.detail .note {
   font-size: 15px;
   line-height: 24px;
 }
+/* 계산기 페이지 질문 목록 끝: 공통 질문이 있는 가이드로 */
+.faq-more {
+  display: inline-block;
+  margin-top: var(--s-4);
+  font-size: var(--t-sub);
+  font-weight: 600;
+}
 /* 링크 묶음: 카드 하나 안을 세로선(좁은 화면은 가로선)으로 나눈다 */
 .related,
 .page-links {

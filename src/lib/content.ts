@@ -1,45 +1,43 @@
-// 여러 페이지가 함께 쓰는 FAQ. 검색엔진용 구조화 데이터(FAQPage)에도 들어간다.
-export const faqs: { scope: 'personal' | 'team' | 'both'; q: string; a: string }[] = [
+// 페이지별 FAQ. 질문마다 놓일 페이지(page)를 하나만 정해 페이지끼리 같은 질문이 반복되지 않게 한다.
+// 검색엔진용 구조화 데이터(FAQPage)에도 화면에 보이는 질문과 똑같이 들어간다.
+// "구독과 API는 뭐가 다른가요?"는 가이드 본문 섹션(#terms)이 답하므로 여기 두지 않는다.
+export type FaqPage = 'personal' | 'team' | 'guide';
+export const faqs: { page: FaqPage; q: string; a: string }[] = [
   {
-    scope: 'both',
-    q: '구독과 API는 뭐가 다른가요?',
-    a: '구독(Pro, Max 등)은 매달 정해진 금액을 내고 사용 한도 안에서 쓰는 방식입니다. VS Code나 터미널에서 계정으로 로그인해 쓰면 구독입니다. API는 발급받은 API 키로 연결해, 쓴 토큰 양만큼 나중에 청구되는 종량제 방식으로 주로 회사나 서비스를 만드는 개발자가 씁니다.',
-  },
-  {
-    scope: 'personal',
+    page: 'personal',
     q: 'Claude Max 5x면 하루 몇 시간까지 쓸 수 있나요?',
     a: '운영자 경험으로는 에이전트에게 맡기는 방식으로 하루 5~6시간 쓰면 5시간 단위 한도에 자주, 주간 한도에 가끔 걸립니다. 직접 보면서 같이 코딩하는 방식이면 그보다 훨씬 오래 쓸 수 있습니다.',
   },
   {
-    scope: 'personal',
+    page: 'personal',
     q: '"같은 양을 API로 냈다면"은 왜 보여주나요?',
     a: '구독이 실제로 얼마나 이득인지 감을 잡기 위해서입니다. 운영자의 실제 사용량은 Opus 5.5 API 기준 월 약 $490(약 68만 원, 부가세 별도)어치였지만, 실제로 낸 돈은 Max 5x 월 $100이었습니다.',
   },
   {
-    scope: 'both',
+    page: 'guide',
     q: '추천 결과는 정확한가요?',
     a: '추정치입니다. Anthropic·OpenAI·Google 모두 구독 한도를 정확한 숫자로 공개하지 않습니다. 이 계산기는 공식 배수(예: Max 20x = Pro의 20배)와 운영자 실사용 경험으로 기준을 잡았고, 지금 요금제에서 한도에 걸리는 빈도를 알려 주면 그 경험을 우선 반영합니다.',
   },
   {
-    scope: 'team',
+    page: 'team',
     q: '회사에서 Claude Code를 도입하면 1인당 얼마나 드나요?',
     a: 'Claude Team 연간 결제 기준 기본 좌석은 1인 월 $20, 많이 쓰는 사람용 프리미엄 좌석은 월 $100입니다. 10명(많이 쓰는 사람 2, 일반 사용자 8) 팀이면 월 약 55만 원, 1인당 약 5.5만 원입니다(부가세 포함). API로만 쓰면 Anthropic 공식 문서 기준 개발자 1인당 월 $150~250 정도가 듭니다.',
   },
   {
-    scope: 'team',
+    page: 'team',
     q: 'Claude Team 기본 좌석과 프리미엄 좌석은 뭐가 다른가요?',
     a: '사용 한도가 다릅니다. 기본 좌석은 개인 Pro의 1.25배, 프리미엄 좌석은 6.25배(기본 좌석의 5배)입니다. 둘 다 Claude Code를 쓸 수 있고, 한 팀 안에서 섞어서 살 수 있어 많이 쓰는 사람만 프리미엄으로 배정하면 됩니다.',
   },
   {
-    scope: 'both',
+    page: 'guide',
     q: 'API(종량제)는 언제 쓰나요?',
     a: '코딩 도구로 매일 쓰는 개인과 팀은 대부분 구독(Pro·Max·Team)을 씁니다. API는 내 서비스에 AI 기능을 넣을 때, GitHub PR 자동 리뷰 같은 자동화에 쓸 때, AWS·Google Cloud 계약 안에서 쓸 때처럼 코딩 도구 구독과 다른 용도에 주로 씁니다. Claude Enterprise는 좌석비와 별도로 사용량을 API 요금으로 냅니다.',
   },
   {
-    scope: 'personal',
+    page: 'personal',
     q: '내 실제 토큰 사용량은 어떻게 확인하나요?',
-    a: 'Claude Code는 내 컴퓨터의 ~/.claude/projects 폴더에 사용량을 기록합니다. 터미널에서 npx ccusage를 실행하면 날짜별 토큰 사용량을 볼 수 있고, 이 값을 아래 "모델별 API 비용 직접 계산"에 넣으면 더 정확하게 계산됩니다.',
+    a: 'Claude Code는 내 컴퓨터의 ~/.claude/projects 폴더에 사용량을 기록합니다. 터미널에서 npx ccusage를 실행하면 날짜별 토큰 사용량을 볼 수 있고, 이 값을 이 페이지의 "자세히: 모델별 API 비용 직접 계산"에 넣으면 더 정확하게 계산됩니다.',
   },
 ];
 
-export const faqsFor = (scope: 'personal' | 'team') => faqs.filter((f) => f.scope === scope || f.scope === 'both');
+export const faqsFor = (page: FaqPage) => faqs.filter((f) => f.page === page);

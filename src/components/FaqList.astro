@@ -2,8 +2,10 @@
 interface Props {
   id: string;
   items: { q: string; a: string }[];
+  /** 계산 방법·공통 질문이 있는 가이드로 가는 링크 (계산기 페이지에서만) */
+  moreHref?: string;
 }
-const { id, items } = Astro.props;
+const { id, items, moreHref } = Astro.props;
 ---
 
 <section class="prose no-embed" aria-labelledby={id}>
@@ -16,4 +18,5 @@ const { id, items } = Astro.props;
       </details>
     ))
   }
+  {moreHref && <a class="faq-more" href={moreHref}>계산 방법·정확도 등은 가이드에서 →</a>}
 </section>
