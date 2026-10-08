@@ -104,6 +104,16 @@ const nav = [
         <span class="site-upd">가격 확인 {updatedLabel}</span>
       </div>
     </header>
+    <!-- 좁은 화면에서 메뉴가 옆으로 밀릴 때, 지금 페이지 메뉴가 화면 안에 보이게 -->
+    <script is:inline>
+      (function () {
+        var nav = document.querySelector('.site-nav');
+        var cur = nav && nav.querySelector('[aria-current="page"]');
+        if (!cur || nav.scrollWidth <= nav.clientWidth) return;
+        var left = cur.getBoundingClientRect().left - nav.getBoundingClientRect().left;
+        nav.scrollLeft = left - (nav.clientWidth - cur.offsetWidth) / 2;
+      })();
+    </script>
 
     <div class={`page${wide ? ' is-wide' : ''}`}>
       <a class="embed-only open-full" href={`${base}${path}`} target="_blank" rel="noopener">전체 화면에서 자세히 보기 ↗</a>

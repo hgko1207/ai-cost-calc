@@ -54,7 +54,30 @@
   --plan-2: #5b37ed;
   --plan-3: #0066ff;
   --plan-4: #d17600;
+  /* 글자 단계 (Montage typography): 새 규칙은 이 7단계만 쓴다 */
+  --t-page: 28px; /* title2: 페이지 제목 */
+  --t-section: 22px; /* heading1: 섹션 제목 */
+  --t-card: 17px; /* headline2: 카드·표 제목 */
+  --t-body: 16px; /* body1: 본문 */
+  --t-sub: 14px; /* label1: 보조 글 */
+  --t-meta: 13px; /* label2: 설명·표 머리 */
+  --t-badge: 12px; /* caption1: 배지 */
+  /* 간격 단계 (4px 기준) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --section-gap: var(--s-8); /* 섹션 사이 */
   color-scheme: light;
+}
+@media (max-width: 991px) {
+  :root {
+    --section-gap: var(--s-7);
+  }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -141,6 +164,12 @@ button {
 :focus-visible {
   outline: 2px solid var(--primary-normal);
   outline-offset: 2px;
+}
+/* 선으로 나눈 묶음(overflow: hidden) 안의 칸은 바깥 테두리가 잘리므로 안쪽에 그린다 */
+.link-card:focus-visible,
+.related a:focus-visible,
+.doc-tab:focus-visible {
+  outline-offset: -3px;
 }
 
 .page {
@@ -929,23 +958,28 @@ table.detail {
   line-height: 20px;
 }
 table.detail caption {
-  margin-bottom: 8px;
+  margin: var(--s-3) 0 var(--s-2);
   color: var(--label-strong);
-  font-size: 15px;
+  font-size: var(--t-card);
   font-weight: 600;
   text-align: left;
 }
 table.detail th,
 table.detail td {
-  padding: 10px 8px;
+  padding: var(--s-3) var(--s-2);
   text-align: left;
   vertical-align: top;
   box-shadow: inset 0 -1px 0 var(--line-alternative);
+  /* 본문의 overflow-wrap: anywhere 때문에 칸이 한 글자 폭까지 줄어드는 것을 막는다 (단어 단위로만 줄바꿈) */
+  overflow-wrap: normal;
+}
+table.detail td {
+  font-variant-numeric: tabular-nums;
 }
 table.detail thead th {
   color: var(--label-alternative);
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--t-meta);
+  font-weight: 600;
   box-shadow: inset 0 -1px 0 var(--line-normal);
 }
 table.detail tbody th {
@@ -970,31 +1004,38 @@ table.detail .note {
 
 /* ── 본문 섹션 ── */
 .prose {
-  margin-top: 56px;
+  margin-top: var(--section-gap);
   font-size: 16px;
   line-height: 26px;
 }
-/* title3 bold */
+/* heading1 bold */
 .prose h2 {
-  margin: 0 0 16px;
+  margin: 0 0 var(--s-4);
   color: var(--label-strong);
-  font-size: 24px;
-  line-height: 32px;
+  font-size: var(--t-section);
+  line-height: 30px;
   font-weight: 700;
-  letter-spacing: -0.023em;
+  letter-spacing: -0.02em;
 }
 .prose h2 .muted {
-  font-size: 14px;
+  font-size: var(--t-sub);
   font-weight: 500;
   letter-spacing: 0;
 }
-/* headline1 bold */
+/* headline2 bold */
 .prose h3 {
-  margin: 32px 0 12px;
+  margin: var(--s-6) 0 var(--s-3);
   color: var(--label-strong);
-  font-size: 18px;
+  font-size: var(--t-card);
   line-height: 26px;
   font-weight: 600;
+}
+/* 본문에 바로 놓인 표도 다른 표(접기 상자)와 같은 카드에 담는다 */
+.prose > .table-wrap {
+  padding: var(--s-2) var(--s-5) var(--s-4);
+  border-radius: 16px;
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-small), inset 0 0 0 1px var(--line-alternative);
 }
 .prose ol,
 .prose ul {
@@ -1010,22 +1051,33 @@ table.detail .note {
 .prose .table-wrap + .table-wrap {
   margin-top: 24px;
 }
-.steps {
+/* 단계·체크리스트: 카드 하나 안을 선으로 나누고, 아래 표와 같은 전체 폭 */
+.steps,
+.checklist {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
   padding: 0 !important;
   list-style: none;
+  border-radius: 16px;
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-small), inset 0 0 0 1px var(--line-alternative);
+  overflow: hidden;
+}
+.prose > .steps,
+.prose > .checklist {
+  max-width: none;
+}
+.steps {
+  grid-template-columns: repeat(3, 1fr);
 }
 .steps li {
   display: flex;
   flex-direction: column;
   gap: 6px;
   margin: 0;
-  padding: 18px;
-  border-radius: 16px;
-  background: var(--bg-elevated);
-  box-shadow: inset 0 0 0 1px var(--line-alternative);
+  padding: 20px var(--s-5);
+}
+.steps li + li {
+  box-shadow: inset 1px 0 0 var(--line-neutral);
 }
 .steps strong {
   color: var(--primary-normal) !important;
@@ -1037,31 +1089,53 @@ table.detail .note {
   line-height: 22px;
 }
 .checklist {
-  display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-  padding: 0 !important;
-  list-style: none;
 }
 .checklist li {
   position: relative;
   margin: 0;
-  padding: 12px 14px 12px 40px;
-  border-radius: 12px;
-  background: var(--bg-elevated);
-  box-shadow: inset 0 0 0 1px var(--line-alternative);
+  padding: 14px var(--s-5) 14px 52px;
   font-size: 14px;
   line-height: 22px;
+}
+/* 2열: 둘째 줄부터 가로선, 오른쪽 칸은 세로선 */
+.checklist li:nth-child(n + 3) {
+  box-shadow: inset 0 1px 0 var(--line-neutral);
+}
+.checklist li:nth-child(even) {
+  box-shadow: inset 1px 0 0 var(--line-neutral);
+}
+.checklist li:nth-child(even):nth-child(n + 3) {
+  box-shadow: inset 1px 0 0 var(--line-neutral), inset 0 1px 0 var(--line-neutral);
 }
 .checklist li::before {
   content: '';
   position: absolute;
-  left: 14px;
-  top: 15px;
+  left: var(--s-5);
+  top: 17px;
   width: 16px;
   height: 16px;
   border-radius: 4px;
   box-shadow: inset 0 0 0 1.5px var(--line-normal);
+}
+/* 1열(767px 이하, 아래 미디어 규칙에서 전환)일 때는 가로선만 */
+@media (max-width: 767px) {
+  .steps li + li,
+  .checklist li + li,
+  .checklist li:nth-child(even),
+  .checklist li:nth-child(even):nth-child(n + 3) {
+    box-shadow: inset 0 1px 0 var(--line-neutral);
+  }
+  .steps li {
+    padding: var(--s-4) 20px;
+  }
+  .checklist li {
+    padding: var(--s-3) 20px var(--s-3) 48px;
+  }
+  .checklist li::before {
+    left: 20px;
+    top: 15px;
+  }
 }
 .faq {
   padding: 16px 0;
@@ -1080,46 +1154,66 @@ table.detail .note {
   font-size: 15px;
   line-height: 24px;
 }
-.related {
+/* 링크 묶음: 카드 하나 안을 세로선(좁은 화면은 가로선)으로 나눈다 */
+.related,
+.page-links {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
   margin: 0;
   padding: 0 !important;
   list-style: none;
+  border-radius: 16px;
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-small), inset 0 0 0 1px var(--line-alternative);
+  overflow: hidden;
 }
 .related li {
   margin: 0;
 }
-.related a {
+.related li + li,
+.link-card + .link-card {
+  box-shadow: inset 1px 0 0 var(--line-neutral);
+}
+.related a,
+.link-card {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--s-1);
   height: 100%;
-  padding: 18px;
-  border-radius: 16px;
-  background: var(--bg-elevated);
-  box-shadow: inset 0 0 0 1px var(--line-alternative);
+  padding: var(--s-5);
   color: var(--label-normal);
   text-decoration: none;
-  transition: box-shadow 0.15s ease;
+  transition: background-color 0.15s ease;
 }
-.related a:hover {
-  box-shadow: var(--shadow-medium), inset 0 0 0 1px var(--line-neutral);
+.related a:hover,
+.link-card:hover {
+  background: var(--fill-alternative);
+  text-decoration: none;
 }
-.related strong {
-  font-size: 16px;
+.related strong,
+.link-card strong {
+  font-size: var(--t-body);
   line-height: 24px;
   font-weight: 600;
 }
-.related span {
+.related strong::after,
+.link-card strong::after {
+  content: ' →';
+  color: var(--primary-normal);
+}
+.related a:hover strong,
+.link-card:hover strong {
+  color: var(--primary-normal);
+}
+.related span,
+.link-card span {
   color: var(--label-alternative);
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 20px;
 }
 .footer {
-  margin-top: 64px;
-  padding-top: 24px;
+  margin-top: var(--section-gap);
+  padding-top: var(--s-5);
   box-shadow: inset 0 1px 0 var(--line-alternative);
   color: var(--label-neutral);
   font-size: 14px;
@@ -1223,7 +1317,7 @@ table.detail .note {
   margin-top: 24px;
   border-radius: 16px;
   background: var(--bg-elevated);
-  box-shadow: inset 0 0 0 1px var(--line-alternative);
+  box-shadow: var(--shadow-small), inset 0 0 0 1px var(--line-alternative);
 }
 .price-more > summary {
   display: flex;
@@ -1234,7 +1328,7 @@ table.detail .note {
 }
 .price-more > summary strong {
   color: var(--label-normal);
-  font-size: 16px;
+  font-size: var(--t-card);
   line-height: 24px;
   font-weight: 600;
 }
@@ -1459,13 +1553,13 @@ table.detail tr.is-best-row strong {
   margin-top: 16px;
 }
 .vendor-group {
-  margin-top: 8px;
-  border-radius: 12px;
+  margin-top: var(--s-3);
+  border-radius: 16px;
   background: var(--bg-elevated);
-  box-shadow: inset 0 0 0 1px var(--line-alternative);
+  box-shadow: var(--shadow-small), inset 0 0 0 1px var(--line-alternative);
 }
 .vendor-group > summary {
-  padding: 12px 16px;
+  padding: var(--s-4) var(--s-5);
   cursor: pointer;
   font-weight: 600;
 }
@@ -1475,7 +1569,7 @@ table.detail tr.is-best-row strong {
   font-weight: 500;
 }
 .vendor-group > .table-wrap {
-  padding: 0 16px 12px;
+  padding: 0 var(--s-5) var(--s-4);
 }
 
 .options-list[hidden] {
@@ -1572,7 +1666,7 @@ table.detail tr.is-best-row strong {
   max-width: 1200px;
 }
 .page-head {
-  margin-bottom: 20px;
+  margin-bottom: var(--s-6);
 }
 .page-head h1 {
   margin: 0;
@@ -1600,28 +1694,7 @@ table.detail tr.is-best-row strong {
   font-weight: 600;
 }
 .page-links {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-top: 32px;
-}
-.link-card {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 16px 18px;
-  color: var(--label-normal);
-}
-.link-card:hover {
-  text-decoration: none;
-  box-shadow: var(--shadow-medium), inset 0 0 0 1px var(--line-neutral);
-}
-.link-card strong {
-  font-weight: 600;
-}
-.link-card span {
-  color: var(--label-alternative);
-  font-size: 13px;
+  margin-top: var(--section-gap);
 }
 
 /* 홈 */
@@ -1640,20 +1713,25 @@ table.detail tr.is-best-row strong {
   font-weight: 700;
   letter-spacing: -0.027em;
 }
+/* 신뢰 표시 한 줄: 큰 숫자 타일 대신 제목·계산기 카드로 눈이 먼저 가게 */
 .home-stats {
   display: flex;
-  gap: 28px;
-  margin: 24px 0 0;
-}
-.home-stats dt {
+  flex-wrap: wrap;
+  gap: var(--s-1) 20px;
+  margin: 20px 0 0;
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-sub);
+  line-height: 22px;
+}
+.home-stats > div {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-1);
 }
 .home-stats dd {
-  margin: 2px 0 0;
-  color: var(--label-strong);
-  font-size: 22px;
-  font-weight: 700;
+  margin: 0;
+  color: var(--label-normal);
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 .home-entries {
@@ -1700,14 +1778,15 @@ table.detail tr.is-best-row strong {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: var(--s-4);
 }
 .sec-head h2 {
   margin: 0;
   color: var(--label-strong);
-  font-size: 20px;
-  line-height: 28px;
+  font-size: var(--t-section);
+  line-height: 30px;
   font-weight: 700;
+  letter-spacing: -0.02em;
 }
 .sec-head a {
   font-size: 14px;
@@ -1723,14 +1802,17 @@ table.detail tr.is-best-row strong {
 }
 .board th,
 .board td {
-  padding: 10px 6px;
+  padding: var(--s-3) 6px;
   text-align: left;
   box-shadow: inset 0 -1px 0 var(--line-alternative);
 }
 .board thead th {
   color: var(--label-alternative);
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--t-meta);
+  font-weight: 600;
+}
+.board td {
+  font-variant-numeric: tabular-nums;
 }
 .board tbody th {
   font-weight: 600;
@@ -1748,7 +1830,7 @@ table.detail tr.is-best-row strong {
   padding: 8px 18px;
 }
 .home-posts {
-  margin-top: 40px;
+  margin-top: var(--section-gap);
 }
 
 /* 변경 기록 */
@@ -1806,13 +1888,42 @@ table.detail tr.is-best-row strong {
   .site-upd {
     display: none;
   }
+  /* 로고는 고정하고 메뉴만 옆으로 밀리게, 양끝을 흐려 더 있다는 걸 알린다 */
   .site-top-in {
+    gap: var(--s-1);
+    padding-right: 0;
+  }
+  .logo {
+    font-size: 15px;
+  }
+  .site-nav {
+    min-width: 0;
     overflow-x: auto;
+    scrollbar-width: none;
+    padding: 0 28px 0 20px;
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 22px, #000 calc(100% - 40px), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 22px, #000 calc(100% - 40px), transparent);
+  }
+  .site-nav::-webkit-scrollbar {
+    display: none;
+  }
+  .site-nav a {
+    padding: 8px 10px;
+    font-size: 14px;
   }
   .home-hero,
   .home-grid,
-  .page-links {
+  .page-links,
+  .related {
     grid-template-columns: 1fr;
+  }
+  .related li + li,
+  .link-card + .link-card {
+    box-shadow: inset 0 1px 0 var(--line-neutral);
+  }
+  .related a,
+  .link-card {
+    padding: var(--s-4) var(--s-5);
   }
 }
 
@@ -1983,14 +2094,38 @@ table.detail tr.is-best-row strong {
   font-size: 13px;
   line-height: 18px;
 }
+/* 요금제 비교: 테두리 하나 안을 세로선으로 나눈 묶음, 추천 칸은 위쪽 파란 띠 */
 .result .plan-fits {
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-  gap: 10px;
+  gap: 0;
   margin: 0;
+  border-radius: 12px;
+  background: var(--bg-normal);
+  box-shadow: inset 0 0 0 1px var(--line-neutral);
+  overflow: hidden;
 }
 .result .fit {
   gap: 10px;
-  padding: 16px;
+  padding: var(--s-4) 18px;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.result .fit + .fit {
+  box-shadow: inset 1px 0 0 var(--line-neutral);
+}
+.result .fit.is-rec {
+  background: var(--primary-a05);
+  box-shadow: inset 0 3px 0 var(--primary-normal);
+}
+/* 상태와 시간은 칸마다 같은 모양이 되도록 일부러 두 줄로 */
+.result .fit .fit-status {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.result .fit-status strong {
+  margin-right: 0;
 }
 .fit-head {
   display: flex;
@@ -2052,10 +2187,11 @@ table.detail tr.is-best-row strong {
   font-size: 15px;
   line-height: 22px;
 }
+/* 크게 쓰는 금액은 추천 금액 하나만: 여기 금액은 본문 크기로 */
 .api-line strong {
   color: var(--label-strong);
-  font-size: 17px;
-  font-weight: 700;
+  font-size: inherit;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 .api-line .good {
@@ -2182,6 +2318,10 @@ table.detail tr.is-best-row strong {
   box-shadow: none;
   font-weight: 600;
 }
+/* 인원은 최대 10000명(5자리)까지 보이게 시간 칸보다 넓게 */
+.group-ctl .stepper:first-child input {
+  width: 56px;
+}
 .group-ctl .stepper input:focus {
   box-shadow: inset 0 0 0 2px var(--primary-a43);
 }
@@ -2193,30 +2333,40 @@ table.detail tr.is-best-row strong {
   font-size: 13px;
   line-height: 18px;
 }
+/* 도입 방식: 테두리 하나 안을 세로선으로 나눈 묶음, 보고 있는 칸은 위쪽 파란 띠 */
 .doc-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  border-radius: 12px;
+  background: var(--bg-normal);
+  box-shadow: inset 0 0 0 1px var(--line-neutral);
+  overflow: hidden;
 }
 .doc-tab {
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 6px;
+  align-content: flex-start;
+  gap: 2px 6px;
   min-height: 40px;
-  padding: 8px 14px;
+  padding: var(--s-3) var(--s-4);
   border: 0;
-  border-radius: 10px;
-  background: var(--bg-normal);
-  box-shadow: inset 0 0 0 1px var(--line-normal);
+  background: none;
   color: var(--label-normal);
   font-size: 14px;
   line-height: 20px;
+  text-align: left;
   cursor: pointer;
+}
+.doc-tab + .doc-tab {
+  box-shadow: inset 1px 0 0 var(--line-neutral);
 }
 .doc-tab strong {
   font-weight: 600;
 }
 .doc-tab > span:last-child {
+  flex-basis: 100%;
   color: var(--label-alternative);
   font-variant-numeric: tabular-nums;
 }
@@ -2225,20 +2375,17 @@ table.detail tr.is-best-row strong {
 }
 .doc-tab[aria-pressed='true'] {
   background: var(--primary-a05);
-  box-shadow: inset 0 0 0 1.5px var(--primary-normal);
-  color: var(--primary-normal);
+  box-shadow: inset 0 3px 0 var(--primary-normal);
 }
 .doc-tab[aria-pressed='true'] > span:last-child {
   color: var(--primary-normal);
 }
 .doc-tab:disabled {
-  background: transparent;
-  box-shadow: inset 0 0 0 1px var(--line-neutral);
   color: var(--label-alternative);
   cursor: default;
 }
 .doc-tab:disabled:hover {
-  background: transparent;
+  background: none;
 }
 table.budget {
   width: 100%;
@@ -2293,9 +2440,9 @@ table.budget {
   font-size: 15px;
   font-weight: 700;
 }
+/* 크게 쓰는 총액은 머리(.result-total)에 있으니 표 합계는 같은 줄 크기로 */
 .budget tfoot strong {
-  font-size: 18px;
-  line-height: 26px;
+  font-size: inherit;
 }
 .feat-legend {
   color: var(--label-alternative);
@@ -2355,4 +2502,270 @@ table.budget {
   .result .plan-fits {
     grid-template-columns: 1fr !important;
   }
+  /* 한 줄씩일 때: 가로선으로 나누고 추천 줄은 왼쪽 파란 띠, 상태·시간은 한 줄 */
+  .result .fit {
+    gap: var(--s-2);
+    padding: var(--s-3) var(--s-4);
+  }
+  .result .fit + .fit {
+    box-shadow: inset 0 1px 0 var(--line-neutral);
+  }
+  .result .fit.is-rec {
+    box-shadow: inset 3px 0 0 var(--primary-normal);
+  }
+  .result .fit + .fit.is-rec {
+    box-shadow: inset 3px 0 0 var(--primary-normal), inset 0 1px 0 var(--line-neutral);
+  }
+  .result .fit .fit-status {
+    flex-direction: row;
+    gap: 6px;
+  }
+  .plan-fits[data-n='4'] .fit-head {
+    flex-direction: row;
+    align-items: center;
+  }
+  /* 선택지 4개 이하: 한 줄을 꽉 채우되 글자 길이에 비례한 폭으로 */
+  .q-options[data-seg]:not(:has(> .opt:nth-child(5))) {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-self: stretch;
+  }
+  .q-options[data-seg] .opt {
+    flex: 1 1 auto;
+    padding: 6px 8px;
+    white-space: nowrap;
+  }
+
+  /* 좌우 여백 24 → 16, 계산기 카드 안쪽 → 20: 표와 입력이 들어갈 폭 확보 */
+  .page,
+  .page.is-wide,
+  .site-top-in {
+    padding-left: var(--s-4);
+  }
+  .page,
+  .page.is-wide {
+    padding-right: var(--s-4);
+  }
+  .advisor > .card {
+    padding: 20px;
+  }
+
+  /* 도입 방식: 한 줄씩, 보고 있는 줄은 왼쪽 파란 띠, 금액은 오른쪽 */
+  .doc-tabs {
+    grid-auto-flow: row;
+    grid-template-columns: 1fr;
+  }
+  .doc-tab + .doc-tab {
+    box-shadow: inset 0 1px 0 var(--line-neutral);
+  }
+  .doc-tab[aria-pressed='true'] {
+    box-shadow: inset 3px 0 0 var(--primary-normal);
+  }
+  .doc-tab + .doc-tab[aria-pressed='true'] {
+    box-shadow: inset 3px 0 0 var(--primary-normal), inset 0 1px 0 var(--line-neutral);
+  }
+  .doc-tab > span:last-child {
+    flex-basis: auto;
+    margin-left: auto;
+  }
+
+  /* 예산표: 5칸 표는 화면보다 넓어 잘리므로 좌석마다 두 줄 (좌석·월 금액 / 대상·단가 × 인원) */
+  table.budget,
+  .budget tbody,
+  .budget tfoot {
+    display: block;
+  }
+  .budget thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .budget tbody tr,
+  .budget tfoot tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 2px 6px;
+    padding: var(--s-3) 0;
+    box-shadow: inset 0 -1px 0 var(--line-alternative);
+  }
+  .budget tbody tr {
+    grid-template-areas: 'seat seat total' 'who unit count';
+  }
+  .budget tfoot tr {
+    padding-bottom: 0;
+    box-shadow: none;
+  }
+  .budget tbody th,
+  .budget tbody td,
+  .budget tfoot th,
+  .budget tfoot td {
+    padding: 0;
+    box-shadow: none;
+  }
+  .budget tbody th {
+    grid-area: seat;
+  }
+  .budget tbody td:nth-of-type(1) {
+    grid-area: who;
+  }
+  .budget tbody td:nth-of-type(2) {
+    grid-area: unit;
+    max-width: 8em; /* "추가 사용량 … 포함"이 왼쪽 대상 칸을 밀어내지 않게 */
+  }
+  .budget tbody td:nth-of-type(3) {
+    grid-area: count;
+  }
+  .budget tbody td:nth-of-type(-n + 3) {
+    color: var(--label-alternative);
+    font-size: var(--t-meta);
+  }
+  .budget tbody td:nth-of-type(3)::before {
+    content: '× ';
+  }
+  .budget tbody td:nth-of-type(3)::after {
+    content: '명';
+  }
+  .budget tbody td:nth-of-type(4) {
+    grid-area: total;
+    font-weight: 600;
+  }
+
+  /* 홈 가격 보드: 5칸 표는 이름이 여러 줄로 꺾이므로 모델마다 두 줄 (이름·메모 / 입력·출력·캐시) */
+  .board {
+    padding: 4px var(--s-4) var(--s-3);
+  }
+  .board table,
+  .board tbody {
+    display: block;
+  }
+  .board thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .board tbody tr {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--s-1) 14px;
+    padding: var(--s-3) 0;
+    box-shadow: inset 0 -1px 0 var(--line-alternative);
+  }
+  /* 숫자를 항상 둘째 줄로 내리는 줄바꿈 */
+  .board tbody tr::after {
+    content: '';
+    order: 2;
+    flex-basis: 100%;
+  }
+  .board tbody th,
+  .board tbody td {
+    padding: 0;
+    box-shadow: none;
+    text-align: left;
+  }
+  .board tbody th {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .board tbody th .sub {
+    display: inline;
+    margin-left: 6px;
+  }
+  .board tbody td:nth-of-type(4) {
+    order: 1;
+    flex: none;
+  }
+  .board tbody td:nth-of-type(4):empty {
+    display: none;
+  }
+  .board tbody td:nth-of-type(-n + 3) {
+    order: 3;
+  }
+  .board tbody td:nth-of-type(-n + 3)::before {
+    margin-right: var(--s-1);
+    color: var(--label-alternative);
+    font-size: var(--t-meta);
+  }
+  .board tbody td:nth-of-type(1)::before {
+    content: '입력';
+  }
+  .board tbody td:nth-of-type(2)::before {
+    content: '출력';
+  }
+  .board tbody td:nth-of-type(3)::before {
+    content: '캐시';
+  }
+  .board td .pill {
+    margin-right: 0;
+    white-space: nowrap;
+  }
+
+  /* 옆으로 밀리는 표(가격표·가이드): 첫 칸(요금제·모델 이름)은 고정.
+     표 상자의 왼쪽 여백을 첫 칸 안쪽 여백으로 옮겨, 고정 칸이 상자 끝에 붙어 틈으로 뒤 글자가 비치지 않게 */
+  .prose .table-wrap {
+    padding-left: 0;
+    padding-right: 20px;
+  }
+  .prose table.detail caption {
+    padding-left: 20px;
+  }
+  /* 마지막 칸(관리 기능·비고 등)이 너무 좁아 여러 줄로 꺾이며 행이 길어지지 않게 */
+  .prose table.detail td:last-child {
+    min-width: 160px;
+  }
+  .prose table.detail tbody th,
+  .prose table.detail thead th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    min-width: 128px;
+    max-width: 152px;
+    padding-left: 20px;
+    background: var(--bg-elevated);
+    box-shadow: inset -1px 0 0 var(--line-neutral), inset 0 -1px 0 var(--line-alternative);
+  }
+  .prose table.detail thead th:first-child {
+    box-shadow: inset -1px 0 0 var(--line-neutral), inset 0 -1px 0 var(--line-normal);
+  }
+  .prose table.detail tr.is-best-row th {
+    background: linear-gradient(var(--primary-a05), var(--primary-a05)), var(--bg-elevated);
+  }
+  /* 오른쪽에 더 있다는 그림자: 끝까지 밀면 덮개(local)가 따라와 가린다 */
+  .table-wrap,
+  .prose > .table-wrap {
+    background:
+      linear-gradient(to left, var(--bg-elevated) 30%, transparent) right center / 32px 100% no-repeat local,
+      radial-gradient(farthest-side at 100% 50%, rgba(23, 23, 23, 0.14), transparent) right center / 12px 100% no-repeat scroll,
+      var(--bg-elevated);
+  }
+
+  /* 인원 입력: "하루"·"시간"이 세로로 꺾이지 않게 버튼 폭을 줄임 */
+  .group-ctl {
+    gap: var(--s-1);
+  }
+  .group-ctl .stepper button {
+    width: 28px;
+  }
+  .group-ctl .stepper input {
+    width: 40px; /* "15.5"시간까지 */
+  }
+  .group-ctl .stepper:first-child input {
+    width: 56px;
+  }
+}
+/* 아주 좁은 화면(360px 등): 인원 입력 줄이 넘치지 않게 "하루" 글자만 숨김 (섹션 제목이 "인원과 하루 사용 시간") */
+@media (max-width: 374px) {
+  .group-gap + .unit-text {
+    display: none;
+  }
+}
+/* 선택지 5개 이상(예: Codex 요금제): 한 칸만 둘째 줄로 떨어지지 않게 3칸 격자 */
+.q-options[data-seg]:has(> .opt:nth-child(5)) {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  justify-self: stretch;
 }

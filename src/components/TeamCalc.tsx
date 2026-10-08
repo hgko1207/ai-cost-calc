@@ -246,6 +246,12 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
                   {view.billingNote && ` · ${view.billingNote}`}
                 </p>
               </div>
+              <div className="result-total">
+                <strong>월 {krwShort(view.monthlyKrw)}</strong>
+                <span>
+                  연 {krwShort(view.annualKrw)} · 1인 {krwShort(view.perUserKrw)}
+                </span>
+              </div>
             </div>
 
             <div className="doc-tabs" role="group" aria-label="도입 방식 바꿔 보기">
@@ -308,9 +314,6 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
                   <td className="num">{r.headcount}명</td>
                   <td className="num">
                     <strong>월 {krwShort(view.monthlyKrw)}</strong>
-                    <span className="sub">
-                      연 {krwShort(view.annualKrw)} · 1인 {krwShort(view.perUserKrw)}
-                    </span>
                   </td>
                 </tr>
               </tfoot>

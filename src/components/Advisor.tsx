@@ -158,6 +158,8 @@ export default function Advisor({ advisor, models, plans, relatedPosts }: Adviso
   const recPrice = rec ? rec.krw : a.api.krw;
   const resultPost = pickPost(relatedPosts, state.toolId, rec?.plan.id ?? (current ? current.plan.id : undefined));
   const saving = a.api.krw - recPrice;
+  // API 추천의 비교 대상: advise()가 API와 견준 "한도 안에서 가장 싼 요금제"
+  const apiAlt = rec ? undefined : a.fits.find((f) => f.status !== 'short');
 
   return (
     <div className="advisor">
@@ -286,18 +288,27 @@ export default function Advisor({ advisor, models, plans, relatedPosts }: Adviso
 
         {lowConfidence && <p className="warn small">{tool.name} 쪽은 실사용 데이터가 없어 Claude Code 기준을 빌려 쓴 참고값입니다.</p>}
 
-        <p className="api-line">
-          <span className="muted">같은 양을 API로 내면</span>
-          <strong>월 {krwShort(a.api.krw)}</strong>
-          <span className={rec && saving > 0 ? 'good' : 'muted'}>
-            →{' '}
-            {!rec
-              ? '구독보다 API가 더 싸요'
-              : saving > 0
-                ? `구독이 월 ${krwShort(saving)} 싸요`
-                : '금액은 비슷하지만 구독이 한도 걱정을 덜어 줘요'}
-          </span>
-        </p>
+        {rec || !apiAlt ? (
+          <p className="api-line">
+            <span className="muted">같은 양을 API로 내면</span>
+            <strong>월 {krwShort(a.api.krw)}</strong>
+            <span className={rec && saving > 0 ? 'good' : 'muted'}>
+              →{' '}
+              {!rec
+                ? '구독보다 API가 더 싸요'
+                : saving > 0
+                  ? `구독이 월 ${krwShort(saving)} 싸요`
+                  : '금액은 비슷하지만 구독이 한도 걱정을 덜어 줘요'}
+            </span>
+          </p>
+        ) : (
+          // API 추천일 때는 위 금액을 되풀이하지 않고, 비교한 구독과의 차이를 보여 준다
+          <p className="api-line">
+            <span className="muted">한도 안에서 가장 싼 구독({shortName(apiAlt.plan.name)})은</span>
+            <strong>월 {krwShort(apiAlt.krw)}</strong>
+            <span className="good">→ API가 월 {krwShort(apiAlt.krw - a.api.krw)} 싸요</span>
+          </p>
+        )}
 
         {resultPost && (
           <p className="result-post">
