@@ -45,10 +45,12 @@
   --inverse-bg: #1b1c1e;
   --inverse-label: #f7f7f8;
   --seg-selected: #ffffff; /* 세그먼트에서 고른 칸 바탕 */
+  --static-white: #ffffff; /* 파란 버튼·배지(primary-solid) 위 글자: 테마와 무관하게 흰색 (Montage static.white) */
   /* elevation */
   --shadow-small: 0 2px 4px -2px rgba(23, 23, 23, 0.06), 0 4px 6px -1px rgba(23, 23, 23, 0.06);
   --shadow-medium: 0 4px 6px -2px rgba(23, 23, 23, 0.07), 0 10px 15px -3px rgba(23, 23, 23, 0.07);
   --scroll-shadow: rgba(23, 23, 23, 0.14); /* 옆으로 밀리는 표의 "더 있음" 그림자 */
+  --shadow-seg: 0 1px 3px rgba(23, 23, 23, 0.14); /* 세그먼트에서 고른 칸 */
   /* 차트·브랜드 구분 색 (accent foreground) */
   --v-anthropic: #f55a00;
   --v-openai: #009632;
@@ -142,6 +144,15 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+/* 키보드 이동·목차 이동 때 고정된 상단 메뉴(60px)·모바일 결과 바에 가리지 않게 (WCAG 2.4.11) */
+html:not([data-embed]) {
+  scroll-padding-top: 72px;
+}
+@media (max-width: 991px) {
+  html:not([data-embed]) {
+    scroll-padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  }
+}
 body {
   margin: 0;
   background: var(--bg-alternative);
@@ -149,7 +160,7 @@ body {
   font-family: 'Pretendard Variable', 'Pretendard JP Variable', Pretendard, 'Pretendard JP', -apple-system, BlinkMacSystemFont,
     system-ui, Roboto, 'Helvetica Neue', 'Segoe UI', 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
   /* body1 */
-  font-size: 16px;
+  font-size: var(--t-body);
   line-height: 1.5;
   letter-spacing: 0.0057em;
   word-break: keep-all;
@@ -193,7 +204,7 @@ button {
 }
 /* label2 */
 .small {
-  font-size: 13px;
+  font-size: var(--t-meta);
   line-height: 18px;
   letter-spacing: 0.0194em;
 }
@@ -205,7 +216,7 @@ button {
 .sub {
   display: block;
   color: var(--label-alternative);
-  font-size: 12px;
+  font-size: var(--t-badge);
   line-height: 16px;
   font-weight: 400;
 }
@@ -229,12 +240,12 @@ button {
 .lead {
   margin: 8px 0 0;
   color: var(--label-alternative);
-  font-size: 16px;
+  font-size: var(--t-body);
   line-height: 26px;
 }
 .open-full {
   margin-top: 6px;
-  font-size: 14px;
+  font-size: var(--t-sub);
   font-weight: 600;
 }
 
@@ -316,7 +327,7 @@ button {
 .opt span,
 .preset span {
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-meta);
   line-height: 18px;
 }
 .opt:hover,
@@ -370,7 +381,7 @@ button {
 .eyebrow-inline {
   margin: 0;
   color: var(--primary-normal);
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 20px;
   font-weight: 600;
 }
@@ -382,7 +393,7 @@ button {
   gap: 4px 12px;
   margin: 4px 0 8px;
   color: var(--label-strong);
-  font-size: 28px;
+  font-size: var(--t-page);
   line-height: 38px;
   font-weight: 700;
   letter-spacing: -0.0236em;
@@ -391,7 +402,7 @@ button {
 .result-reason {
   margin: 0 0 20px;
   color: var(--label-neutral);
-  font-size: 16px;
+  font-size: var(--t-body);
   line-height: 26px;
 }
 
@@ -468,7 +479,7 @@ button {
   border-radius: 6px;
   background: var(--fill-normal);
   color: var(--label-neutral);
-  font-size: 12px;
+  font-size: var(--t-badge);
   line-height: 16px;
   font-weight: 600;
   vertical-align: 1px;
@@ -476,7 +487,7 @@ button {
 .pill.rec,
 .badge {
   background: var(--primary-solid);
-  color: #ffffff;
+  color: var(--static-white);
 }
 .warn-pill {
   background: var(--cautionary-bg);
@@ -505,8 +516,8 @@ button {
   border: 0;
   border-radius: 12px;
   background: var(--primary-solid);
-  color: #ffffff;
-  font-size: 16px;
+  color: var(--static-white);
+  font-size: var(--t-body);
   line-height: 24px;
   font-weight: 600;
   cursor: pointer;
@@ -523,7 +534,7 @@ button {
   border: 0;
   background: none;
   color: var(--primary-normal);
-  font-size: 14px;
+  font-size: var(--t-sub);
   font-weight: 600;
   cursor: pointer;
 }
@@ -560,7 +571,7 @@ button {
 }
 .unit-text {
   color: var(--label-alternative);
-  font-size: 14px;
+  font-size: var(--t-sub);
 }
 
 /* ── 자세히(토큰 계산기) ── */
@@ -576,7 +587,7 @@ button {
   gap: 2px;
   padding: 18px 24px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: var(--t-body);
   line-height: 24px;
 }
 .detail-calc > summary strong {
@@ -584,7 +595,7 @@ button {
 }
 .detail-calc > summary span {
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-meta);
   line-height: 18px;
 }
 .detail-calc[open] > summary {
@@ -627,7 +638,7 @@ button {
 }
 .field-label {
   color: var(--label-neutral);
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 20px;
   font-weight: 600;
 }
@@ -645,13 +656,13 @@ button {
   position: absolute;
   right: 12px;
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-meta);
   white-space: nowrap;
   pointer-events: none;
 }
 .field-hint {
   color: var(--label-alternative);
-  font-size: 12px;
+  font-size: var(--t-badge);
   line-height: 16px;
 }
 .check {
@@ -660,7 +671,7 @@ button {
   gap: 8px;
   margin-top: 16px;
   color: var(--label-neutral);
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 20px;
 }
 .check input {
@@ -675,7 +686,7 @@ button {
 .advanced summary {
   margin-bottom: 12px;
   color: var(--label-alternative);
-  font-size: 14px;
+  font-size: var(--t-sub);
   font-weight: 600;
   cursor: pointer;
 }
@@ -683,7 +694,7 @@ button {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: var(--t-sub);
   font-weight: 600;
 }
 .model-select select {
@@ -704,7 +715,7 @@ table.options {
   width: 100%;
   margin-top: 16px;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 20px;
 }
 table.options th,
@@ -716,7 +727,7 @@ table.options td {
 }
 table.options thead th {
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-meta);
   font-weight: 500;
 }
 table.options tbody th {
@@ -744,7 +755,7 @@ table.options tr.is-best {
 }
 .chart .axis-label {
   fill: var(--label-alternative);
-  font-size: 12px;
+  font-size: var(--t-badge);
 }
 .chart .api-line {
   stroke: var(--label-normal);
@@ -758,7 +769,7 @@ table.options tr.is-best {
 }
 .chart .current-label {
   fill: var(--primary-normal);
-  font-size: 12px;
+  font-size: var(--t-badge);
   font-weight: 700;
 }
 .chart-legend {
@@ -768,7 +779,7 @@ table.options tr.is-best {
   margin: 10px 0 0;
   padding: 0;
   list-style: none;
-  font-size: 13px;
+  font-size: var(--t-meta);
 }
 .swatch {
   display: inline-block;
@@ -784,7 +795,7 @@ table.options tr.is-best {
 .zones {
   margin: 14px 0 0;
   padding-left: 18px;
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 22px;
 }
 
@@ -804,7 +815,7 @@ table.options tr.is-best {
   border: 0;
   border-radius: 10px;
   background: transparent;
-  font-size: 14px;
+  font-size: var(--t-sub);
   text-align: left;
   cursor: pointer;
 }
@@ -870,7 +881,7 @@ table.detail {
   width: 100%;
   min-width: 560px;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 20px;
 }
 table.detail caption {
@@ -905,7 +916,7 @@ table.detail tbody th {
 table.detail .note {
   min-width: 180px;
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-meta);
 }
 
 .disclaimer {
@@ -914,14 +925,14 @@ table.detail .note {
   border-radius: 12px;
   background: var(--fill-alternative);
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-meta);
   line-height: 20px;
 }
 
 /* ── 본문 섹션 ── */
 .prose {
   margin-top: var(--section-gap);
-  font-size: 16px;
+  font-size: var(--t-body);
   line-height: 26px;
 }
 /* heading1 bold */
@@ -1001,7 +1012,7 @@ table.detail .note {
   line-height: 22px;
 }
 .steps span {
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 22px;
 }
 .checklist {
@@ -1011,7 +1022,7 @@ table.detail .note {
   position: relative;
   margin: 0;
   padding: 14px var(--s-5) 14px 52px;
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 22px;
 }
 /* 2열: 둘째 줄부터 가로선, 오른쪽 칸은 세로선 */
@@ -1024,15 +1035,15 @@ table.detail .note {
 .checklist li:nth-child(even):nth-child(n + 3) {
   box-shadow: inset 1px 0 0 var(--line-neutral), inset 0 1px 0 var(--line-neutral);
 }
+/* 빈 네모는 누르는 체크박스처럼 보이므로, 확인할 항목이라는 표시(✓)만 둔다. 첫 줄 글자와 같은 높이 */
 .checklist li::before {
-  content: '';
+  content: '✓';
   position: absolute;
   left: var(--s-5);
-  top: 17px;
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
-  box-shadow: inset 0 0 0 1.5px var(--line-normal);
+  top: 14px;
+  color: var(--primary-text);
+  font-weight: 700;
+  line-height: 22px;
 }
 /* 1열(767px 이하, 아래 미디어 규칙에서 전환)일 때는 가로선만 */
 @media (max-width: 767px) {
@@ -1050,7 +1061,7 @@ table.detail .note {
   }
   .checklist li::before {
     left: 20px;
-    top: 15px;
+    top: var(--s-3);
   }
 }
 .faq {
@@ -1059,7 +1070,7 @@ table.detail .note {
 }
 .faq summary {
   color: var(--label-normal);
-  font-size: 16px;
+  font-size: var(--t-body);
   line-height: 24px;
   font-weight: 600;
   cursor: pointer;
@@ -1139,7 +1150,7 @@ table.detail .note {
   padding-top: var(--s-5);
   box-shadow: inset 0 1px 0 var(--line-alternative);
   color: var(--label-neutral);
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 22px;
 }
 
@@ -1245,7 +1256,7 @@ table.detail .note {
 }
 .price-more > summary span {
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-meta);
   line-height: 18px;
 }
 .price-more > .table-wrap,
@@ -1271,8 +1282,9 @@ table.detail tr.is-best-row strong {
   color: var(--primary-text);
 }
 
-/* 화면 읽기 프로그램 전용 */
-.sr-only {
+/* 화면 읽기 프로그램 전용 (삽입 화면의 페이지 제목도 화면에서만 숨기고 h1은 남긴다) */
+.sr-only,
+[data-embed] .page-head {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -1317,7 +1329,7 @@ table.detail tr.is-best-row strong {
     background: var(--inverse-bg);
     color: var(--inverse-label);
     box-shadow: var(--shadow-medium);
-    font-size: 14px;
+    font-size: var(--t-sub);
     line-height: 20px;
     font-weight: 600;
   }
@@ -1333,7 +1345,7 @@ table.detail tr.is-best-row strong {
     border: 0;
     border-radius: 10px;
     background: var(--primary-solid);
-    color: #ffffff;
+    color: var(--static-white);
     font-weight: 600;
     cursor: pointer;
   }
@@ -1349,7 +1361,7 @@ table.detail tr.is-best-row strong {
 .feature-checks table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 20px;
 }
 .feature-checks th,
@@ -1361,7 +1373,7 @@ table.detail tr.is-best-row strong {
 }
 .feature-checks thead th {
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-meta);
   font-weight: 500;
 }
 .feature-checks thead th.is-hl {
@@ -1391,7 +1403,7 @@ table.detail tr.is-best-row strong {
 .fc-note {
   display: block;
   color: var(--label-alternative);
-  font-size: 12px;
+  font-size: var(--t-badge);
   line-height: 16px;
   font-weight: 400;
   white-space: normal;
@@ -1410,7 +1422,7 @@ table.detail tr.is-best-row strong {
 .fc-legend {
   margin: 6px 0 0;
   color: var(--label-alternative);
-  font-size: 12px;
+  font-size: var(--t-badge);
   line-height: 16px;
 }
 
@@ -1452,7 +1464,7 @@ table.detail tr.is-best-row strong {
 }
 .vendor-group > summary .muted {
   margin-left: 6px;
-  font-size: 13px;
+  font-size: var(--t-meta);
   font-weight: 500;
 }
 .vendor-group > .table-wrap {
@@ -1471,7 +1483,7 @@ table.detail tr.is-best-row strong {
 }
 .num-error {
   color: var(--negative-text);
-  font-size: 12px;
+  font-size: var(--t-badge);
   line-height: 16px;
   font-weight: 500;
 }
@@ -1507,7 +1519,7 @@ table.detail tr.is-best-row strong {
 }
 .logo {
   color: var(--label-strong);
-  font-size: 17px;
+  font-size: var(--t-card);
   font-weight: 800;
   letter-spacing: -0.02em;
   white-space: nowrap;
@@ -1542,7 +1554,7 @@ table.detail tr.is-best-row strong {
 .site-upd {
   margin-left: auto;
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-meta);
   white-space: nowrap;
 }
 .page.is-wide {
@@ -1554,7 +1566,7 @@ table.detail tr.is-best-row strong {
 .page-head h1 {
   margin: 0;
   color: var(--label-strong);
-  font-size: 28px;
+  font-size: var(--t-page);
   line-height: 38px;
   font-weight: 700;
   letter-spacing: -0.0236em;
@@ -1573,7 +1585,7 @@ table.detail tr.is-best-row strong {
   border-radius: 8px;
   background: var(--fill-alternative);
   color: var(--label-neutral);
-  font-size: 14px;
+  font-size: var(--t-sub);
   font-weight: 600;
 }
 .page-links {
@@ -1634,7 +1646,7 @@ table.detail tr.is-best-row strong {
 }
 .entry-kicker {
   color: var(--primary-normal);
-  font-size: 13px;
+  font-size: var(--t-meta);
   font-weight: 700;
 }
 .entry strong {
@@ -1644,7 +1656,7 @@ table.detail tr.is-best-row strong {
   font-weight: 700;
 }
 .entry .muted {
-  font-size: 14px;
+  font-size: var(--t-sub);
 }
 .entry-go {
   margin-top: 6px;
@@ -1672,7 +1684,7 @@ table.detail tr.is-best-row strong {
   letter-spacing: -0.02em;
 }
 .sec-head a {
-  font-size: 14px;
+  font-size: var(--t-sub);
   font-weight: 600;
 }
 .board {
@@ -1681,7 +1693,7 @@ table.detail tr.is-best-row strong {
 .board table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: var(--t-sub);
 }
 .board th,
 .board td {
@@ -1738,7 +1750,7 @@ table.detail tr.is-best-row strong {
   align-items: flex-start;
   gap: 4px;
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-meta);
   font-variant-numeric: tabular-nums;
 }
 .cl-body {
@@ -1755,7 +1767,7 @@ table.detail tr.is-best-row strong {
 }
 .cl-detail {
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-meta);
   line-height: 18px;
 }
 .changes-card .changelog li {
@@ -1777,22 +1789,25 @@ table.detail tr.is-best-row strong {
     padding-right: 0;
   }
   .logo {
+    padding-right: var(--s-3);
     font-size: 15px;
+    /* 옆으로 밀린 메뉴 글자 조각이 로고의 일부로 읽히지 않게 세로 구분선 */
+    box-shadow: inset -1px 0 0 var(--line-normal);
   }
   .site-nav {
     min-width: 0;
     overflow-x: auto;
     scrollbar-width: none;
     padding: 0 28px 0 20px;
-    -webkit-mask-image: linear-gradient(to right, transparent, #000 22px, #000 calc(100% - 40px), transparent);
-    mask-image: linear-gradient(to right, transparent, #000 22px, #000 calc(100% - 40px), transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent 8px, #000 36px, #000 calc(100% - 40px), transparent);
+    mask-image: linear-gradient(to right, transparent 8px, #000 36px, #000 calc(100% - 40px), transparent);
   }
   .site-nav::-webkit-scrollbar {
     display: none;
   }
   .site-nav a {
     padding: 8px 10px;
-    font-size: 14px;
+    font-size: var(--t-sub);
   }
   .home-hero,
   .home-grid,
@@ -1859,7 +1874,7 @@ table.detail tr.is-best-row strong {
   gap: 8px;
   margin: 0;
   color: var(--label-normal);
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 20px;
   font-weight: 600;
 }
@@ -1869,7 +1884,7 @@ table.detail tr.is-best-row strong {
 .qf-hint {
   margin: 0;
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-meta);
   line-height: 18px;
 }
 .qf-row {
@@ -1882,7 +1897,7 @@ table.detail tr.is-best-row strong {
   align-items: center;
   gap: 8px;
   color: var(--label-alternative);
-  font-size: 14px;
+  font-size: var(--t-sub);
 }
 .qf-row-input input {
   width: 64px;
@@ -1920,7 +1935,7 @@ table.detail tr.is-best-row strong {
   background: transparent;
   box-shadow: none;
   color: var(--label-neutral);
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 20px;
 }
 .q-options[data-seg] .opt:hover {
@@ -1929,7 +1944,7 @@ table.detail tr.is-best-row strong {
 }
 .q-options[data-seg] .opt[aria-checked='true'] {
   background: var(--seg-selected);
-  box-shadow: 0 1px 3px rgba(23, 23, 23, 0.14);
+  box-shadow: var(--shadow-seg);
   color: var(--label-strong);
 }
 
@@ -1965,7 +1980,7 @@ table.detail tr.is-best-row strong {
 }
 .result-total strong {
   color: var(--label-strong);
-  font-size: 28px;
+  font-size: var(--t-page);
   line-height: 36px;
   font-weight: 700;
   letter-spacing: -0.02em;
@@ -1974,7 +1989,7 @@ table.detail tr.is-best-row strong {
 }
 .result-total span {
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-meta);
   line-height: 18px;
 }
 /* 요금제 비교: 테두리 하나 안을 세로선으로 나눈 묶음, 추천 칸은 위쪽 파란 띠 */
@@ -2036,14 +2051,14 @@ table.detail tr.is-best-row strong {
 }
 .fit-price {
   color: var(--label-alternative);
-  font-size: 14px;
+  font-size: var(--t-sub);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 .fit .fit-status {
   margin: 0;
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-meta);
   line-height: 18px;
 }
 .fit-status strong {
@@ -2086,7 +2101,7 @@ table.detail tr.is-best-row strong {
   align-items: baseline;
   gap: 10px;
   margin: 0;
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 20px;
 }
 .result-post span {
@@ -2114,7 +2129,7 @@ table.detail tr.is-best-row strong {
   margin: 0;
   padding-left: 18px;
   color: var(--label-alternative);
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 22px;
 }
 .why-list li + li {
@@ -2124,7 +2139,7 @@ table.detail tr.is-best-row strong {
   display: grid;
   gap: 12px;
   color: var(--label-alternative);
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 22px;
 }
 .why-panel p {
@@ -2166,7 +2181,7 @@ table.detail tr.is-best-row strong {
 }
 .group-name span {
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-meta);
   line-height: 18px;
 }
 .group-ctl {
@@ -2188,7 +2203,7 @@ table.detail tr.is-best-row strong {
   border-radius: 10px;
   background: transparent;
   color: var(--label-neutral);
-  font-size: 16px;
+  font-size: var(--t-body);
 }
 .group-ctl .stepper button:hover {
   background: var(--fill-alternative);
@@ -2213,7 +2228,7 @@ table.detail tr.is-best-row strong {
 .doc-meta {
   margin: 0;
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-meta);
   line-height: 18px;
 }
 /* 도입 방식: 테두리 하나 안을 세로선으로 나눈 묶음, 보고 있는 칸은 위쪽 파란 띠 */
@@ -2237,7 +2252,7 @@ table.detail tr.is-best-row strong {
   border: 0;
   background: none;
   color: var(--label-normal);
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 20px;
   text-align: left;
   cursor: pointer;
@@ -2273,7 +2288,7 @@ table.detail tr.is-best-row strong {
 table.budget {
   width: 100%;
   border-collapse: collapse;
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 20px;
   font-variant-numeric: tabular-nums;
 }
@@ -2295,7 +2310,7 @@ table.budget {
   padding-bottom: 8px;
   box-shadow: inset 0 -1px 0 var(--line-normal);
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-meta);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -2310,7 +2325,7 @@ table.budget {
 .budget .sub {
   display: block;
   color: var(--label-alternative);
-  font-size: 12px;
+  font-size: var(--t-badge);
   line-height: 16px;
   font-weight: 400;
   white-space: normal;
@@ -2329,13 +2344,13 @@ table.budget {
 }
 .feat-legend {
   color: var(--label-alternative);
-  font-size: 12px;
+  font-size: var(--t-badge);
   font-weight: 400;
 }
 .fits-label {
   margin: 0 0 -10px;
   color: var(--label-alternative);
-  font-size: 13px;
+  font-size: var(--t-meta);
   line-height: 18px;
   font-weight: 600;
 }
@@ -2350,7 +2365,7 @@ table.budget {
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 14px;
+  font-size: var(--t-sub);
   line-height: 20px;
 }
 .feat-list li {
@@ -2385,7 +2400,7 @@ table.budget {
   .result .plan-fits {
     grid-template-columns: 1fr !important;
   }
-  /* 한 줄씩일 때: 가로선으로 나누고 추천 줄은 왼쪽 파란 띠, 상태·시간은 한 줄 */
+  /* 한 줄씩일 때: 가로선으로 나누고 추천 줄은 파란 테두리, 상태·시간은 한 줄 */
   .result .fit {
     gap: var(--s-2);
     padding: var(--s-3) var(--s-4);
@@ -2394,10 +2409,10 @@ table.budget {
     box-shadow: inset 0 1px 0 var(--line-neutral);
   }
   .result .fit.is-rec {
-    box-shadow: inset 3px 0 0 var(--primary-normal);
+    box-shadow: inset 0 0 0 1.5px var(--primary-normal);
   }
   .result .fit + .fit.is-rec {
-    box-shadow: inset 3px 0 0 var(--primary-normal), inset 0 1px 0 var(--line-neutral);
+    box-shadow: inset 0 0 0 1.5px var(--primary-normal);
   }
   .result .fit .fit-status {
     flex-direction: row;
@@ -2433,7 +2448,7 @@ table.budget {
     padding: 20px;
   }
 
-  /* 도입 방식: 한 줄씩, 보고 있는 줄은 왼쪽 파란 띠, 금액은 오른쪽 */
+  /* 도입 방식: 한 줄씩, 보고 있는 줄은 파란 테두리, 금액은 오른쪽 */
   .doc-tabs {
     grid-auto-flow: row;
     grid-template-columns: 1fr;
@@ -2442,10 +2457,10 @@ table.budget {
     box-shadow: inset 0 1px 0 var(--line-neutral);
   }
   .doc-tab[aria-pressed='true'] {
-    box-shadow: inset 3px 0 0 var(--primary-normal);
+    box-shadow: inset 0 0 0 1.5px var(--primary-normal);
   }
   .doc-tab + .doc-tab[aria-pressed='true'] {
-    box-shadow: inset 3px 0 0 var(--primary-normal), inset 0 1px 0 var(--line-neutral);
+    box-shadow: inset 0 0 0 1.5px var(--primary-normal);
   }
   .doc-tab > span:last-child {
     flex-basis: auto;
@@ -2626,24 +2641,27 @@ table.budget {
       var(--bg-elevated);
   }
 
-  /* 인원 입력: "하루"·"시간"이 세로로 꺾이지 않게 버튼 폭을 줄임 */
+  /* 인원 입력: 한 줄에 다 넣으면 −/+ 버튼이 좁아지므로 "인원 [−2+] 명" / "하루 [−7+] 시간" 두 줄로,
+     버튼은 손가락 터치 영역 44px */
   .group-ctl {
-    gap: var(--s-1);
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    gap: var(--s-2) var(--s-3);
+  }
+  .group-ctl::before {
+    content: '인원';
+    color: var(--label-alternative);
+    font-size: var(--t-sub);
+  }
+  .group-gap {
+    display: none;
   }
   .group-ctl .stepper button {
-    width: 28px;
+    width: 44px;
   }
-  .group-ctl .stepper input {
-    width: 40px; /* "15.5"시간까지 */
-  }
+  .group-ctl .stepper input,
   .group-ctl .stepper:first-child input {
-    width: 56px;
-  }
-}
-/* 아주 좁은 화면(360px 등): 인원 입력 줄이 넘치지 않게 "하루" 글자만 숨김 (섹션 제목이 "인원과 하루 사용 시간") */
-@media (max-width: 374px) {
-  .group-gap + .unit-text {
-    display: none;
+    width: 56px; /* 인원 5자리·시간 "15.5"까지, 두 줄의 칸 폭을 맞춤 */
   }
 }
 /* 선택지 5개 이상(예: Codex 요금제): 한 칸만 둘째 줄로 떨어지지 않게 3칸 격자 */

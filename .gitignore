@@ -3,6 +3,3 @@ dist/
 .astro/
 .env
 .gstack/
-
-# 레이아웃 시안 (로컬 비교용, 배포 안 함)
-public/mockups/
