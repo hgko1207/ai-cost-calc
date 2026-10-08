@@ -1,5 +1,6 @@
 // "구독이 유리한 구간" 차트: x = 하루 입력 토큰, y = 월 비용(원)
 // API 비용은 사용량에 정비례하는 직선, 구독은 한도까지 평평한 선으로 그린다.
+import { useEffect, useRef, useState } from 'react';
 import { planKrw, usdToKrw, type PlanZone, type Settings } from '../lib/calc';
 import { krwShort, tokensM } from '../lib/format';
 
@@ -10,8 +11,10 @@ interface Props {
   modelName: string;
 }
 
-const W = 640;
-const H = 300;
+// 넓은 화면은 640×300 비율 그대로 늘려 그리고, 이보다 좁은 칸은 실제 폭으로 그려 축 글자가 줄어들지 않게 한다
+const BASE_W = 640;
+const BASE_H = 300;
+const MIN_H = 240;
 const PAD = { top: 16, right: 16, bottom: 40, left: 64 };
 const PLAN_COLORS = ['var(--plan-1)', 'var(--plan-2)', 'var(--plan-3)', 'var(--plan-4)'];
 
@@ -23,6 +26,21 @@ function niceStep(max: number, count: number): number {
 }
 
 export default function BreakEvenChart({ zones, usdPerDailyM, settings, modelName }: Props) {
+  const ref = useRef<HTMLElement>(null);
+  const [boxW, setBoxW] = useState(BASE_W);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !('ResizeObserver' in window)) return;
+    const ro = new ResizeObserver(([e]) => {
+      const w = Math.round(e.contentRect.width);
+      if (w > 0) setBoxW(w); // 접힌 상태(폭 0)는 무시
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const W = Math.min(boxW, BASE_W);
+  const H = W === BASE_W ? BASE_H : Math.max(MIN_H, Math.round((W * BASE_H) / BASE_W));
+
   const krwPerM = usdToKrw(usdPerDailyM, settings);
   const current = settings.dailyInputM;
   const prices = zones.map((z) => planKrw(z.plan, settings));
@@ -65,7 +83,7 @@ export default function BreakEvenChart({ zones, usdPerDailyM, settings, modelNam
   const yTicks = Array.from({ length: Math.round(yMax / yStep) + 1 }, (_, i) => i * yStep);
 
   return (
-    <figure className="chart">
+    <figure className="chart" ref={ref}>
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${modelName} 사용량별 API 비용과 구독 요금 비교 차트`}>
         {bands.map((b, i) => (
           <rect

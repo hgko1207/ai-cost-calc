@@ -283,7 +283,8 @@ export default function Calculator({ data }: { data: CalculatorData }) {
           <ol className="bars">
             {costs.map((c) => (
               <li key={c.model.id} className={c.model.id === model.id ? 'is-selected' : undefined}>
-                <button type="button" onClick={() => set({ modelId: c.model.id })} aria-label={`${c.model.name} 선택`}>
+                {/* 화면 낭독기도 이름·금액을 그대로 읽도록 aria-label 대신 보이는 글자를 쓴다 */}
+                <button type="button" onClick={() => set({ modelId: c.model.id })} aria-pressed={c.model.id === model.id}>
                   <span className="bar-label">
                     <span className={`dot v-${c.model.vendor}`} />
                     {c.model.name}
@@ -303,7 +304,7 @@ export default function Calculator({ data }: { data: CalculatorData }) {
             ))}
           </ol>
         ) : (
-          <div className="table-wrap">
+          <div className="table-wrap" tabIndex={0} role="region" aria-label="모델별 API 월 비용 표">
             <table className="detail">
               <thead>
                 <tr>

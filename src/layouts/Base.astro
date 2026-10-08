@@ -116,8 +116,10 @@ const nav = [
     </script>
 
     <div class={`page${wide ? ' is-wide' : ''}`}>
-      <a class="embed-only open-full" href={`${base}${path}`} target="_blank" rel="noopener">전체 화면에서 자세히 보기 ↗</a>
-      <slot />
+      <main>
+        <a class="embed-only open-full" href={`${base}${path}`} target="_blank" rel="noopener">전체 화면에서 자세히 보기 ↗</a>
+        <slot />
+      </main>
 
       <footer class="footer no-embed">
         <p>

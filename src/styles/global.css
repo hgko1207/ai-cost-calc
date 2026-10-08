@@ -40,12 +40,15 @@
   --positive-text: #007a33;
   --cautionary-text: #a35700;
   --negative-text: #d32f2f;
+  /* 연한 파랑(primary-a05·a08) 위에 올리는 파란 글자: primary-normal은 4.49:1로 미달 → strong 단계(약 5.1:1) */
+  --primary-text: #005eeb;
   --inverse-bg: #1b1c1e;
   --inverse-label: #f7f7f8;
   --seg-selected: #ffffff; /* 세그먼트에서 고른 칸 바탕 */
   /* elevation */
   --shadow-small: 0 2px 4px -2px rgba(23, 23, 23, 0.06), 0 4px 6px -1px rgba(23, 23, 23, 0.06);
   --shadow-medium: 0 4px 6px -2px rgba(23, 23, 23, 0.07), 0 10px 15px -3px rgba(23, 23, 23, 0.07);
+  --scroll-shadow: rgba(23, 23, 23, 0.14); /* 옆으로 밀리는 표의 "더 있음" 그림자 */
   /* 차트·브랜드 구분 색 (accent foreground) */
   --v-anthropic: #f55a00;
   --v-openai: #009632;
@@ -112,6 +115,8 @@
     --positive-text: #1ed45a;
     --cautionary-text: #ffa938;
     --negative-text: #ff6363;
+    --primary-text: #4f95ff;
+    --scroll-shadow: rgba(0, 0, 0, 0.6); /* 어두운 카드(#212225) 위에서도 보이게 */
     --inverse-bg: #f7f7f8;
     --inverse-label: #171719;
     --seg-selected: #4a4b51; /* 트랙(fill)보다 밝아야 고른 칸이 보인다 */
@@ -156,6 +161,12 @@ a {
 }
 a:hover {
   text-decoration: underline;
+}
+/* 문장 속 링크는 색만으로 구분하지 않게 밑줄 (WCAG 1.4.1: 주변 글자와 대비 3:1 미만) */
+p a {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 button {
   font: inherit;
@@ -212,38 +223,8 @@ button {
 [data-embed] .page {
   padding-top: 16px;
 }
-[data-embed] .hero h1 {
-  font-size: 22px;
-  line-height: 30px;
-}
 
 /* ── 헤더 ── */
-.hero {
-  margin-bottom: 28px;
-}
-.eyebrow {
-  display: inline-flex;
-  gap: 4px;
-  margin: 0 0 12px;
-  padding: 4px 8px;
-  border-radius: 6px;
-  background: var(--primary-a08);
-  color: var(--primary-normal);
-  /* caption1 bold */
-  font-size: 12px;
-  line-height: 16px;
-  font-weight: 600;
-  letter-spacing: 0.0252em;
-}
-/* title1 bold */
-.hero h1 {
-  margin: 0;
-  color: var(--label-strong);
-  font-size: 32px;
-  line-height: 44px;
-  font-weight: 700;
-  letter-spacing: -0.0253em;
-}
 /* body1-reading */
 .lead {
   margin: 8px 0 0;
@@ -255,45 +236,6 @@ button {
   margin-top: 6px;
   font-size: 14px;
   font-weight: 600;
-}
-
-/* ── 탭 (Montage Tab: 하단 2px label.strong 인디케이터) ── */
-.tabs {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
-  box-shadow: inset 0 -1px 0 var(--line-alternative);
-}
-.tabs [role='tab'] {
-  position: relative;
-  padding: 12px;
-  border: 0;
-  background: none;
-  color: var(--label-alternative);
-  /* headline2 bold */
-  font-size: 17px;
-  line-height: 24px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: color 0.15s ease;
-}
-.tabs [role='tab']:hover {
-  color: var(--label-neutral);
-}
-.tabs [role='tab'][aria-selected='true'] {
-  color: var(--label-strong);
-}
-.tabs [role='tab'][aria-selected='true']::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 2px;
-  background: var(--label-strong);
-}
-.panel[hidden] {
-  display: none;
 }
 
 /* ── 카드 ── */
@@ -331,18 +273,6 @@ button {
 }
 
 /* ── 질문 ── */
-.q + .q {
-  margin-top: 28px;
-}
-/* headline2 bold */
-.q-label {
-  display: block;
-  margin: 0 0 12px;
-  color: var(--label-normal);
-  font-size: 17px;
-  line-height: 24px;
-  font-weight: 600;
-}
 .q-value {
   margin-left: 6px;
   color: var(--primary-normal);
@@ -397,12 +327,11 @@ button {
 .preset[aria-pressed='true'] {
   background: var(--primary-a05);
   box-shadow: inset 0 0 0 1px var(--primary-a43);
-  color: var(--primary-normal);
+  color: var(--primary-text);
 }
 .opt[aria-checked='true'] span,
 .preset[aria-pressed='true'] span {
-  color: var(--primary-normal);
-  opacity: 0.8;
+  color: var(--primary-text);
 }
 
 /* 슬라이더 */
@@ -413,20 +342,6 @@ button {
 }
 
 /* Montage TextField 기반 숫자 입력 */
-.inline-field,
-.group-hours {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--label-alternative);
-  font-size: 14px;
-  line-height: 20px;
-}
-.inline-field {
-  margin-top: 14px;
-}
-.inline-field input,
-.group-hours input,
 .stepper input,
 .field input,
 .model-select select {
@@ -441,19 +356,10 @@ button {
   outline: none;
   transition: box-shadow 0.15s ease;
 }
-.inline-field input,
-.group-hours input {
-  width: 64px;
-  min-height: 40px;
-  padding: 7px 10px;
-  text-align: right;
-}
-.inline-field input:focus,
-.group-hours input:focus,
 .stepper input:focus,
 .field input:focus,
 .model-select select:focus {
-  box-shadow: inset 0 0 0 2px var(--primary-a43);
+  box-shadow: inset 0 0 0 2px var(--primary-normal); /* 포커스 테두리 대비 3:1 이상 (WCAG 1.4.11) */
 }
 
 /* ── 결과 카드 ── */
@@ -684,11 +590,21 @@ button {
 .detail-calc[open] > summary {
   box-shadow: inset 0 -1px 0 var(--line-alternative);
 }
+/* 접는 상자 안의 계산기는 카드 안에 카드를 겹치지 않고, 칸을 가로선으로만 나눈다 */
 .detail-calc .calc {
-  padding: 16px;
+  gap: 0;
 }
 .detail-calc .card {
-  box-shadow: inset 0 0 0 1px var(--line-neutral);
+  padding: var(--s-5);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.detail-calc .card + .card {
+  box-shadow: inset 0 1px 0 var(--line-alternative);
+}
+.detail-calc .disclaimer {
+  margin: 0 var(--s-5) var(--s-5);
 }
 
 /* 프리셋·토큰 입력 */
@@ -1259,10 +1175,6 @@ table.detail .note {
   .page {
     padding: 24px 16px 48px;
   }
-  .hero h1 {
-    font-size: 24px;
-    line-height: 32px;
-  }
   .card {
     padding: 20px 16px;
   }
@@ -1275,17 +1187,6 @@ table.detail .note {
   .result-title {
     font-size: 24px;
     line-height: 32px;
-  }
-  .totals {
-    gap: 6px;
-  }
-  .totals div {
-    padding: 10px;
-  }
-  .totals dd {
-    font-size: 15px;
-    line-height: 22px;
-    white-space: nowrap;
   }
   .presets,
   .fields {
@@ -1308,8 +1209,11 @@ table.detail .note {
   .detail-calc > summary {
     padding: 16px;
   }
-  .detail-calc .calc {
-    padding: 12px;
+  .detail-calc .card {
+    padding: var(--s-4);
+  }
+  .detail-calc .disclaimer {
+    margin: 0 var(--s-4) var(--s-4);
   }
 }
 
@@ -1364,7 +1268,7 @@ table.detail tr.is-best-row td {
   background: var(--primary-a05);
 }
 table.detail tr.is-best-row strong {
-  color: var(--primary-normal);
+  color: var(--primary-text);
 }
 
 /* 화면 읽기 프로그램 전용 */
@@ -1385,9 +1289,7 @@ table.detail tr.is-best-row strong {
 }
 @media (max-width: 767px) {
   .stepper button,
-  .stepper input,
-  .inline-field input,
-  .group-hours input {
+  .stepper input {
     min-height: 44px;
   }
   .stepper button {
@@ -1537,28 +1439,6 @@ table.detail tr.is-best-row strong {
 }
 
 /* ── C단계: 문구·신뢰 표현 ── */
-.method > summary {
-  cursor: pointer;
-  list-style: none;
-}
-.method > summary::-webkit-details-marker {
-  display: none;
-}
-.method > summary h2 {
-  display: inline;
-}
-.method > summary::after {
-  content: ' +';
-  color: var(--label-alternative);
-  font-size: 24px;
-  font-weight: 400;
-}
-.method[open] > summary::after {
-  content: ' −';
-}
-.method ol {
-  margin-top: 16px;
-}
 .vendor-group {
   margin-top: var(--s-3);
   border-radius: 16px;
@@ -1577,10 +1457,6 @@ table.detail tr.is-best-row strong {
 }
 .vendor-group > .table-wrap {
   padding: 0 var(--s-5) var(--s-4);
-}
-
-.options-list[hidden] {
-  display: none;
 }
 
 /* 숫자 입력 오류 안내 */
@@ -2023,7 +1899,7 @@ table.detail tr.is-best-row strong {
   outline: none;
 }
 .qf-row-input input:focus {
-  box-shadow: inset 0 0 0 2px var(--primary-a43);
+  box-shadow: inset 0 0 0 2px var(--primary-normal); /* 포커스 테두리 대비 3:1 이상 (WCAG 1.4.11) */
 }
 
 /* Montage Segmented control: 회색 트랙 위에서 고른 칸만 흰 바탕 */
@@ -2330,7 +2206,7 @@ table.detail tr.is-best-row strong {
   width: 56px;
 }
 .group-ctl .stepper input:focus {
-  box-shadow: inset 0 0 0 2px var(--primary-a43);
+  box-shadow: inset 0 0 0 2px var(--primary-normal); /* 포커스 테두리 대비 3:1 이상 (WCAG 1.4.11) */
 }
 
 /* 팀: 예산표 */
@@ -2385,7 +2261,7 @@ table.detail tr.is-best-row strong {
   box-shadow: inset 0 3px 0 var(--primary-normal);
 }
 .doc-tab[aria-pressed='true'] > span:last-child {
-  color: var(--primary-normal);
+  color: var(--primary-text);
 }
 .doc-tab:disabled {
   color: var(--label-alternative);
@@ -2746,7 +2622,7 @@ table.budget {
   .prose > .table-wrap {
     background:
       linear-gradient(to left, var(--bg-elevated) 30%, transparent) right center / 32px 100% no-repeat local,
-      radial-gradient(farthest-side at 100% 50%, rgba(23, 23, 23, 0.14), transparent) right center / 12px 100% no-repeat scroll,
+      radial-gradient(farthest-side at 100% 50%, var(--scroll-shadow), transparent) right center / 12px 100% no-repeat scroll,
       var(--bg-elevated);
   }
 
@@ -2775,4 +2651,16 @@ table.budget {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   justify-self: stretch;
+}
+/* 모바일 손가락 터치 영역 44px (앞쪽 기본 규칙을 이기도록 파일 끝에 둔다) */
+@media (max-width: 767px) {
+  .q-options[data-seg] .opt,
+  .result-actions .link-btn {
+    min-height: 44px;
+  }
+  /* 슬라이더는 막대는 그대로, 누를 수 있는 높이만 키운다 */
+  .range {
+    height: 44px;
+    margin: 0;
+  }
 }

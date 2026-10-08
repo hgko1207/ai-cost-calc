@@ -33,7 +33,7 @@ const teamAdmin = team.features.filter((f) => claudeTeam?.checks[f.id]?.value ==
 const fmt = (n: number) => `$${Number.isInteger(n) ? n : n.toFixed(2)}`;
 ---
 
-<div class="table-wrap">
+<div class="table-wrap" tabindex="0" role="region" aria-label="사용량 대비 가격 표">
   <table class="detail">
     <caption>사용량 대비 가격 (Claude, 1인 기준)</caption>
     <thead>

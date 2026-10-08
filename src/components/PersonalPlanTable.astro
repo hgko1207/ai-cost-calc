@@ -22,7 +22,7 @@ const rangeText = (h?: number) => {
       <summary>
         {v.name} <span class="muted">{prices.plans.filter((p) => p.vendor === v.id).length}개 요금제</span>
       </summary>
-      <div class="table-wrap">
+      <div class="table-wrap" tabindex="0" role="region" aria-label={`${v.name} 요금제 표`}>
         <table class="detail">
           <thead>
             <tr>
