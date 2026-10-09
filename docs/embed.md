@@ -33,7 +33,7 @@ addEventListener('message', function (e) {
 | [GPT-6 Astra vs Claude Fable 5.1](https://hgko-dev.tistory.com/620) | `personal/?embed=1&t=codex` | Codex 기준 |
 | 회사 도입 글 (새로 쓸 때) | `team/?embed=1` | 팀·회사 예산표, 10명 기본 |
 
-주소 앞부분은 항상 `https://hgko1207.github.io/ai-cost-calc/` 이다. 다른 값은 README의 "URL 파라미터" 표를 참고한다.
+주소 앞부분은 항상 `https://hgko1207.github.io/ai-cost-calc/` 이다. 다른 값은 [운영 가이드](maintaining.md)의 "URL 파라미터" 표를 참고한다.
 
 ## 3. 삽입 모드에서 달라지는 것
 

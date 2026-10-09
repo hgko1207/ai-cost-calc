@@ -1,0 +1,108 @@
+# 운영 가이드
+
+가격 갱신, 자동 점검, URL 파라미터, 배포, 방문 측정처럼 계산기를 관리할 때 필요한 내용입니다. 사이트 소개와 실행 방법은 [README](../README.md)에 있습니다.
+
+## 가격 갱신 (모델 출시·가격 변경 시)
+
+코드는 건드리지 않고 데이터만 고친다.
+
+1. `src/data/prices.json`
+   - `updatedAt`: 페이지에 표시되는 기준일
+   - `models[]`: 단가는 모두 USD / 100만 토큰. `longContext`는 할증 구간이 있는 모델만.
+   - `plans[]`: `krwMonthly`는 공식 원화가(부가세 포함 표시)가 있을 때만, 없으면 `null`(USD × 환율로 계산).
+   - 요금제별 사용 한도(하루 감당 시간)는 `advisor.json`에만 둔다. 토큰 계산기·팀 계산기도 이 값을 쓴다.
+   - 항목마다 `sourceUrl`, `verifiedAt` 갱신
+2. `npm test && npm run build`: 스키마가 맞지 않으면 빌드가 실패한다.
+3. 커밋·푸시하면 자동 배포된다(아래 설정 후).
+
+요금제 추천 기준(사용 방식 계수, 요금제별 감당 가능 시간, 시간당 토큰)은 `src/data/advisor.json`,
+팀 요금제(좌석 가격·한도, 도입 방식)는 `src/data/team.json`,
+프리셋은 `src/data/presets.json`, 블로그 관련 글은 `src/data/related-posts.json`.
+
+## 월간 가격 점검 (자동)
+
+- `.github/workflows/price-check.yml`이 매월 1일 "가격 점검 YYYY-MM" 이슈를 만든다.
+  - 다가오는 종료·가격 변경일(`retiresAt`, `priceChangesAt`), 깨지거나 바뀐 출처 링크, 항목별 체크리스트(확인일 35일 초과는 "오래됨")
+  - 봇을 막는 사이트(chatgpt.com 등)는 "자동 확인 불가(직접 확인)"로 표시된다.
+- 로컬에서 미리 보기: `node scripts/price-check.ts`
+- 수동 실행: GitHub Actions → 월간 가격 점검 → Run workflow (`dry_run` 끄면 이슈 생성)
+- 주의: 공개 저장소는 60일간 커밋이 없으면 예약 실행이 자동으로 꺼진다(GitHub가 미리 메일로 알림). 메일을 받으면 Actions 화면에서 다시 켠다.
+- 페이지의 가격표는 빌드한 날 기준 확인일이 35일을 넘으면 "확인 필요"를 표시한다.
+
+## URL 파라미터
+
+개인 (`/personal/`):
+
+| 키 | 의미 | 예 |
+|---|---|---|
+| `t` | 도구 (`claude-code`, `codex`, `antigravity`) | `?t=codex` |
+| `h` | 하루 사용 시간 | `&h=5` |
+| `u` | 사용 방식 (`chat`, `pair`, `agent`) | `&u=agent` |
+| `c` | 지금 요금제 id (`none`, `claude-max-5x` 등) | `&c=claude-max-5x` |
+| `f` | 한도에 걸리는 빈도 (`none`, `sometimes`, `often`, `daily`) | `&f=often` |
+| `wd` | 한 달 작업일 | `&wd=20` |
+
+팀·회사 (`/team/`):
+
+| 키 | 의미 | 예 |
+|---|---|---|
+| `tt` | 도구 (`claude-code`, `codex`, `gemini`) | `&tt=codex` |
+| `hc` / `nc` | 많이 쓰는 사람 / 일반 사용자 인원 | `&hc=3&nc=10` |
+| `hh` / `nh` | 그룹별 하루 사용 시간 | `&hh=8` |
+| `b` | 결제 주기 (`annual`, `monthly`) | `&b=monthly` |
+| `twd` | 한 달 작업일 | `&twd=20` |
+
+모델별 API 비용 직접 계산(자세히, 아래 키가 있으면 자동으로 펼쳐짐):
+
+| 키 | 의미 | 예 |
+|---|---|---|
+| `p` | 프리셋 (`light`, `daily`, `heavy`, `custom`) | `?p=heavy` |
+| `m` | 비교 기준 모델 id | `&m=gpt-6-astra` |
+| `in` / `out` / `d` | 하루 입력(M) / 하루 출력(K) / 월 작업일 | `&in=40` |
+| `cr` / `cw` / `ctx` | 캐시 읽기% / 캐시 쓰기% / 평균 컨텍스트(K) | |
+| `fx` / `vat` / `cap` | 환율 / 부가세(기본 포함, `vat=0`이면 별도) / 구독 한도 배율 | |
+
+모든 계산기 페이지 공통: `embed=1`이면 머리글·설명·FAQ를 숨기고 계산기만 보여 준다(블로그 iframe용). 예: `/personal/?embed=1`, `/team/?embed=1`
+
+## 예전 주소와 변경 기록
+
+예전 한 페이지 시절 링크(`/?tab=team&…`, `/?h=5…`, `/?embed=1`)는 홈에서 새 페이지로 자동 이동한다.
+가격·요금제가 바뀌면 `src/data/changelog.json`에 기록을 추가한다(날짜 내림차순).
+
+## 티스토리 글에 넣기
+
+글별 삽입 코드(자동 높이 포함)와 추천 주소는 [docs/embed.md](embed.md)에 있다.
+
+## 배포: GitHub Pages (현재 사용 중, 무료)
+
+- 주소: https://hgko1207.github.io/ai-cost-calc/
+- `main` 브랜치에 푸시하면 `.github/workflows/deploy.yml`이 테스트 → 빌드 → 배포를 자동으로 한다.
+- 진행 상황: 저장소의 Actions 탭, 또는 `gh run watch`
+
+## 다른 호스팅으로 옮기기 (Cloudflare Pages 등)
+
+대역폭 무제한, 커스텀 도메인을 원하면 Cloudflare Pages(무료)로 옮길 수 있다.
+
+1. Cloudflare 대시보드 → Workers & Pages → Create → Pages → Connect to Git → 이 저장소 선택
+2. Build command `npm run build`, Output directory `dist`
+3. 환경 변수: `SITE_URL` = 새 주소(예: `https://ai-cost-calc.pages.dev`), `BASE_PATH` = `/`
+4. 옮긴 뒤에는 GitHub Pages 워크플로를 끄거나 지운다.
+
+## 방문 측정 (GoatCounter, 쿠키 없음)
+
+- 집계 화면: https://hgko-calc.goatcounter.com (코드는 `src/layouts/Base.astro` 하단)
+- 페이지는 쿼리 없이 경로로 센다. 블로그 iframe 안의 계산기는 `/ai-cost-calc/personal/ (삽입)`처럼 따로 보이고, 어느 글에서 왔는지는 Top referrers에 나온다.
+- 이벤트(`src/lib/track.ts`, iframe 안이면 이름 끝에 "(삽입)"):
+
+| 이벤트 | 위치 |
+|---|---|
+| `홈: 1분 계산하기`, `홈: 견적 내기` | 홈 입구 카드 |
+| `개인: 결과 링크 복사`, `개인: 관련 글 클릭` | 개인 계산기 |
+| `팀: 결재용 요약 복사`, `팀: 링크 복사` | 팀 계산기 |
+
+- localhost 방문은 GoatCounter가 세지 않는다(콘솔에 "not counting because of: localhost"가 뜨는 건 정상).
+
+## 검색 노출
+
+- Google Search Console, 네이버 서치어드바이저에 사이트 등록 후 `sitemap-index.xml` 제출
+- 블로그 글 → 계산기 링크, 계산기 → 블로그 글 링크(`utm_source=ai-cost-calc`)로 서로 연결
