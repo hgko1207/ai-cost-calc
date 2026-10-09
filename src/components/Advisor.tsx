@@ -21,6 +21,8 @@ type State = Omit<AdvisorInput, 'fxRate' | 'vat'>;
 const KEYS = { toolId: 't', hours: 'h', modeId: 'u', currentPlanId: 'c', frequency: 'f', workDays: 'wd' } as const;
 const STATUS_LABEL: Record<PlanStatus, string> = { short: '한도 초과', tight: '한도 근접', ok: '여유' };
 const FREQ_IDS: LimitFrequency[] = ['none', 'sometimes', 'often', 'daily'];
+/** 구독과 API 금액 차이가 추천 요금의 이 비율 이내면 "비슷하다"고 쓴다 (문구 기준, 추천 판단과는 별개) */
+const SIMILAR_RATIO = 0.05;
 
 function toQuery(s: State, d: State): string {
   const q = new URLSearchParams();
@@ -61,7 +63,7 @@ function reasonText(a: Advice, s: State, modeName: string, current: PlanFit | un
   const usage = `하루 ${s.hours}시간, '${modeName}' 방식이면`;
   switch (a.reason) {
     case 'api-cheaper':
-      return `${usage} 쓴 만큼 내는 API가 조금 더 싸요. 결제 걱정 없이 쓰고 싶다면 ${(a.fits.find((f) => f.status !== 'short') ?? a.fits.at(-1)!).plan.name}도 괜찮아요.`;
+      return `${usage} 쓴 만큼 내는 API가 더 싸요. 결제 걱정 없이 쓰고 싶다면 ${(a.fits.find((f) => f.status !== 'short') ?? a.fits.at(-1)!).plan.name}도 괜찮아요.`;
     case 'fits':
       return rec!.status === 'tight'
         ? `${usage} 이 요금제가 가장 경제적이에요. 다만 한도에 가끔 걸릴 수 있어요.`
@@ -290,7 +292,8 @@ export default function Advisor({ advisor, models, plans, relatedPosts }: Adviso
 
         {rec || !apiAlt ? (
           <p className="api-line">
-            <span className="muted">같은 양을 API로 내면</span>
+            {/* 한도 빈도로 추천을 정했으면 API 금액은 사용자 경험이 아니라 계산값이라는 점을 밝힌다 */}
+            <span className="muted">{current && freqChosen ? '계산한 사용량을 API로 내면' : '같은 양을 API로 내면'}</span>
             <strong>월 {krwShort(a.api.krw)}</strong>
             <span className={rec && saving > 0 ? 'good' : 'muted'}>
               →{' '}
@@ -298,7 +301,9 @@ export default function Advisor({ advisor, models, plans, relatedPosts }: Adviso
                 ? '구독보다 API가 더 싸요'
                 : saving > 0
                   ? `구독이 월 ${krwShort(saving)} 싸요`
-                  : '금액은 비슷하지만 구독이 한도 걱정을 덜어 줘요'}
+                  : -saving <= recPrice * SIMILAR_RATIO
+                    ? '금액은 비슷하고, 구독은 요금이 고정돼요'
+                    : `API가 월 ${krwShort(-saving)} 싸지만, 쓰는 만큼 늘어나요`}
             </span>
           </p>
         ) : (

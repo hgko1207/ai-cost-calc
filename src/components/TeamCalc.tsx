@@ -100,14 +100,18 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
   const view = r.options.find((o) => o.option.id === viewId && o.applicable) ?? rec;
   const typeName = (id: string) => team.userTypes.find((t) => t.id === id)?.name ?? id;
   const hoursOf = (typeId: string) => state.groups.find((g) => g.typeId === typeId)?.hours ?? 0;
+  // 개인 구독 지원에는 좌석·관리자가 없으므로 안내 문구의 단위를 "요금제"로 쓴다
+  const isIndividual = view?.option.kind === 'individual';
+  const unit = isIndividual ? '요금제' : '좌석';
 
   /** "이 좌석은 하루 약 7.5시간까지(추정)" */
   const capacityText = (l: GroupLine) => {
     const hours = hoursOf(l.typeId);
     if (!l.capacityAgentHours || l.loadHours <= 0) return '좌석별 한도 없음, 쓴 만큼 결제';
     const cap = (l.capacityAgentHours * hours) / l.loadHours; // 이 그룹의 사용 방식 기준 시간으로 환산
-    if (cap >= 16) return '이 좌석은 한도가 넉넉함';
-    return `이 좌석은 하루 약 ${Math.round(cap * 2) / 2}시간까지(추정)`;
+    const subject = isIndividual ? '이 요금제는' : '이 좌석은';
+    if (cap >= 16) return `${subject} 한도가 넉넉함`;
+    return `${subject} 하루 약 ${Math.round(cap * 2) / 2}시간까지(추정)`;
   };
 
   const setGroup = (i: number, patch: Partial<TeamGroup>) =>
@@ -319,8 +323,14 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
               </tfoot>
             </table>
 
-            {view.hasOverage && <p className="warn small">일부 인원은 좌석 한도를 넘어 추가 사용량 비용이 포함됐습니다. {tool.overageNote}.</p>}
-            {view.hasShortage && <p className="warn small">일부 인원은 좌석 한도를 넘습니다. {tool.overageNote}.</p>}
+            {view.hasOverage && (
+              <p className="warn small">
+                {isIndividual
+                  ? '일부 인원은 개인 요금제 한도를 넘어, 넘는 사용량을 API 요금으로 계산해 더했습니다.'
+                  : `일부 인원은 좌석 한도를 넘어 추가 사용량 비용이 포함됐습니다. ${tool.overageNote}.`}
+              </p>
+            )}
+            {view.hasShortage && <p className="warn small">일부 인원은 {isIndividual ? '개인 요금제' : '좌석'} 한도를 넘습니다. {tool.overageNote}.</p>}
 
             {cmp?.kind === 'vs-individual' && (
               <p className="api-line">
@@ -368,7 +378,7 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
                 {copied ? '링크를 복사했습니다' : '링크 복사'}
               </button>
               <button type="button" className="link-btn sub" aria-expanded={showWhy} aria-controls="team-why" onClick={() => setShowWhy((v) => !v)}>
-                좌석 배정·계산 근거 {showWhy ? '▴' : '▾'}
+                {isIndividual ? '요금제 선택·계산 근거' : '좌석 배정·계산 근거'} {showWhy ? '▴' : '▾'}
               </button>
             </div>
 
@@ -386,10 +396,14 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
                       {typeName(l.typeId)} {l.count}명(1인 하루 {hoursOf(l.typeId)}시간) → {l.choice}: {capacityText(l)}
                     </li>
                   ))}
-                  <li>모든 금액은 추정치입니다. 상태는 1인 기준으로, 하루 사용 시간이 좌석 한도의 70% 이하면 여유, 100% 이하면 한도 근접입니다.</li>
-                  <li>사람마다 총비용(좌석 + 한도 초과분)이 가장 싼 좌석을 배정했습니다. {tool.overageNote}.</li>
+                  <li>모든 금액은 추정치입니다. 상태는 1인 기준으로, 하루 사용 시간이 {unit} 한도의 70% 이하면 여유, 100% 이하면 한도 근접입니다.</li>
                   <li>
-                    Enterprise 사용량과 좌석 한도 초과분은 API 요금({models.find((m) => m.id === tool.defaultModel)?.name} 기준)으로 계산했습니다. 환율{' '}
+                    {isIndividual
+                      ? `사람마다 총비용(요금제 + 한도 초과분)이 가장 싼 요금제를 골랐습니다.${tool.overage === 'paid' ? '' : ` ${tool.overageNote}.`}`
+                      : `사람마다 총비용(좌석 + 한도 초과분)이 가장 싼 좌석을 배정했습니다. ${tool.overageNote}.`}
+                  </li>
+                  <li>
+                    Enterprise 사용량과 {unit} 한도 초과분은 API 요금({models.find((m) => m.id === tool.defaultModel)?.name} 기준)으로 계산했습니다. 환율{' '}
                     {money.fxRate.toLocaleString('ko-KR')}원/$, 부가세 {money.vat ? '10% 포함' : '별도'}.
                   </li>
                   <li>API 종량제(쓴 만큼 결제)는 비교에서 뺐습니다. 서비스 개발·자동화처럼 코딩 도구 구독과 다른 용도에 주로 씁니다.</li>

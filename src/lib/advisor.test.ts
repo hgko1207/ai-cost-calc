@@ -51,11 +51,56 @@ describe('advise', () => {
     expect(a.reason).toBe('upgrade-top');
   });
 
-  it('추천하려는 요금제보다 API가 싸면 API를 추천한다 (같이 코딩 3시간)', () => {
-    const a = run({ hours: 3, modeId: 'pair' }); // Max 5x 14만 원 vs API 약 13.9만 원
-    expect(a.api.krw).toBeLessThan(140_000);
+  // 손계산: 에이전트 작업 1시간분 API 월 비용(Opus 5.5, 22일) = 캐시 읽기 102.3M×$0.2 + 캐시 쓰기 7.7M×$5 + 출력 0.352M×$20 = $66
+  it('API가 조금만 싸면 구독을 추천한다 (같이 코딩 3시간: API ₩138,600 vs Max 5x ₩140,000, 1% 차이)', () => {
+    const a = run({ hours: 3, modeId: 'pair' });
+    expect(a.api.krw).toBeCloseTo(138_600, 0);
+    expect(a.recommended?.plan.id).toBe('claude-max-5x');
+    expect(a.reason).toBe('fits');
+  });
+
+  it('기준(20%) 미만 차이면 구독 (같이 코딩 2.5시간: API ₩115,500, Max 5x보다 17.5% 쌈)', () => {
+    const a = run({ hours: 2.5, modeId: 'pair' });
+    expect(a.api.krw).toBeCloseTo(115_500, 0);
+    expect(a.recommended?.plan.id).toBe('claude-max-5x');
+  });
+
+  it('기준(20%) 이상 싸면 API (질문 위주 1시간: API ₩18,480 vs Pro ₩28,000, 34% 쌈)', () => {
+    const a = run({ hours: 1, modeId: 'chat' });
+    expect(a.api.krw).toBeCloseTo(18_480, 0);
     expect(a.reason).toBe('api-cheaper');
-    expect(a.recommended).toBeNull();
+  });
+
+  it('API는 한도 안 가장 싼 구독보다 기준(20%) 이상 쌀 때만 추천한다 (모든 도구·방식, 슬라이더 0.5시간 단위)', () => {
+    const ratio = advisor.apiRecommendation.minSavingRatio;
+    for (const toolId of advisor.tools.map((t) => t.id)) {
+      for (const modeId of advisor.modes.map((m) => m.id)) {
+        for (let hours = 0.5; hours <= 12; hours += 0.5) {
+          const a = run({ toolId, hours, modeId, frequency: null });
+          if (a.recommended) continue;
+          const cheapest = a.fits.find((f) => f.status !== 'short')!;
+          expect(a.api.krw, `${toolId} ${modeId} ${hours}시간`).toBeLessThanOrEqual(cheapest.krw * (1 - ratio));
+        }
+      }
+    }
+  });
+
+  it('Claude Code(실측 기반)는 하루 시간을 늘려도 한 번 구독을 추천한 뒤 API로 되돌아가지 않는다', () => {
+    for (const modeId of advisor.modes.map((m) => m.id)) {
+      let subscribed = false;
+      for (let hours = 0.5; hours <= 12; hours += 0.5) {
+        const a = run({ hours, modeId, frequency: null });
+        if (a.recommended) subscribed = true;
+        else expect(subscribed, `${modeId} ${hours}시간`).toBe(false);
+      }
+    }
+  });
+
+  it('한도에 딱 맞는 사용량은 초과가 아니다 (질문 위주 6시간 = 환산 1.2시간 = Pro 한도)', () => {
+    const a = run({ hours: 6, modeId: 'chat', frequency: null });
+    expect(a.loadHours).toBe(1.2);
+    expect(a.fits[0].status).not.toBe('short');
+    expect(a.recommended?.plan.id).toBe('claude-pro');
   });
 
   it('한도 빈도를 고르지 않으면 지금 요금제도 계산값으로 판단한다', () => {

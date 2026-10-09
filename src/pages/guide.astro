@@ -2,9 +2,11 @@
 import FaqList from '../components/FaqList.astro';
 import Base from '../layouts/Base.astro';
 import { faqsFor } from '../lib/content';
+import { advisor } from '../lib/data';
 
 const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 const faqs = faqsFor('guide');
+const apiMinSavingPct = Math.round(advisor.apiRecommendation.minSavingRatio * 100);
 const title = 'AI 코딩 요금제 가이드 — 구독 vs API, 한도 추정 방법, 회사 도입 체크리스트';
 const description =
   '구독과 API 종량제의 차이, 요금제 한도를 추정한 방법, 회사에 AI 코딩 도구를 도입하는 단계와 체크리스트, 자주 묻는 질문을 정리했습니다.';
@@ -46,7 +48,7 @@ const jsonLd = [
         걸렸습니다. Pro는 그 1/5, Max 20x는 4배(공식 배수)입니다. 정확한 한도는 회사들이 공개하지 않아 추정치입니다.
       </li>
       <li>
-        <strong>추천</strong>: 한도 안에서 가장 싼 요금제를 고릅니다. 지금 요금제에서 한도에 자주 걸린다고 답하면 계산보다 그 경험을 우선해 한 단계 위를, 거의 안
+        <strong>추천</strong>: 한도 안에서 가장 싼 요금제를 고릅니다. 쓴 만큼 내는 API가 그 요금제보다 {apiMinSavingPct}% 이상 쌀 때만 API를 권합니다(차이가 작으면 요금이 고정된 구독이 낫습니다). 지금 요금제에서 한도에 자주 걸린다고 답하면 계산보다 그 경험을 우선해 한 단계 위를, 거의 안
         걸리면 한 단계 아래를 권합니다.
       </li>
       <li><strong>"API로 냈다면"</strong>: 같은 양을 쓴 만큼 결제했을 때의 금액입니다. 운영자 기록(입력의 93%가 캐시 재사용)과 각 회사 공식 단가로 계산합니다.</li>

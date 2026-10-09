@@ -98,6 +98,7 @@ const RelatedPostSchema = z.object({
 const AdvisorSchema = z.object({
   agentHourUsage: InputValuesSchema.omit({ workDays: true }).extend({ note: z.string() }),
   defaultWorkDays: z.number().min(1).max(31),
+  apiRecommendation: z.object({ minSavingRatio: z.number().min(0).max(1), note: z.string() }),
   modes: z.array(
     z.object({ id: z.string(), name: z.string(), description: z.string(), intensity: z.number().positive() }),
   ),

@@ -8,6 +8,10 @@
     "avgContextK": 300
   },
   "defaultWorkDays": 22,
+  "apiRecommendation": {
+    "minSavingRatio": 0.2,
+    "note": "API 종량제는 한도 안에서 가장 싼 구독보다 이 비율 이상 쌀 때만 추천한다. 차이가 작으면 요금이 고정되고 한도가 있는 구독이 낫다는 판단(시간을 조금만 바꿔도 추천이 뒤집히는 것 방지)."
+  },
   "modes": [
     {
       "id": "chat",

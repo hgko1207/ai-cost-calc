@@ -62,7 +62,8 @@ export function advise(input: AdvisorInput, advisor: Advisor, models: Model[], p
   const tool = advisor.tools.find((t) => t.id === input.toolId) ?? advisor.tools[0];
   const mode = advisor.modes.find((m) => m.id === input.modeId) ?? advisor.modes[0];
   const model = models.find((m) => m.id === tool.defaultModel)!;
-  const loadHours = input.hours * mode.intensity;
+  // 소수 계산 오차(6 × 0.2 = 1.2000000000000002)로 한도에 딱 맞는 사용량이 "초과"가 되지 않게 반올림
+  const loadHours = Math.round(input.hours * mode.intensity * 1000) / 1000;
 
   const u = advisor.agentHourUsage;
   const usage = {
@@ -115,8 +116,9 @@ export function advise(input: AdvisorInput, advisor: Advisor, models: Model[], p
 
   const cheapestFit = fits.find((f) => f.status !== 'short');
   if (!cheapestFit) return result(fits.at(-1)!, 'exceeds-all');
-  // 추천하려는 요금제보다 API가 싸면 API를 추천한다 (가장 싼 요금제가 아니라 감당 가능한 요금제와 비교)
-  if (apiKrw < cheapestFit.krw) return result(null, 'api-cheaper');
+  // 추천하려는 요금제보다 API가 기준 비율 이상 쌀 때만 API를 추천한다 (가장 싼 요금제가 아니라 감당 가능한 요금제와 비교).
+  // 차이가 작으면 고정 요금인 구독을 추천해, 시간을 조금 바꿨을 때 추천이 뒤집히지 않게 한다
+  if (apiKrw <= cheapestFit.krw * (1 - advisor.apiRecommendation.minSavingRatio)) return result(null, 'api-cheaper');
   return result(cheapestFit, 'fits');
 }
 
