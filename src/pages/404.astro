@@ -1,0 +1,25 @@
+---
+// 없는 주소로 들어온 독자를 계산기로 안내한다. GitHub Pages가 이 사이트 경로 아래의 없는 주소에 404.html을 보여 준다.
+// 어느 깊이의 주소에서 열려도 깨지지 않게 링크는 모두 base 기준 절대 경로로 쓴다.
+import Base from '../layouts/Base.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const title = '페이지를 찾을 수 없어요 — AI 코딩 요금제 계산기';
+const description = '주소가 바뀌었거나 잘못 입력된 페이지입니다. 개인 요금제 추천, 회사 도입 비용, 가격표로 이동하세요.';
+---
+
+<Base title={title} description={description} path="404.html">
+  <meta slot="head" name="robots" content="noindex" />
+
+  <header class="page-head">
+    <h1>페이지를 찾을 수 없어요</h1>
+    <p class="muted">주소가 바뀌었거나 잘못 입력됐을 수 있어요. 아래에서 찾으시는 계산기로 이동하세요.</p>
+  </header>
+
+  <section class="page-links" aria-label="이동할 곳">
+    <a class="link-card" href={`${base}personal/`}><strong>내 요금제 추천</strong><span>Pro·Max 중 나에게 맞는 요금제</span></a>
+    <a class="link-card" href={`${base}team/`}><strong>회사 도입 비용</strong><span>인원별 월·연 예산 비교</span></a>
+    <a class="link-card" href={`${base}prices/`}><strong>요금제·모델 가격표</strong><span>3사 요금제와 API 단가</span></a>
+  </section>
+  <a class="faq-more" href={base}>홈으로 가기 →</a>
+</Base>
