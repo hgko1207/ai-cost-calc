@@ -2,6 +2,10 @@
 
 하루 몇 시간, 어떻게 쓰는지만 고르면 AI 코딩 구독 요금제(Pro, Max 5x, Max 20x 등)를 추천하고, 같은 양을 API로 쓰면 얼마인지 원화로 비교하는 정적 사이트.
 
+**🔗 Live:** <https://hgko1207.github.io/ai-cost-calc/>
+
+![AI 코딩 요금제 계산기 홈 화면](docs/screenshots/home.png)
+
 - 스택: Astro 7 + Preact(React 호환 모드). 계산기만 아일랜드, 나머지는 정적 HTML
 - 디자인: 원티드 디자인 시스템(Montage) 토큰 (`src/styles/global.css`)
 - 서버 없음. `dist/`를 정적 호스팅에 올리면 끝.
