@@ -34,3 +34,7 @@ npm run usage     # 내 Claude Code 로그에서 토큰 사용량 집계 (숫자
 ## 운영 문서
 
 가격 갱신 절차, 월간 가격 점검, URL 파라미터, 블로그 삽입 코드, 배포·호스팅 이전, 방문 측정은 [docs/maintaining.md](docs/maintaining.md)에 있습니다. 블로그에 넣는 코드만 보려면 [docs/embed.md](docs/embed.md).
+
+## 라이선스
+
+MIT — [LICENSE](LICENSE)
