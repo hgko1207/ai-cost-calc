@@ -15,9 +15,11 @@
 2. `npm test && npm run build`: 스키마가 맞지 않으면 빌드가 실패한다.
 3. 커밋·푸시하면 자동 배포된다(아래 설정 후).
 
-요금제 추천 기준(사용 방식 계수, 요금제별 감당 가능 시간, 시간당 토큰)은 `src/data/advisor.json`,
+요금제 추천 기준(사용 방식 계수, 요금제별 감당 가능 시간, 시간당 토큰, API 추천 기준)은 `src/data/advisor.json`,
 팀 요금제(좌석 가격·한도, 도입 방식)는 `src/data/team.json`,
 프리셋은 `src/data/presets.json`, 블로그 관련 글은 `src/data/related-posts.json`.
+
+- API 추천 기준 `advisor.json`의 `apiRecommendation.minSavingRatio`(지금 0.2): API 종량제가 한도 안에서 가장 싼 구독보다 이 비율 이상 쌀 때만 API를 추천한다. 차이가 작으면 요금이 고정된 구독을 추천해, 하루 시간을 조금 바꿨을 때 추천이 뒤집히지 않게 한다. 바꾸면 가이드의 계산 방법 설명도 같은 값으로 바뀐다. `src/lib/advisor.test.ts`의 경계 사례(같이 코딩 2.5·3시간 등)를 손계산 값으로 다시 맞춘다.
 
 ## 월간 가격 점검 (자동)
 
