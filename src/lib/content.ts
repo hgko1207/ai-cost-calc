@@ -1,3 +1,34 @@
+import { advisor, prices, team } from './data';
+import { krwShort } from './format';
+import { evaluateTeam } from './team';
+import { DEFAULT_MONEY } from './url';
+
+/**
+ * "1인당 얼마나 드나요?" 답변. 가격을 글로 적지 않고 빌드 때 team.json과 팀 계산기(evaluateTeam)로
+ * 기본 상태(인원 유형별 기본값 · 연간 결제 · 기본 환율·부가세)를 계산해 채운다. 가격이 바뀌면 답변도 따라 바뀐다.
+ */
+export function teamCostAnswer(): string {
+  const tool = team.tools[0];
+  const option = tool.options.find((o) => o.id === 'claude-team');
+  if (!option || option.kind !== 'seats') throw new Error('team.json에 Claude Team 좌석 정보가 없습니다');
+  const seat = (id: string) => option.seats.find((s) => s.id === id)!;
+  const groups = team.userTypes.map((t) => ({ typeId: t.id, count: t.defaultCount, hours: t.defaultHours }));
+  const r = evaluateTeam(
+    { toolId: tool.id, groups, billing: 'annual', workDays: team.defaultWorkDays, ...DEFAULT_MONEY },
+    team,
+    advisor,
+    prices.models,
+    prices.plans,
+  );
+  const result = r.options.find((o) => o.option.id === 'claude-team')!;
+  const who = team.userTypes.map((t) => `${t.name} ${t.defaultCount}`).join(', ');
+  return (
+    `Claude Team 연간 결제 기준 기본 좌석은 1인 월 $${seat('standard').annualUsd}, 많이 쓰는 사람용 프리미엄 좌석은 월 $${seat('premium').annualUsd}입니다. ` +
+    `${r.headcount}명(${who}) 팀이면 월 약 ${krwShort(result.monthlyKrw)}, 1인당 약 ${krwShort(result.perUserKrw)}입니다(부가세 ${DEFAULT_MONEY.vat ? '포함' : '별도'}). ` +
+    'API로만 쓰면 Anthropic 공식 문서 기준 개발자 1인당 월 $150~250 정도가 듭니다.'
+  );
+}
+
 // 페이지별 FAQ. 질문마다 놓일 페이지(page)를 하나만 정해 페이지끼리 같은 질문이 반복되지 않게 한다.
 // 검색엔진용 구조화 데이터(FAQPage)에도 화면에 보이는 질문과 똑같이 들어간다.
 // "구독과 API는 뭐가 다른가요?"는 가이드 본문 섹션(#terms)이 답하므로 여기 두지 않는다.
@@ -21,7 +52,7 @@ export const faqs: { page: FaqPage; q: string; a: string }[] = [
   {
     page: 'team',
     q: '회사에서 Claude Code를 도입하면 1인당 얼마나 드나요?',
-    a: 'Claude Team 연간 결제 기준 기본 좌석은 1인 월 $20, 많이 쓰는 사람용 프리미엄 좌석은 월 $100입니다. 10명(많이 쓰는 사람 2, 일반 사용자 8) 팀이면 월 약 55만 원, 1인당 약 5.5만 원입니다(부가세 포함). API로만 쓰면 Anthropic 공식 문서 기준 개발자 1인당 월 $150~250 정도가 듭니다.',
+    a: teamCostAnswer(),
   },
   {
     page: 'team',

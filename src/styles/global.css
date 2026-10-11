@@ -597,6 +597,7 @@ button {
   color: var(--label-alternative);
   font-size: var(--t-meta);
   line-height: 18px;
+  text-wrap: balance; /* 좁은 화면에서 마지막 낱말만 혼자 줄바꿈되지 않게 */
 }
 .detail-calc[open] > summary {
   box-shadow: inset 0 -1px 0 var(--line-alternative);
@@ -2153,7 +2154,8 @@ table.detail tr.is-best-row strong {
   color: var(--label-alternative);
 }
 /* 글자 버튼도 누르는 영역은 WCAG 2.2 최소 크기(24px) 이상 */
-.result-actions .link-btn {
+.result-actions .link-btn,
+.card-head .link-btn {
   min-height: 36px;
 }
 .why-list {
