@@ -7,11 +7,11 @@
     "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing?hl=ko"
   },
   {
-    "date": "2026-10-15",
-    "kind": "retire",
-    "title": "Claude Haiku 4.5 지원 종료 예정",
-    "detail": "공식 모델 개요 기준 2026-10-15 이후 종료",
-    "sourceUrl": "https://platform.claude.com/docs/ko/about-claude/models/overview"
+    "date": "2026-10-23",
+    "kind": "site",
+    "title": "Claude Haiku 5.5 추가, Anthropic 단가 재확인",
+    "detail": "10월 7일 출시된 Haiku 5.5 추가(입력 $0.10·출력 $0.50, 10만 토큰 초과 시 $0.50·$2.50). Sonnet 5.5 캐시 읽기 단가 정정 $0.20 → $0.10. Haiku 4.5는 종료 발표가 없는 이전 세대 모델이라 \"종료 예정\" 표시를 지움",
+    "sourceUrl": "https://platform.claude.com/docs/ko/about-claude/pricing"
   },
   {
     "date": "2026-10-06",

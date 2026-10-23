@@ -8,7 +8,9 @@
 
 1. `src/data/prices.json`
    - `updatedAt`: 페이지에 표시되는 기준일
-   - `models[]`: 단가는 모두 USD / 100만 토큰. `longContext`는 할증 구간이 있는 모델만.
+   - `models[]`: 단가는 모두 USD / 100만 토큰. `longContext`는 할증 구간이 있는 모델만(예: GPT 272K 초과, Haiku 5.5 질문 10만 토큰 초과).
+   - `retiresAt`(종료 예정일)은 회사가 **종료를 발표한 날짜만** 넣는다. Claude는 [모델 폐기 페이지](https://platform.claude.com/docs/en/about-claude/model-deprecations)에서 상태가 "Deprecated"이고 "Retirement date"가 정해진 경우다. "Not sooner than ○○"은 그 날짜 전에는 종료하지 않는다는 최소 보장이라 종료일이 아니다(2026-10-23 Haiku 4.5를 잘못 표시했다가 바로잡음).
+   - 캐시 읽기 단가는 모델마다 비율이 다르다(Claude 기본 0.1배, Fable 5.1 0.025배, Opus·Sonnet 5.5 0.05배). 입력 단가에 비율을 곱해 추정하지 말고 요금표 값을 그대로 옮긴다.
    - `plans[]`: `krwMonthly`는 공식 원화가(부가세 포함 표시)가 있을 때만, 없으면 `null`(USD × 환율로 계산).
    - 요금제별 사용 한도(하루 감당 시간)는 `advisor.json`에만 둔다. 토큰 계산기·팀 계산기도 이 값을 쓴다.
    - 항목마다 `sourceUrl`, `verifiedAt` 갱신

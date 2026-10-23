@@ -28,8 +28,10 @@ describe('월간 가격 점검', () => {
   });
 
   it('종료·가격 변경 예정일 알림 (45일 이내·지난 것)', () => {
-    const a = dateAlerts(prices, '2026-10-06');
-    expect(a.map((x) => x.label)).toContain('Claude Haiku 4.5');
+    // 지금 데이터에는 종료 예정 모델이 없어서, 하나를 가정해 넣는다
+    const withRetire = { ...prices, models: [...prices.models, { ...prices.models[0], name: '종료 예정 모델', retiresAt: '2026-10-15' }] };
+    const a = dateAlerts(withRetire, '2026-10-06');
+    expect(a.map((x) => x.label)).toContain('종료 예정 모델');
     expect(a.some((x) => x.kind === 'price-change')).toBe(false); // 2027-01-01은 아직 45일 밖
     expect(dateAlerts(prices, '2026-12-01').some((x) => x.kind === 'price-change')).toBe(true);
   });

@@ -28,8 +28,15 @@ describe('modelCost', () => {
   });
 
   it('최대 컨텍스트를 넘으면 사용 불가로 표시한다', () => {
-    expect(modelCost(model('haiku-4-5'), daily).available).toBe(false);
-    expect(modelCost(model('haiku-4-5'), { ...daily, avgContextK: 150 }).available).toBe(true);
+    // 지금 목록은 모두 1M 컨텍스트라, 200K 모델을 가정해 확인한다
+    const small = { ...model('opus-5-5'), contextWindowK: 200 };
+    expect(modelCost(small, daily).available).toBe(false);
+    expect(modelCost(small, { ...daily, avgContextK: 150 }).available).toBe(true);
+  });
+
+  it('Haiku 5.5는 10만 토큰을 넘는 요청에 높은 단가를 적용한다', () => {
+    expect(modelCost(model('haiku-5-5'), daily).longContext).toBe(true); // 300K > 100K
+    expect(modelCost(model('haiku-5-5'), { ...daily, avgContextK: 80 }).longContext).toBe(false);
   });
 
   it('캐시 비율 합이 100%를 넘으면 정규화한다', () => {

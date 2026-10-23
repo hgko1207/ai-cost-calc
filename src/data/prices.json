@@ -36,7 +36,7 @@
       },
       "note": "1M 컨텍스트까지 동일 단가. 캐시 쓰기는 5분 TTL 기준(1시간 TTL은 $20).",
       "sourceUrl": "https://platform.claude.com/docs/ko/about-claude/pricing",
-      "verifiedAt": "2026-10-06"
+      "verifiedAt": "2026-10-23"
     },
     {
       "id": "opus-5-5",
@@ -53,7 +53,7 @@
       },
       "note": "1M 컨텍스트까지 동일 단가. 캐시 쓰기는 5분 TTL 기준(1시간 TTL은 $8).",
       "sourceUrl": "https://platform.claude.com/docs/ko/about-claude/pricing",
-      "verifiedAt": "2026-10-06"
+      "verifiedAt": "2026-10-23"
     },
     {
       "id": "sonnet-5-5",
@@ -65,29 +65,37 @@
       "prices": {
         "input": 2,
         "cacheWrite": 2.5,
-        "cacheRead": 0.2,
+        "cacheRead": 0.1,
         "output": 10
       },
       "sourceUrl": "https://platform.claude.com/docs/ko/about-claude/pricing",
-      "verifiedAt": "2026-10-06"
+      "verifiedAt": "2026-10-23"
     },
     {
-      "id": "haiku-4-5",
+      "id": "haiku-5-5",
       "vendor": "anthropic",
-      "name": "Claude Haiku 4.5",
-      "apiId": "claude-haiku-4-5-20251001",
+      "name": "Claude Haiku 5.5",
+      "apiId": "claude-haiku-5-5",
       "tier": "light",
-      "contextWindowK": 200,
+      "contextWindowK": 1000,
       "prices": {
-        "input": 1,
-        "cacheWrite": 1.25,
-        "cacheRead": 0.1,
-        "output": 5
+        "input": 0.1,
+        "cacheWrite": 0.125,
+        "cacheRead": 0.01,
+        "output": 0.5
+      },
+      "longContext": {
+        "thresholdK": 100,
+        "prices": {
+          "input": 0.5,
+          "cacheWrite": 0.625,
+          "cacheRead": 0.05,
+          "output": 2.5
+        }
       },
       "sourceUrl": "https://platform.claude.com/docs/ko/about-claude/pricing",
-      "verifiedAt": "2026-10-06",
-      "note": "2026-10-15 이후 지원 종료 예정(공식 모델 개요).",
-      "retiresAt": "2026-10-15"
+      "verifiedAt": "2026-10-23",
+      "note": "2026-10-07 출시. 캐시 쓰기는 5분 TTL 기준(1시간 TTL은 $0.20). 이전 세대 Haiku 4.5(입력 $1·출력 $5)도 아직 사용 가능."
     },
     {
       "id": "gpt-6-astra",

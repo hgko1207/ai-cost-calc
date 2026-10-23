@@ -24,8 +24,7 @@ describe('데이터 검증', () => {
   });
 
   it('종료·가격 변경 예정일은 날짜 형식이다', () => {
-    const haiku = prices.models.find((m) => m.id === 'haiku-4-5')!;
-    expect(haiku.retiresAt).toBe('2026-10-15');
+    for (const m of prices.models) if (m.retiresAt) expect(m.retiresAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(prices.models.find((m) => m.id === 'gemini-3-8-flash')!.priceChangesAt).toBe('2027-01-01');
   });
 
