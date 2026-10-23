@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-06",
+  "updatedAt": "2026-10-23",
   "vendors": [
     {
       "id": "anthropic",
@@ -120,7 +120,7 @@
         }
       },
       "sourceUrl": "https://developers.openai.com/api/docs/pricing",
-      "verifiedAt": "2026-10-06"
+      "verifiedAt": "2026-10-23"
     },
     {
       "id": "gpt-6-1-sol",
@@ -145,7 +145,7 @@
         }
       },
       "sourceUrl": "https://developers.openai.com/api/docs/pricing",
-      "verifiedAt": "2026-10-06"
+      "verifiedAt": "2026-10-23"
     },
     {
       "id": "gpt-6-luna",
@@ -170,7 +170,7 @@
         }
       },
       "sourceUrl": "https://developers.openai.com/api/docs/pricing",
-      "verifiedAt": "2026-10-06"
+      "verifiedAt": "2026-10-23"
     },
     {
       "id": "gemini-3-1-pro",
@@ -196,7 +196,25 @@
       },
       "note": "캐시 쓰기 요금이 따로 없고 시간당 저장 요금($4.50/1M·시간)이 붙음. 계산기에서는 캐시 쓰기를 입력 단가로 근사하고 저장 요금은 제외.",
       "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing?hl=ko",
-      "verifiedAt": "2026-10-06"
+      "verifiedAt": "2026-10-23"
+    },
+    {
+      "id": "gemini-4-argon",
+      "vendor": "google",
+      "name": "Gemini 4 Argon",
+      "apiId": "gemini-4-argon",
+      "tier": "flagship",
+      "contextWindowK": 1000,
+      "prices": {
+        "input": 2,
+        "cacheWrite": 2,
+        "cacheRead": 0.1,
+        "output": 10
+      },
+      "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing?hl=ko",
+      "verifiedAt": "2026-10-23",
+      "note": "2026-10-13 정식 출시. 2026-11-30까지 가격이며 2026-12-01부터 입력 $4 / 출력 $20 / 캐시 읽기 $0.20로 2배 인상 예정. 자동(암시적) 캐시만 지원해 캐시 쓰기 요금이 따로 없어 입력 단가로 계산. 무료 등급 없음.",
+      "priceChangesAt": "2026-12-01"
     },
     {
       "id": "gemini-3-8-flash",
@@ -211,9 +229,9 @@
         "cacheRead": 0.075,
         "output": 3.75
       },
-      "note": "2026-12-31까지 프로모션 가격. 2027-01-01부터 입력 $1.50 / 출력 $7.50로 2배 인상 예정. 캐시 저장 요금 제외.",
+      "note": "2026-12-31까지 적용 가격. 2027-01-01부터 입력 $1.50 / 출력 $7.50 / 캐시 읽기 $0.15로 인상 예정. 캐시 저장 요금 제외.",
       "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing?hl=ko",
-      "verifiedAt": "2026-10-06",
+      "verifiedAt": "2026-10-23",
       "priceChangesAt": "2027-01-01"
     },
     {
@@ -231,7 +249,7 @@
       },
       "note": "캐시 저장 요금 제외.",
       "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing?hl=ko",
-      "verifiedAt": "2026-10-06"
+      "verifiedAt": "2026-10-23"
     }
   ],
   "plans": [
@@ -244,7 +262,7 @@
       "codingTools": "Claude Code",
       "limitsNote": "5시간 단위 한도 + 주간 한도 (수치 비공개)",
       "sourceUrl": "https://support.claude.com/ko/articles/8325606",
-      "verifiedAt": "2026-10-06",
+      "verifiedAt": "2026-10-23",
       "proMultiplier": 1
     },
     {
@@ -256,7 +274,7 @@
       "codingTools": "Claude Code",
       "limitsNote": "Pro의 5배 (5시간 단위) + 주간 한도",
       "sourceUrl": "https://support.claude.com/ko/articles/11049741",
-      "verifiedAt": "2026-10-06",
+      "verifiedAt": "2026-10-23",
       "proMultiplier": 5
     },
     {
@@ -268,7 +286,7 @@
       "codingTools": "Claude Code",
       "limitsNote": "Pro의 20배 (5시간 단위) + 주간 한도",
       "sourceUrl": "https://support.claude.com/ko/articles/11049741",
-      "verifiedAt": "2026-10-06",
+      "verifiedAt": "2026-10-23",
       "proMultiplier": 20
     },
     {
@@ -302,7 +320,7 @@
       "codingTools": "Codex",
       "limitsNote": "5시간 한도 없음, 주간 한도 있음 (수치 비공개)",
       "sourceUrl": "https://learn.chatgpt.com/docs/pricing",
-      "verifiedAt": "2026-10-06"
+      "verifiedAt": "2026-10-23"
     },
     {
       "id": "chatgpt-pro-500",
@@ -313,7 +331,7 @@
       "codingTools": "Codex (Astra Ultrafast 포함)",
       "limitsNote": "5시간 한도 없음, 가장 높은 사용량 (수치 비공개)",
       "sourceUrl": "https://learn.chatgpt.com/docs/pricing",
-      "verifiedAt": "2026-10-06"
+      "verifiedAt": "2026-10-23"
     },
     {
       "id": "google-ai-pro",
@@ -324,7 +342,7 @@
       "codingTools": "Antigravity, Jules",
       "limitsNote": "Antigravity 5시간 단위 갱신 (수치 비공개), Jules 하루 100건",
       "sourceUrl": "https://one.google.com/about/plans?hl=ko&gl=KR",
-      "verifiedAt": "2026-10-06"
+      "verifiedAt": "2026-10-23"
     },
     {
       "id": "google-ai-ultra-5x",
@@ -335,7 +353,7 @@
       "codingTools": "Antigravity, Jules",
       "limitsNote": "AI Pro의 5배",
       "sourceUrl": "https://gemini.google/kr/subscriptions/",
-      "verifiedAt": "2026-10-06"
+      "verifiedAt": "2026-10-23"
     },
     {
       "id": "google-ai-ultra-20x",
@@ -346,7 +364,7 @@
       "codingTools": "Antigravity, Jules",
       "limitsNote": "AI Pro의 20배",
       "sourceUrl": "https://gemini.google/kr/subscriptions/",
-      "verifiedAt": "2026-10-06"
+      "verifiedAt": "2026-10-23"
     }
   ]
 }

@@ -3,15 +3,29 @@
     "date": "2027-01-01",
     "kind": "price",
     "title": "Gemini 3.8 Flash API 가격 2배 인상 예정",
-    "detail": "프로모션 종료: 입력 $0.75 → $1.50, 출력 $3.75 → $7.50 (100만 토큰당)",
+    "detail": "2026년 12월 31일까지 적용 가격 종료: 입력 $0.75 → $1.50, 출력 $3.75 → $7.50, 캐시 읽기 $0.075 → $0.15 (100만 토큰당)",
+    "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing?hl=ko"
+  },
+  {
+    "date": "2026-12-01",
+    "kind": "price",
+    "title": "Gemini 4 Argon API 가격 2배 인상 예정",
+    "detail": "입력 $2 → $4, 출력 $10 → $20, 캐시 읽기 $0.10 → $0.20 (100만 토큰당)",
     "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing?hl=ko"
   },
   {
     "date": "2026-10-23",
     "kind": "site",
-    "title": "Claude Haiku 5.5 추가, Anthropic 단가 재확인",
-    "detail": "10월 7일 출시된 Haiku 5.5 추가(입력 $0.10·출력 $0.50, 10만 토큰 초과 시 $0.50·$2.50). Sonnet 5.5 캐시 읽기 단가 정정 $0.20 → $0.10. Haiku 4.5는 종료 발표가 없는 이전 세대 모델이라 \"종료 예정\" 표시를 지움",
+    "title": "가격 전체 재확인, Claude Haiku 5.5·Gemini 4 Argon 추가",
+    "detail": "3사 API 단가·요금제·팀 좌석을 공식 페이지와 다시 대조. Haiku 5.5(10월 7일 출시)·Gemini 4 Argon(10월 13일 출시) 추가. Sonnet 5.5 캐시 읽기 단가 정정 $0.20 → $0.10. Haiku 4.5는 종료 발표가 없는 이전 세대 모델이라 \"종료 예정\" 표시를 지움",
     "sourceUrl": "https://platform.claude.com/docs/ko/about-claude/pricing"
+  },
+  {
+    "date": "2026-10-09",
+    "kind": "plan",
+    "title": "Gemini Code Assist Standard·Enterprise 신규 구매 종료",
+    "detail": "기존 고객은 계약 기간까지 사용. 코딩 에이전트 기능은 Antigravity(Gemini Enterprise 포함)로 안내",
+    "sourceUrl": "https://docs.cloud.google.com/gemini/docs/codeassist/sunset"
   },
   {
     "date": "2026-10-06",
