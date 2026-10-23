@@ -187,4 +187,30 @@ describe('evaluateTeam', () => {
     expect(text).toContain('부가세 포함');
     expect(text).toContain('https://example.com/?tab=team');
   });
+
+  describe('신규 구매 종료', () => {
+    it('살 수 있는 방식이 있으면 판매가 끝난 방식은 더 싸도 추천하지 않는다', () => {
+      const t2 = structuredClone(team);
+      const claude = t2.tools.find((x) => x.id === 'claude-code')!;
+      claude.options.find((o) => o.id === 'claude-team')!.salesEnded = { date: '2026-10-09', note: '-', sourceUrl: 'https://example.com' };
+      const r = evaluateTeam(base, t2, advisor, prices.models, prices.plans);
+      expect(opt(r, 'claude-team').monthlyKrw).toBeLessThan(opt(r, 'claude-individual').monthlyKrw); // 금액은 여전히 가장 쌈
+      expect(r.recommended?.option.id).not.toBe('claude-team');
+    });
+
+    it('Gemini는 Code Assist가 모두 판매 종료라 참고 금액으로 보여 주고, 요약에 주의 문구를 넣는다', () => {
+      const r = run({ toolId: 'gemini', vat: true });
+      expect(r.recommended?.option.salesEnded?.date).toBe('2026-10-09');
+      const text = buildTeamSummary(r, {
+        toolName: 'Gemini Code Assist',
+        billing: 'annual',
+        vat: true,
+        fxRate: 1400,
+        groups: [{ name: '일반 사용자', count: 8, hours: 3 }],
+        checkedAt: '2026-10-23',
+        url: 'https://example.com/team/',
+      });
+      expect(text).toContain('2026-10-09부터 신규 구매가 종료됨');
+    });
+  });
 });

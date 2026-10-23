@@ -165,8 +165,13 @@ export function evaluateTeam(input: TeamInput, team: Team, advisor: Advisor, mod
   const options = tool.options
     .map(evaluate)
     .sort((a, b) => Number(b.applicable) - Number(a.applicable) || a.monthlyKrw - b.monthlyKrw);
-  const candidates = options.filter((o) => o.applicable && !o.hasShortage);
-  const recommended = (candidates.length ? candidates : options.filter((o) => o.applicable))[0] ?? null;
+  // 새로 살 수 있는 방식 → (판매 종료 포함) 한도 초과 시 대기 없는 방식 → 적용 가능한 방식 순으로 고른다
+  const tiers = [
+    options.filter((o) => o.applicable && !o.hasShortage && !o.option.salesEnded),
+    options.filter((o) => o.applicable && !o.hasShortage),
+    options.filter((o) => o.applicable),
+  ];
+  const recommended = tiers.find((t) => t.length)?.[0] ?? null;
   return { headcount, totalLoadHours, options, recommended, apiUsdPerAgentHour };
 }
 

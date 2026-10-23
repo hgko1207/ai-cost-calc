@@ -20,6 +20,7 @@ const rows = team.tools.flatMap((tool) =>
         annualSub: s.annualKrw ? usd(s.annualUsd) : undefined,
         // 최소 인원을 공식 페이지에 적지 않은 요금제는 team.json에 1로 둔다
         minSeats: o.minSeats > 1 ? `${o.minSeats}명` : '표기 없음',
+        ended: o.salesEnded?.date,
         limit: s.limitNote,
         features: yesFeatures(o.checks),
         sourceUrl: o.sourceUrl,
@@ -36,6 +37,7 @@ const rows = team.tools.flatMap((tool) =>
           annual: `${usd(o.seatAnnualUsd)} + 사용량`,
           annualSub: '사용량은 API 요금',
           minSeats: `${o.minSeats}명`,
+          ended: o.salesEnded?.date,
           limit: o.limitNote,
           features: yesFeatures(o.checks),
           sourceUrl: o.sourceUrl,
@@ -67,6 +69,7 @@ const rows = team.tools.flatMap((tool) =>
           <tr>
             <th scope="row">
               <a href={r.sourceUrl} rel="noopener" target="_blank">{r.name}</a>
+              {r.ended && <span class="pill warn-pill">{r.ended.split('-').map(Number).join('.')} 신규 구매 종료</span>}
             </th>
             <td class="num">
               {r.monthly}

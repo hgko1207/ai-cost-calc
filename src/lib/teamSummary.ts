@@ -21,6 +21,9 @@ export function buildTeamSummary(r: TeamResult, c: SummaryContext): string {
     '',
     `■ 인원: 총 ${r.headcount}명 (${c.groups.filter((g) => g.count > 0).map((g) => `${g.name} ${g.count}명·하루 ${g.hours}시간`).join(', ')})`,
     `■ 추천: ${rec.option.name} — ${compositionText(rec)}`,
+    ...(rec.option.salesEnded
+      ? [`■ 주의: ${rec.option.name}은(는) ${rec.option.salesEnded.date}부터 신규 구매가 종료됨. 이미 계약한 회사용 참고 금액이며, ${rec.option.salesEnded.note}`]
+      : []),
     `■ 예산(${c.billing === 'annual' ? '연간 결제' : '월간 결제'}, ${vatText}): 월 ${krw(rec.monthlyKrw)} / 연 ${krw(rec.annualKrw)} / 1인당 월 ${krw(rec.perUserKrw)}`,
   ];
   const cmp = compareAlternative(r);

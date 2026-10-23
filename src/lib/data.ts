@@ -144,6 +144,8 @@ const TeamOptionBase = {
   checks: z.record(z.string(), FeatureCheckSchema),
   highlights: z.array(z.string()), // 체크 항목 외의 특징 (IP 면책 등)
   sourceUrl: z.url(),
+  // 신규 구매 종료 (공식 발표). 기존 계약 고객용 참고 금액으로만 보여 주고, 살 수 있는 방식을 먼저 추천한다
+  salesEnded: z.object({ date: isoDate, note: z.string(), sourceUrl: z.url() }).optional(),
 };
 const TeamOptionSchema = z.discriminatedUnion('kind', [
   z.object({

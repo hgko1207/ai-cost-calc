@@ -316,7 +316,12 @@
             "Google Cloud 보안·VPC-SC",
             "IP 면책",
             "소스 인용 표시"
-          ]
+          ],
+          "salesEnded": {
+            "date": "2026-10-09",
+            "note": "새로 도입한다면 Gemini Enterprise(Antigravity 포함)를 확인하세요.",
+            "sourceUrl": "https://docs.cloud.google.com/gemini/docs/codeassist/sunset"
+          }
         },
         {
           "id": "code-assist-enterprise",
@@ -358,7 +363,12 @@
           "highlights": [
             "Standard 기능 전체",
             "사내 코드로 맞춤화"
-          ]
+          ],
+          "salesEnded": {
+            "date": "2026-10-09",
+            "note": "새로 도입한다면 Gemini Enterprise(Antigravity 포함)를 확인하세요.",
+            "sourceUrl": "https://docs.cloud.google.com/gemini/docs/codeassist/sunset"
+          }
         }
       ],
       "overage": "wait"

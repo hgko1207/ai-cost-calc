@@ -258,6 +258,15 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
               </div>
             </div>
 
+            {view.option.salesEnded && (
+              <p className="warn small">
+                <strong>{dotDate(view.option.salesEnded.date)}부터 신규 구매 종료</strong> · 이미 계약한 회사용 참고 금액이에요. {view.option.salesEnded.note}{' '}
+                <a href={view.option.salesEnded.sourceUrl} target="_blank" rel="noopener">
+                  공식 안내 ↗
+                </a>
+              </p>
+            )}
+
             <div className="doc-tabs" role="group" aria-label="도입 방식 바꿔 보기">
               {r.options.map((o) => (
                 <button
@@ -270,6 +279,7 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
                 >
                   <strong>{o.option.name}</strong>
                   {o === rec && <span className="pill rec">추천</span>}
+                  {o.option.salesEnded && <span className="pill warn-pill">판매 종료</span>}
                   <span>{o.applicable ? `월 ${krwShort(o.monthlyKrw)}` : o.notApplicableReason}</span>
                 </button>
               ))}
