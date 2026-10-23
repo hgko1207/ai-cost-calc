@@ -176,19 +176,26 @@
           "id": "chatgpt-business",
           "kind": "seats",
           "name": "ChatGPT Business",
-          "summary": "좌석제. ChatGPT·Codex 포함",
+          "summary": "좌석제. ChatGPT·Codex 포함, Standard·Premium 좌석을 섞어 살 수 있음",
           "minSeats": 2,
           "seats": [
             {
               "id": "standard",
-              "name": "Business 좌석",
+              "name": "Standard 좌석",
               "monthlyUsd": 25,
               "annualUsd": 20,
-              "monthlyKrw": 36100,
-              "annualKrw": 28900,
               "agentHours": 1.2,
               "basis": "개인 Plus와 같은 수준 (공식)",
               "limitNote": "개인 Plus와 같은 수준 (5시간 단위 + 주간 한도)"
+            },
+            {
+              "id": "premium",
+              "name": "Premium 좌석",
+              "monthlyUsd": 125,
+              "annualUsd": 100,
+              "agentHours": 6.0,
+              "basis": "Standard 좌석의 5배 (공식 배수, 시간은 Standard 추정치 × 5)",
+              "limitNote": "Standard 대비 사용량 5배, 5시간 단위 제한 없음"
             }
           ],
           "sourceUrl": "https://chatgpt.com/ko-KR/pricing/?type=team",

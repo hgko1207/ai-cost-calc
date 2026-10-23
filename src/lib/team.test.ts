@@ -64,11 +64,14 @@ describe('evaluateTeam', () => {
     ];
     const b = opt(run({ toolId: 'codex', groups, vat: true }), 'chatgpt-business');
     expect(b.hasOverage).toBe(true);
-    expect(b.lines.find((l) => l.typeId === 'normal')!.unitKrw).toBe(28_900); // 공식 원화가(부가세 포함), 한도 안
-    // 부가세 별도 기준이면 공식 원화가도 1.1로 나눠 달러 환산값과 기준을 맞춘다
+    // 가격 페이지가 달러로만 표시(2026-10-23) → Standard 연간 $20 × 1,400원 × 부가세 1.1, 한도 안
+    expect(b.lines.find((l) => l.typeId === 'normal')!.unitKrw).toBeCloseTo(20 * 1400 * 1.1);
     const bNoVat = opt(run({ toolId: 'codex', groups, vat: false }), 'chatgpt-business');
-    expect(bNoVat.lines.find((l) => l.typeId === 'normal')!.unitKrw).toBeCloseTo(28_900 / 1.1);
-    expect(b.lines.find((l) => l.typeId === 'heavy')!.overageKrw).toBeGreaterThan(0);
+    expect(bNoVat.lines.find((l) => l.typeId === 'normal')!.unitKrw).toBeCloseTo(20 * 1400);
+    // 많이 쓰는 사람(환산 7시간)은 Premium 좌석(Standard의 5배 = 6시간) + 넘는 1시간 추가 비용
+    const heavy = b.lines.find((l) => l.typeId === 'heavy')!;
+    expect(heavy.choice).toBe('Premium 좌석');
+    expect(heavy.overageKrw).toBeGreaterThan(0);
   });
 
   it('한도를 조금 넘으면 "기본 좌석 + 초과분"이 프리미엄보다 싸면 그쪽을 고른다', () => {

@@ -17,7 +17,7 @@
     "date": "2026-10-23",
     "kind": "site",
     "title": "가격 전체 재확인, Claude Haiku 5.5·Gemini 4 Argon 추가",
-    "detail": "3사 API 단가·요금제·팀 좌석을 공식 페이지와 다시 대조. Haiku 5.5(10월 7일 출시)·Gemini 4 Argon(10월 13일 출시) 추가. Sonnet 5.5 캐시 읽기 단가 정정 $0.20 → $0.10. Haiku 4.5는 종료 발표가 없는 이전 세대 모델이라 \"종료 예정\" 표시를 지움",
+    "detail": "3사 API 단가·요금제·팀 좌석을 공식 페이지와 다시 대조. Haiku 5.5(10월 7일 출시)·Gemini 4 Argon(10월 13일 출시) 추가. Sonnet 5.5 캐시 읽기 단가 정정 $0.20 → $0.10. Haiku 4.5는 종료 발표가 없는 이전 세대 모델이라 \"종료 예정\" 표시를 지움. ChatGPT Business에 Premium 좌석(월 $125·연 $100, Standard의 5배) 추가, 원화 표시가 없어져 달러 기준으로 계산",
     "sourceUrl": "https://platform.claude.com/docs/ko/about-claude/pricing"
   },
   {

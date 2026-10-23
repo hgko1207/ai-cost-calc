@@ -298,7 +298,7 @@
       "codingTools": "Codex",
       "limitsNote": "5시간당 로컬 메시지: Astra 5~45, Sol 15~160 + 주간 한도",
       "sourceUrl": "https://chatgpt.com/ko-KR/pricing/",
-      "verifiedAt": "2026-10-05"
+      "verifiedAt": "2026-10-23"
     },
     {
       "id": "chatgpt-pro-100",
@@ -309,7 +309,7 @@
       "codingTools": "Codex",
       "limitsNote": "5시간 한도 없음, 주간 한도 있음 (수치 비공개)",
       "sourceUrl": "https://chatgpt.com/ko-KR/pricing/",
-      "verifiedAt": "2026-10-05"
+      "verifiedAt": "2026-10-23"
     },
     {
       "id": "chatgpt-pro-200",
