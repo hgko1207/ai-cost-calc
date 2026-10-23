@@ -14,6 +14,13 @@
     "sourceUrl": "https://ai.google.dev/gemini-api/docs/pricing?hl=ko"
   },
   {
+    "date": "2026-10-24",
+    "kind": "site",
+    "title": "팀 계산기 Gemini 대체 상품: Gemini Enterprise 추가",
+    "detail": "판매가 끝난 Code Assist 대신 Antigravity가 포함된 Gemini Enterprise Standard(좌석 월 $30부터 + 1인 월 $10 크레딧)와 종량제(좌석료 $0)를 비교. Code Assist는 기존 계약 고객용으로 남김",
+    "sourceUrl": "https://antigravity.google/pricing"
+  },
+  {
     "date": "2026-10-23",
     "kind": "site",
     "title": "가격 전체 재확인, Claude Haiku 5.5·Gemini 4 Argon 추가",

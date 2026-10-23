@@ -44,6 +44,26 @@ const rows = team.tools.flatMap((tool) =>
         },
       ];
     }
+    if (o.kind === 'seat-credit-usage') {
+      const from = o.seatPriceFrom ? '부터' : '';
+      const seat = (n: number) => (n > 0 ? `${usd(n)}${from}` : '$0');
+      return [
+        {
+          key: o.id,
+          name: o.name,
+          tool: tool.name,
+          monthly: `${seat(o.seatMonthlyUsd)} + 사용량`,
+          monthlySub: o.includedCreditUsd > 0 ? `1인 월 ${usd(o.includedCreditUsd)} 크레딧 포함` : '전부 사용량 과금',
+          annual: `${seat(o.seatAnnualUsd)} + 사용량`,
+          annualSub: undefined,
+          minSeats: o.minSeats > 1 ? `${o.minSeats}명` : '1명',
+          ended: o.salesEnded?.date,
+          limit: o.limitNote,
+          features: yesFeatures(o.checks),
+          sourceUrl: o.sourceUrl,
+        },
+      ];
+    }
     return [];
   }),
 );
@@ -91,5 +111,5 @@ const rows = team.tools.flatMap((tool) =>
 </div>
 <p class="muted small">
   연간 결제 가격은 1년 약정 시 월 환산 금액입니다. 원화 표기가 없는 요금제는 달러 가격(부가세 별도)입니다. 좌석 한도를 넘는 사용량은 Claude는 API 요금, ChatGPT는
-  워크스페이스 크레딧으로 추가 결제합니다.
+  워크스페이스 크레딧, Gemini Enterprise는 포함 크레딧을 넘는 만큼 API 요금으로 추가 결제합니다.
 </p>

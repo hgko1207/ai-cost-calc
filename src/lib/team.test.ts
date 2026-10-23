@@ -198,11 +198,12 @@ describe('evaluateTeam', () => {
       expect(r.recommended?.option.id).not.toBe('claude-team');
     });
 
-    it('Gemini는 Code Assist가 모두 판매 종료라 참고 금액으로 보여 주고, 요약에 주의 문구를 넣는다', () => {
+    it('Gemini는 판매가 끝난 Code Assist 대신 Gemini Enterprise를 추천하고, Code Assist는 참고로 남긴다', () => {
       const r = run({ toolId: 'gemini', vat: true });
-      expect(r.recommended?.option.salesEnded?.date).toBe('2026-10-09');
+      expect(r.recommended?.option.id).toMatch(/^gemini-enterprise-/);
+      expect(opt(r, 'code-assist-standard').option.salesEnded?.date).toBe('2026-10-09');
       const text = buildTeamSummary(r, {
-        toolName: 'Gemini Code Assist',
+        toolName: 'Gemini',
         billing: 'annual',
         vat: true,
         fxRate: 1400,
@@ -210,7 +211,31 @@ describe('evaluateTeam', () => {
         checkedAt: '2026-10-23',
         url: 'https://example.com/team/',
       });
-      expect(text).toContain('2026-10-09부터 신규 구매가 종료됨');
+      expect(text).toContain('■ 도입 조건:');
+      expect(text).toContain('인보이스');
+    });
+  });
+
+  describe('Gemini Enterprise (좌석 + 팀 공동 크레딧 + 사용량)', () => {
+    it('Standard = 좌석 $30 × 인원 + (팀 사용량 − 1인 $10 × 인원), 종량제 = 사용량만', () => {
+      const r = run({ toolId: 'gemini' }); // 많이 쓰는 2명 × 7시간 + 일반 8명 × 3시간 × 0.5 = 에이전트 환산 26시간
+      const usageUsd = r.apiUsdPerAgentHour * 26;
+      expect(usageUsd).toBeGreaterThan(100); // 크레딧($10 × 10명)보다 많이 쓰는 경우
+      expect(opt(r, 'gemini-enterprise-standard').monthlyKrw).toBeCloseTo((30 * 10 + usageUsd - 10 * 10) * 1400);
+      expect(opt(r, 'gemini-enterprise-payg').monthlyKrw).toBeCloseTo(usageUsd * 1400);
+    });
+
+    it('팀 사용량이 크레딧 합계 안이면 좌석료만 낸다 (크레딧은 팀 공동이라 많이 쓰는 사람 몫도 덮음)', () => {
+      // 실제 크레딧($10)은 에이전트 작업 몇 분 분량이라, 크레딧을 크게 가정해 계산 규칙만 확인한다
+      const t2 = structuredClone(team);
+      const ge = t2.tools.find((x) => x.id === 'gemini')!.options.find((o) => o.id === 'gemini-enterprise-standard')!;
+      if (ge.kind !== 'seat-credit-usage') throw new Error('kind');
+      ge.includedCreditUsd = 1000;
+      const r = evaluateTeam({ ...base, toolId: 'gemini' }, t2, advisor, prices.models, prices.plans);
+      expect(r.apiUsdPerAgentHour * 26).toBeLessThan(1000 * 10); // 팀 사용량 < 크레딧 합계
+      const s = opt(r, 'gemini-enterprise-standard');
+      expect(s.monthlyKrw).toBeCloseTo(30 * 10 * 1400);
+      expect(s.lines.every((l) => l.overageKrw === 0)).toBe(true);
     });
   });
 });

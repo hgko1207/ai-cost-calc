@@ -132,6 +132,32 @@ export function evaluateTeam(input: TeamInput, team: Team, advisor: Advisor, mod
         overageKrw: 0,
       }));
 
+    } else if (option.kind === 'seat-credit-usage') {
+      if (headcount < option.minSeats) {
+        return { option, applicable: false, notApplicableReason: `최소 ${option.minSeats}명부터`, ...empty };
+      }
+      if (option.maxSeats && headcount > option.maxSeats) {
+        return { option, applicable: false, notApplicableReason: `최대 ${option.maxSeats}명까지`, ...empty };
+      }
+      const seatKrw = krw(input.billing === 'annual' ? option.seatAnnualUsd : option.seatMonthlyUsd);
+      // 크레딧은 팀 전체가 나눠 쓰므로, 팀 사용량 합계에서 크레딧 합계를 뺀 만큼만 청구된다.
+      // 넘는 금액은 사람마다 사용량 비율로 나눠 1인 금액에 넣는다 (합계는 정확히 맞음).
+      const usageTotal = groups.reduce((s, g) => s + apiKrw(g.loadHours) * g.count, 0);
+      const creditTotal = krw(option.includedCreditUsd) * headcount;
+      const billable = Math.max(0, usageTotal - creditTotal);
+      const share = usageTotal > 0 ? billable / usageTotal : 0;
+      lines = groups.map((g) => {
+        const usageKrw = apiKrw(g.loadHours) * share;
+        return {
+          typeId: g.typeId,
+          count: g.count,
+          loadHours: g.loadHours,
+          choice: option.seatMonthlyUsd > 0 ? '좌석 + 사용량' : '사용량만',
+          unitKrw: seatKrw + usageKrw,
+          status: 'api' as const,
+          overageKrw: usageKrw,
+        };
+      });
     } else if (option.kind === 'individual') {
       const choices = option.plans.map((p) => {
         const plan = plans.find((x) => x.id === p.planId)!;
@@ -164,7 +190,8 @@ export function evaluateTeam(input: TeamInput, team: Team, advisor: Advisor, mod
 
   const options = tool.options
     .map(evaluate)
-    .sort((a, b) => Number(b.applicable) - Number(a.applicable) || a.monthlyKrw - b.monthlyKrw);
+    // 적용 가능 → 새로 살 수 있는 방식(판매 종료는 뒤로) → 월 비용 순
+    .sort((a, b) => Number(b.applicable) - Number(a.applicable) || Number(!!a.option.salesEnded) - Number(!!b.option.salesEnded) || a.monthlyKrw - b.monthlyKrw);
   // 새로 살 수 있는 방식 → (판매 종료 포함) 한도 초과 시 대기 없는 방식 → 적용 가능한 방식 순으로 고른다
   const tiers = [
     options.filter((o) => o.applicable && !o.hasShortage && !o.option.salesEnded),

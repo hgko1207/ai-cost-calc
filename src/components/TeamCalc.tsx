@@ -258,6 +258,7 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
               </div>
             </div>
 
+            {view.option.notice && <p className="muted small option-notice">{view.option.notice}</p>}
             {view.option.salesEnded && (
               <p className="warn small">
                 <strong>{dotDate(view.option.salesEnded.date)}부터 신규 구매 종료</strong> · 이미 계약한 회사용 참고 금액이에요. {view.option.salesEnded.note}{' '}
@@ -313,7 +314,12 @@ export default function TeamCalc({ team, advisor, models, plans }: TeamCalcProps
                     </td>
                     <td className="num">
                       {krwShort(l.unitKrw)}
-                      {l.overageKrw > 0 && <span className="sub">추가 사용량 {krwShort(l.overageKrw)} 포함</span>}
+                      {/* 좌석료가 있을 때만 사용량 몫을 따로 보여 준다 (종량제는 1인 금액이 곧 사용량) */}
+                      {l.overageKrw > 0 && l.overageKrw < l.unitKrw && (
+                        <span className="sub">
+                          {l.status === 'api' ? '사용량' : '추가 사용량'} {krwShort(l.overageKrw)} 포함
+                        </span>
+                      )}
                     </td>
                     <td className="num">{l.count}</td>
                     <td className="num">{krwShort(l.unitKrw * l.count)}</td>

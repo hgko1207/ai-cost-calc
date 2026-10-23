@@ -146,6 +146,8 @@ const TeamOptionBase = {
   sourceUrl: z.url(),
   // 신규 구매 종료 (공식 발표). 기존 계약 고객용 참고 금액으로만 보여 주고, 살 수 있는 방식을 먼저 추천한다
   salesEnded: z.object({ date: isoDate, note: z.string(), sourceUrl: z.url() }).optional(),
+  // 결과 화면·결재용 요약에 함께 보여 줄 도입 조건 (예: 결제 계정 조건, 최저가 기준)
+  notice: z.string().optional(),
 };
 const TeamOptionSchema = z.discriminatedUnion('kind', [
   z.object({
@@ -160,6 +162,18 @@ const TeamOptionSchema = z.discriminatedUnion('kind', [
     kind: z.literal('seat-plus-usage'),
     minSeats: z.number().int().positive(),
     seatAnnualUsd: price,
+    limitNote: z.string(),
+  }),
+  z.object({
+    ...TeamOptionBase,
+    // 좌석료 + 팀 공동 사용 크레딧 + 넘는 사용량은 API 요금 (Gemini Enterprise). 좌석료·크레딧이 0이면 종량제
+    kind: z.literal('seat-credit-usage'),
+    minSeats: z.number().int().positive(),
+    maxSeats: z.number().int().positive().optional(),
+    seatMonthlyUsd: price,
+    seatAnnualUsd: price,
+    seatPriceFrom: z.boolean().optional(), // 공식 가격이 "○○부터"(최저가)뿐일 때
+    includedCreditUsd: price, // 1인당 월 포함 사용 크레딧 (팀 전체가 나눠 씀)
     limitNote: z.string(),
   }),
   z.object({

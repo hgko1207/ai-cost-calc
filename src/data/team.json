@@ -270,11 +270,89 @@
     },
     {
       "id": "gemini",
-      "name": "Gemini Code Assist",
+      "name": "Gemini (Antigravity·Code Assist)",
       "vendor": "google",
       "defaultModel": "gemini-3-1-pro",
       "overageNote": "하루 요청 한도를 넘으면 다음 날까지 대기",
       "options": [
+        {
+          "id": "gemini-enterprise-standard",
+          "kind": "seat-credit-usage",
+          "name": "Gemini Enterprise Standard",
+          "summary": "좌석제 + 1인당 월 $10 사용 크레딧(팀 공동, 1주 단위). 넘는 사용량은 API 요금. Antigravity 포함",
+          "minSeats": 1,
+          "maxSeats": 1000,
+          "seatMonthlyUsd": 30,
+          "seatAnnualUsd": 30,
+          "seatPriceFrom": true,
+          "includedCreditUsd": 10,
+          "limitNote": "1인 월 $10 크레딧(팀 공동, 1주 단위), 넘으면 API 요금",
+          "notice": "좌석 가격은 공식 최저가(\"월 $30부터\") 기준이라 실제 견적은 더 높을 수 있어요. Antigravity는 청구서(인보이스) 결제 Cloud 계정이 필요하고, 사람별 사용 한도는 아직 없어요(프로젝트 단위 지출 상한만).",
+          "sourceUrl": "https://antigravity.google/pricing",
+          "checks": {
+            "no-training": {
+              "value": "yes",
+              "sourceUrl": "https://docs.cloud.google.com/gemini/enterprise/docs/ai-developer-tools-settings?hl=ko"
+            },
+            "sso": {
+              "value": "yes",
+              "sourceUrl": "https://docs.cloud.google.com/gemini/enterprise/docs/configure-identity-provider?hl=ko"
+            },
+            "admin": {
+              "value": "yes",
+              "sourceUrl": "https://cloud.google.com/blog/products/ai-machine-learning/expanding-google-antigravity-for-enterprise-customers",
+              "note": "관리 콘솔·Cloud 결제"
+            },
+            "spend-limits": {
+              "value": "no",
+              "sourceUrl": "https://docs.cloud.google.com/gemini/enterprise/docs/quotas-and-overages?hl=ko",
+              "note": "프로젝트 단위 월 지출 상한만(사람별은 예정)"
+            }
+          },
+          "highlights": [
+            "Antigravity 포함",
+            "1인 월 $10 크레딧(팀 공동)",
+            "Antigravity는 SOC 2·ISO 27001 미지원"
+          ]
+        },
+        {
+          "id": "gemini-enterprise-payg",
+          "kind": "seat-credit-usage",
+          "name": "Gemini Enterprise 종량제",
+          "summary": "좌석료 $0, 쓴 만큼 API 요금. Antigravity 포함",
+          "minSeats": 1,
+          "seatMonthlyUsd": 0,
+          "seatAnnualUsd": 0,
+          "includedCreditUsd": 0,
+          "limitNote": "기능 한도 없음, 쓴 만큼 API 요금",
+          "notice": "Antigravity는 청구서(인보이스) 결제 Cloud 계정이 필요하고, 사람별 사용 한도는 아직 없어요(프로젝트 단위 지출 상한만).",
+          "sourceUrl": "https://antigravity.google/pricing",
+          "checks": {
+            "no-training": {
+              "value": "yes",
+              "sourceUrl": "https://docs.cloud.google.com/gemini/enterprise/docs/ai-developer-tools-settings?hl=ko"
+            },
+            "sso": {
+              "value": "yes",
+              "sourceUrl": "https://docs.cloud.google.com/gemini/enterprise/docs/configure-identity-provider?hl=ko"
+            },
+            "admin": {
+              "value": "yes",
+              "sourceUrl": "https://cloud.google.com/blog/products/ai-machine-learning/expanding-google-antigravity-for-enterprise-customers",
+              "note": "관리 콘솔·Cloud 결제"
+            },
+            "spend-limits": {
+              "value": "no",
+              "sourceUrl": "https://docs.cloud.google.com/gemini/enterprise/docs/quotas-and-overages?hl=ko",
+              "note": "프로젝트 단위 월 지출 상한만(사람별은 예정)"
+            }
+          },
+          "highlights": [
+            "Antigravity 포함",
+            "좌석료 없음",
+            "Antigravity는 SOC 2·ISO 27001 미지원"
+          ]
+        },
         {
           "id": "code-assist-standard",
           "kind": "seats",
@@ -319,7 +397,7 @@
           ],
           "salesEnded": {
             "date": "2026-10-09",
-            "note": "새로 도입한다면 Gemini Enterprise(Antigravity 포함)를 확인하세요.",
+            "note": "새로 도입한다면 Gemini Enterprise(Antigravity 포함)를 보세요.",
             "sourceUrl": "https://docs.cloud.google.com/gemini/docs/codeassist/sunset"
           }
         },
@@ -366,7 +444,7 @@
           ],
           "salesEnded": {
             "date": "2026-10-09",
-            "note": "새로 도입한다면 Gemini Enterprise(Antigravity 포함)를 확인하세요.",
+            "note": "새로 도입한다면 Gemini Enterprise(Antigravity 포함)를 보세요.",
             "sourceUrl": "https://docs.cloud.google.com/gemini/docs/codeassist/sunset"
           }
         }

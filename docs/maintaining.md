@@ -18,10 +18,22 @@
 3. 커밋·푸시하면 자동 배포된다(아래 설정 후).
 
 요금제 추천 기준(사용 방식 계수, 요금제별 감당 가능 시간, 시간당 토큰, API 추천 기준)은 `src/data/advisor.json`,
-팀 요금제(좌석 가격·한도, 도입 방식)는 `src/data/team.json`,
+팀 요금제(좌석 가격·한도, 도입 방식)는 `src/data/team.json`(도입 방식 종류는 아래 "팀 도입 방식 종류"),
 프리셋은 `src/data/presets.json`, 블로그 관련 글은 `src/data/related-posts.json`.
 
 - API 추천 기준 `advisor.json`의 `apiRecommendation.minSavingRatio`(지금 0.2): API 종량제가 한도 안에서 가장 싼 구독보다 이 비율 이상 쌀 때만 API를 추천한다. 차이가 작으면 요금이 고정된 구독을 추천해, 하루 시간을 조금 바꿨을 때 추천이 뒤집히지 않게 한다. 바꾸면 가이드의 계산 방법 설명도 같은 값으로 바뀐다. `src/lib/advisor.test.ts`의 경계 사례(같이 코딩 2.5·3시간 등)를 손계산 값으로 다시 맞춘다.
+
+### 팀 도입 방식 종류 (`team.json`의 `kind`)
+
+| kind | 계산 | 예 |
+|---|---|---|
+| `seats` | 사람마다 좌석 중 가장 싼 것(좌석 + 한도 초과분) 배정 | Claude Team, ChatGPT Business |
+| `seat-plus-usage` | 연간 좌석료 + 사용량 전부 API 요금 | Claude Enterprise |
+| `seat-credit-usage` | 좌석료 + (팀 사용량 − 1인 크레딧 × 인원)만큼 API 요금. 좌석료·크레딧이 0이면 종량제. `seatPriceFrom: true`면 가격표에 "부터" 표시 | Gemini Enterprise Standard·종량제 |
+| `individual` | 개인 요금제를 사람마다 지원 (한도는 `advisor.json`) | 개인 구독 회사 지원 |
+
+- `salesEnded`(신규 구매 종료일·안내·출처): 결과에 경고를 띄우고, 살 수 있는 방식이 있으면 추천에서 뺀다.
+- `notice`: 결과 화면과 결재용 요약에 함께 보여 줄 도입 조건(결제 계정 조건, 최저가 기준 등).
 
 ## 월간 가격 점검 (자동)
 
