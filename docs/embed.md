@@ -28,7 +28,7 @@ addEventListener('message', function (e) {
 
 | 글 | 주소 | 열리는 상태 |
 |---|---|---|
-| [Claude Max 후기](https://hgko-dev.tistory.com/572) | `personal/?embed=1&c=claude-max-5x&u=agent&h=5` | 지금 Max 5x, 에이전트 작업 하루 5시간 |
+| [Claude Max 후기](https://hgko-dev.tistory.com/572) | `personal/?embed=1&c=claude-max-5x&u=agent&h=5` | 지금 Max(구 Max 5x), 에이전트 작업 하루 5시간 |
 | [Claude Opus 5.5 정리](https://hgko-dev.tistory.com/634) | `personal/?embed=1&u=agent&h=4` | Claude Code, 에이전트 작업 하루 4시간 |
 | [GPT-6 Astra vs Claude Fable 5.1](https://hgko-dev.tistory.com/620) | `personal/?embed=1&t=codex` | Codex 기준 |
 | 회사 도입 글 (새로 쓸 때) | `team/?embed=1` | 팀·회사 예산표, 10명 기본 |

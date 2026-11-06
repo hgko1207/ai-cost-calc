@@ -27,6 +27,7 @@ const rows = [...personal, ...teamSeats]
   .map((r) => ({ ...r, unit: r.usd / r.multiplier }))
   .sort((a, b) => a.multiplier - b.multiplier || a.unit - b.unit);
 const minUnit = Math.min(...rows.map((r) => r.unit));
+const cheapest = rows.filter((r) => r.unit === minUnit).map((r) => `${r.name}(${r.billing})`).join('·');
 // Team 좌석의 관리 기능은 team.json 체크 데이터에서 가져온다 (문구 중복 방지)
 const claudeTeam = team.tools.flatMap((t) => t.options).find((o) => o.id === 'claude-team');
 const teamAdmin = team.features.filter((f) => claudeTeam?.checks[f.id]?.value === 'yes').map((f) => f.short).join(' · ');
@@ -65,6 +66,6 @@ const fmt = (n: number) => `$${Number.isInteger(n) ? n : n.toFixed(2)}`;
   </table>
 </div>
 <p class="muted small">
-  사용량 배수는 Anthropic 공식 안내 기준입니다(5시간 단위 사용량). 월 요금만 보면 Team 프리미엄 좌석(월간 $125)이 개인 Max 5x($100)보다 비싸지만, 사용량이 25% 더 많아 단가는 같고 연간 결제면 더
-  쌉니다. 사용량 대비 가장 싼 것은 개인 Max 20x지만 Team 요금제에는 같은 수준의 좌석이 없습니다.
+  사용량 배수는 Anthropic 공식 안내 기준입니다(Team은 5시간 단위, Ultra는 주간 기준이고 인증 계정은 5시간 한도가 없습니다). 월 요금만 보면 Team 프리미엄 좌석(월간 $125)이 개인 Max($100)보다 비싸지만, 사용량이 25% 더 많아 단가는 같고 연간 결제면 더
+  쌉니다. 사용량 대비 가장 싼 것은 {cheapest}입니다.
 </p>

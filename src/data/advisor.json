@@ -57,7 +57,7 @@
       "vendor": "anthropic",
       "defaultModel": "opus-5-5",
       "confidence": "high",
-      "basis": "운영자 1명이 82일 동안 Claude Code를 쓴 기록 기준: Max 5x로 에이전트에게 맡기는 작업을 하루 5~6시간 하면 5시간 한도에 자주 걸렸습니다. Pro는 그 1/5, Max 20x는 4배(공식 배수)로 계산했습니다.",
+      "basis": "운영자 1명이 82일 동안 Claude Code를 쓴 기록 기준: Max(구 Max 5x)로 에이전트에게 맡기는 작업을 하루 5~6시간 하면 5시간 한도에 자주 걸렸습니다. Pro는 그 1/5, Ultra(구 Max 20x)는 공식 주간 사용량(Pro의 10배)에 맞춰 Max의 2배로 계산했습니다.",
       "plans": [
         {
           "planId": "claude-pro",
@@ -69,7 +69,7 @@
         },
         {
           "planId": "claude-max-20x",
-          "agentHours": 24
+          "agentHours": 12
         }
       ]
     },

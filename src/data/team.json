@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-10-23",
+  "updatedAt": "2026-11-06",
   "defaultWorkDays": 22,
   "userTypes": [
     {
@@ -122,7 +122,7 @@
           "id": "claude-individual",
           "kind": "individual",
           "name": "개인 구독 회사 지원",
-          "summary": "각자 Pro·Max를 결제하고 회사가 비용 처리",
+          "summary": "각자 Pro·Max·Ultra를 결제하고 회사가 비용 처리",
           "plans": [
             {
               "planId": "claude-pro"
@@ -287,7 +287,7 @@
           "seatPriceFrom": true,
           "includedCreditUsd": 10,
           "limitNote": "1인 월 $10 크레딧(팀 공동, 1주 단위), 넘으면 API 요금",
-          "notice": "좌석 가격은 공식 최저가(\"월 $30부터\") 기준이라 실제 견적은 더 높을 수 있어요. Antigravity는 청구서(인보이스) 결제 Cloud 계정이 필요하고, 사람별 사용 한도는 아직 없어요(프로젝트 단위 지출 상한만).",
+          "notice": "좌석 가격은 공식 최저가(\"월 $30부터\") 기준이라 실제 견적은 더 높을 수 있어요. Antigravity는 청구서 결제 계정이나 선불 크레딧을 충전한 온라인 결제 계정으로 쓸 수 있고, 사람별 사용 한도는 아직 없어요(프로젝트 단위 지출 상한만).",
           "sourceUrl": "https://antigravity.google/pricing",
           "checks": {
             "no-training": {
@@ -305,8 +305,8 @@
             },
             "spend-limits": {
               "value": "no",
-              "sourceUrl": "https://docs.cloud.google.com/gemini/enterprise/docs/quotas-and-overages?hl=ko",
-              "note": "프로젝트 단위 월 지출 상한만(사람별은 예정)"
+              "sourceUrl": "https://docs.cloud.google.com/gemini/enterprise/docs/quotas-and-pay-as-you-go-usage?hl=ko",
+              "note": "프로젝트 단위 월 지출 상한만"
             }
           },
           "highlights": [
@@ -325,7 +325,7 @@
           "seatAnnualUsd": 0,
           "includedCreditUsd": 0,
           "limitNote": "기능 한도 없음, 쓴 만큼 API 요금",
-          "notice": "Antigravity는 청구서(인보이스) 결제 Cloud 계정이 필요하고, 사람별 사용 한도는 아직 없어요(프로젝트 단위 지출 상한만).",
+          "notice": "Antigravity는 청구서 결제 계정이나 선불 크레딧을 충전한 온라인 결제 계정으로 쓸 수 있고, 사람별 사용 한도는 아직 없어요(프로젝트 단위 지출 상한만).",
           "sourceUrl": "https://antigravity.google/pricing",
           "checks": {
             "no-training": {
@@ -343,8 +343,8 @@
             },
             "spend-limits": {
               "value": "no",
-              "sourceUrl": "https://docs.cloud.google.com/gemini/enterprise/docs/quotas-and-overages?hl=ko",
-              "note": "프로젝트 단위 월 지출 상한만(사람별은 예정)"
+              "sourceUrl": "https://docs.cloud.google.com/gemini/enterprise/docs/quotas-and-pay-as-you-go-usage?hl=ko",
+              "note": "프로젝트 단위 월 지출 상한만"
             }
           },
           "highlights": [

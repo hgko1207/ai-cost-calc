@@ -49,11 +49,11 @@ describe('evaluateTeam', () => {
   it('개인 구독 지원: 하루 7시간이면 Max 5x + 초과분이 Max 20x보다 싸다', () => {
     const i = opt(run({}), 'claude-individual');
     const heavy = i.lines.find((l) => l.typeId === 'heavy')!;
-    expect(heavy.choice).toBe('Claude Max 5x');
+    expect(heavy.choice).toBe('Claude Max');
     expect(heavy.unitKrw).toBeLessThan(200 * 1400);
     // 하루 10시간이면 초과분이 커져 Max 20x가 낫다
     const i10 = opt(run({ groups: [{ typeId: 'heavy', count: 2, hours: 10 }] }), 'claude-individual');
-    expect(i10.lines[0].choice).toBe('Claude Max 20x');
+    expect(i10.lines[0].choice).toBe('Claude Ultra');
     expect(i.monthlyKrw).toBeGreaterThan(opt(run({}), 'claude-team').monthlyKrw);
   });
 
@@ -212,7 +212,7 @@ describe('evaluateTeam', () => {
         url: 'https://example.com/team/',
       });
       expect(text).toContain('■ 도입 조건:');
-      expect(text).toContain('인보이스');
+      expect(text).toContain('선불 크레딧');
     });
   });
 

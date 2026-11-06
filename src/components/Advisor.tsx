@@ -52,7 +52,7 @@ function fromQuery(search: string, d: State, data: AdvisorData, plans: Plan[]): 
   return s;
 }
 
-/** "Claude Max 20x" → 화면 폭이 좁을 때 쓰는 짧은 이름 */
+/** "Claude Ultra" → 화면 폭이 좁을 때 쓰는 짧은 이름 */
 const shortName = (name: string) => name.replace(/^(Claude|ChatGPT|Google AI)\s+/, '');
 /** "Gemini (Antigravity)" → "Gemini": 선택 버튼에 들어가는 짧은 도구 이름 */
 const toolLabel = (name: string) => name.replace(/\s*\(.*\)$/, '');
